@@ -1,0 +1,69 @@
+﻿@model List<Student>
+@{
+}
+<h2 class="text-center mb-5 ">Öğrenci Listesi</h2>
+
+<div class="row mb-5">
+	<div class="col">
+		<a class="btn btn-success" asp-controller="Admin" asp-action="AddStudent">Öğrenci Kayıt</a>
+	</div>
+	<div class="col">
+	</div>
+</div>
+
+<div>
+	<div class="d-flex flex-row align-items-center justify-content-end mb-3">
+		<!-- Arama Formu -->
+		<form asp-controller="Admin" asp-action="StudentList" method="get" class="mr-2">
+			<div class="input-group">
+				<input type="text" class="form-control" placeholder="Ürün adı, marka veya kategori arayın" name="searchParam" value="@ViewBag.Search">
+				<button class="btn btn-outline-secondary" type="submit">Ara</button>
+			</div>
+		</form>
+
+		<!-- Temizle Butonu -->
+		<form asp-controller="Admin" asp-action="StudentList" method="get">
+			<button class="btn btn-outline-secondary" type="submit" name="searchParam" value="">Temizle</button>
+		</form>
+	</div>
+</div>
+
+<table class="table">
+	<thead>
+		<tr>
+			<th>Öğrenci No</th>
+			<th>Ad</th>
+			<th>Soyad</th>
+			<th>Email</th>
+			<th>Telefon</th>
+			<th>Ev Adresi</th>
+			<th>Cinsiyet</th>
+			<th>Kayıt Tarihi</th>
+			<th>Resim</th>
+			<th>Bölüm</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var student in Model)
+		{
+			<tr>
+				<td>@student.StudentId</td>
+				<td>@student.StudentName</td>
+				<td>@student.StudentSurname</td>
+				<td>@student.StudentEmail</td>
+				<td>@student.StudentPhone</td>
+				<td>@student.StudentAddress</td>
+				<td>@student.StudentGender</td>
+				<td>@student.StudentRegisterDate.ToString("dd/MM/yyyy") </td>
+				<td><img src="/img/@student.ImageFileName" width="100" alt="Alternate Text" /></td>
+				<td>@student.DepartmentName</td>
+
+				<td>
+					<a class="btn btn-primary" asp-controller="Admin" asp-action="EditStudent" asp-route-id="@student.StudentId">Düzenle</a>
+					<a class="btn btn-danger" asp-controller="Admin" asp-action="DeleteStudent" onclick="return confirm('(@student.StudentName) Adlı Öğrenciyi Silmek İstediğinize Emin Misiniz ?');" asp-route-id="@student.StudentId">Sil</a>
+				</td>
+
+			</tr>
+		}
+	</tbody>
+</table>
