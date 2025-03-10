@@ -86,7 +86,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             context.Students.Add(student);
             context.SaveChanges();
 
-            return View();
+            return RedirectToAction("StudentList");
         }
 
         public IActionResult EditStudent(int id)
