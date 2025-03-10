@@ -12,8 +12,8 @@ using OgrenciBilgiSistemiProje.Services;
 namespace OgrenciBilgiSistemiProje.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250310144309_OBSV1")]
-    partial class OBSV1
+    [Migration("20250310174717_Update1Department")]
+    partial class Update1Department
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,7 +35,11 @@ namespace OgrenciBilgiSistemiProje.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("Quota")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

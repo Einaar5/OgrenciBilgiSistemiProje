@@ -20,6 +20,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             return View();
         }
 
+        //-------------------------------------------------------------------------------Öğrenci Başlangıç
         // Öğrenci listesi
         public IActionResult StudentList(string searchParam)
         {
@@ -28,7 +29,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             {
                 //Bu kısım idsine göre arama yapmak için kullanılır.
                 var student = from s in context.Students
-                              where s.StudentName.Contains(searchParam) || s.StudentEmail.Contains(searchParam) || s.StudentSurname.Contains(searchParam) // Öğrenci adı, emaili veya soyadı arama terimini içeriyorsa
+                              where s.StudentName.Contains(searchParam) || s.DepartmentName.Contains(searchParam) || s.StudentSurname.Contains(searchParam) // Öğrenci adı, emaili veya soyadı arama terimini içeriyorsa
                               select s; // Arama terimine göre ürünleri çekiyoruz.
 
                 students = student;
@@ -66,6 +67,9 @@ namespace OgrenciBilgiSistemiProje.Controllers
             {
                 studentDto.ImageFile.CopyTo(stream); // Dosyayı yeni dosyaya kopyalıyoruz.
             }
+
+            var departments = context.Departments.OrderByDescending(d => d.Id).ToList(); // Bölümleri bölüm numarasına göre sıralıyoruz ve listeye çeviriyoruz.           
+            ViewData["Departments"] = departments; // Bölümleri view'a gönderiyoruz.
 
             // Öğrenci objesi oluştur ve veritabanına ekle 
             // 
@@ -107,6 +111,9 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 DepartmentName = student.DepartmentName
             };
 
+            var departments = context.Departments.OrderByDescending(d => d.Id).ToList(); // Bölümleri bölüm numarasına göre sıralıyoruz ve listeye çeviriyoruz.           
+            ViewData["Departments"] = departments; // Bölümleri view'a gönderiyoruz.
+
             ViewData["StudentId"] = id; // Öğrenci numarasını view'a gönderiyoruz.
             ViewData["ImageFileName"] = student.ImageFileName; // Resim dosya adını view'a gönderiyoruz.
 
@@ -147,6 +154,9 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             }
 
+            var departments = context.Departments.OrderByDescending(d => d.Id).ToList(); // Bölümleri bölüm numarasına göre sıralıyoruz ve listeye çeviriyoruz.           
+            ViewData["Departments"] = departments; // Bölümleri view'a gönderiyoruz.
+
             // Student objesine student dtoya atadığımız değerleri atıyoruz.
 
             student.StudentName = studentDto.StudentName;
@@ -180,5 +190,40 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
 
         }
+
+        //-------------------------------------------------------------------------------Öğrenci Bitiş
+
+        //-------------------------------------------------------------------------------Bölüm Başlangıç
+
+        public IActionResult DepartmentList()
+        {
+            var departments = context.Departments.OrderByDescending(d => d.Id).ToList(); // Bölümleri bölüm numarasına göre sıralıyoruz ve listeye çeviriyoruz.
+            return View(departments);
+        }
+        public IActionResult DepartmentAdd()
+        {
+           return View();
+        }
+
+        [HttpPost]
+        public IActionResult DepartmentAdd(DepartmentDto departmentDto)
+        {
+            if (!ModelState.IsValid) // Eğer model doğrulama başarısız olursa
+            {
+                return View(departmentDto);
+            }
+
+            Department department = new Department
+            {
+                Name = departmentDto.Name,
+                Quota = departmentDto.Quota
+            };
+
+            context.Departments.Add(department);
+            context.SaveChanges();
+            return RedirectToAction("DepartmentList");
+        }
+
+        //-------------------------------------------------------------------------------Bölüm Bitiş
     }
 }

@@ -1,0 +1,52 @@
+﻿
+@model List<Department>
+@{
+}
+<h2 class="text-center mb-5 ">Bölüm Listesi</h2>
+
+<div class="row mb-5">
+	<div class="col">
+		<a class="btn btn-success" asp-controller="Admin" asp-action="DepartmentAdd">Bölüm Listesi</a>
+	</div>
+	<div class="col">
+	</div>
+</div>
+
+@* <div>
+	<div class="d-flex flex-row align-items-center justify-content-end mb-3">
+		<!-- Arama Formu -->
+		<form asp-controller="Admin" asp-action="StudentList" method="get" class="mr-2">
+			<div class="input-group">
+				<input type="text" class="form-control" placeholder="Ürün adı, marka veya kategori arayın" name="searchParam" value="@ViewBag.Search">
+				<button class="btn btn-outline-secondary" type="submit">Ara</button>
+			</div>
+		</form>
+
+		<!-- Temizle Butonu -->
+		<form asp-controller="Admin" asp-action="StudentList" method="get">
+			<button class="btn btn-outline-secondary" type="submit" name="searchParam" value="">Temizle</button>
+		</form>
+	</div>
+</div> *@
+
+<table class="table">
+	<thead>
+		<tr>
+			<th>Bölüm No</th>
+			<th>Bölüm Adı</th>
+			<th>Bölüm Konteyjanı</th>
+			
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var department in Model)
+		{
+			<tr>
+				<td>@department.Id</td>
+				<td>@department.Name</td>
+				<td>@department.Quota</td>
+				
+			</tr>
+		}
+	</tbody>
+</table>

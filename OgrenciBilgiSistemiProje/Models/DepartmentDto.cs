@@ -2,16 +2,14 @@
 
 namespace OgrenciBilgiSistemiProje.Models
 {
-    public class Department
+    public class DepartmentDto
     {
-        [Key]
+        
         public int Id { get; set; }  // Primary Key
 
         [MaxLength(100)]
         public string Name { get; set; } = "";  // Bölüm Adı
 
-        public int? Quota { get; set; }  // Kontenjan
-
-
+        public int Quota { get; set; }  // Kontenjan
     }
 }

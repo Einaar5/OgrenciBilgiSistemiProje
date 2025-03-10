@@ -81,8 +81,14 @@
 				<label class="col-sm-4 col-form-label">Bölüm</label>
 				<div class="col-sm-8">
 					<select class="form-select" asp-for="DepartmentName">
-						<option value="Computer Programing">Bilgisayar Programcılığı</option>
-						<option value="Cyber Security">Siber Güvenlik</option>
+						<option value="">Lütfen bir bölüm seçin</option>
+						@if (ViewData["Departments"] is List<OgrenciBilgiSistemiProje.Models.Department> departmentList)
+						{
+							@foreach (var department in departmentList)
+							{
+								<option value="@department.Name">@department.Name</option>
+							}
+						}
 					</select>
 				</div>
 			</div>
@@ -92,7 +98,7 @@
 					<button type="submit" class="btn btn-primary">Gönder</button>
 				</div>
 				<div class="col-sm-4 d-grid">
-					<a class="btn btn-outline-primary" asp-controller="Admin" asp-action="EditStudent" role="button">
+					<a class="btn btn-outline-primary" asp-controller="Admin" asp-action="StudentList" role="button">
 						<!--asp-action = "Index" Index Sayfasına Yönlendirme Yapılacaktır. Çünkü Ürünler Listesine Geri Dönülecektir.-->
 						İptal
 					</a>

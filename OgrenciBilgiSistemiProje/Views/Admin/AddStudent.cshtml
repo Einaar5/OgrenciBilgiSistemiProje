@@ -48,7 +48,10 @@
 			<div class="row mb-3">
 				<label class="col-sm-4 col-form-label">Cinsiyet</label>
 				<div class="col-sm-8">
-					<input class="form-control" asp-for="StudentGender" />
+					<select class="form-select" asp-for="StudentGender">
+						<option value="Erkek">Erkek</option>
+						<option value="Kız">Kız</option>
+					</select>
 					<span asp-validation-for="StudentGender" class="text-danger"></span> <!--Validation Hatası Olursa Burada Gösterilecektir.-->
 				</div>
 			</div>
@@ -65,8 +68,14 @@
 				<label class="col-sm-4 col-form-label">Bölüm</label>
 				<div class="col-sm-8">
 					<select class="form-select" asp-for="DepartmentName">
-						<option value="Computer Programing">Bilgisayar Programcılığı</option>
-						<option value="Cyber Security">Siber Güvenlik</option>
+						<option value="">Lütfen bir bölüm seçin</option>
+						@if (ViewData["Departments"] is List<OgrenciBilgiSistemiProje.Models.Department> departmentList)
+						{
+							@foreach (var department in departmentList)
+							{
+								<option value="@department.Name">@department.Name</option>
+							}
+						}
 					</select>
 				</div>
 			</div>
@@ -76,7 +85,7 @@
 					<button type="submit" class="btn btn-primary">Gönder</button>
 				</div>
 				<div class="col-sm-4 d-grid">
-					<a class="btn btn-outline-primary" asp-controller="Admin" asp-action="AddStudent" role="button">
+					<a class="btn btn-outline-primary" asp-controller="Admin" asp-action="StudentList" role="button">
 						<!--asp-action = "Index" Index Sayfasına Yönlendirme Yapılacaktır. Çünkü Ürünler Listesine Geri Dönülecektir.-->
 						İptal
 					</a>
