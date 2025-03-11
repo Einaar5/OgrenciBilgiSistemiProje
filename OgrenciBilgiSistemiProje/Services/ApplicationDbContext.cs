@@ -12,8 +12,9 @@ namespace OgrenciBilgiSistemiProje.Services
 
         }
 
-        
-        
+        public DbSet<Teacher> Teachers { get; set; }
+
+
     }
     
 }
