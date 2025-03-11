@@ -226,5 +226,171 @@ namespace OgrenciBilgiSistemiProje.Controllers
         }
 
         //-------------------------------------------------------------------------------Bölüm Bitiş
+
+
+
+        //-------------------------------------------------------------------------------Teacher Başlangıç
+
+
+
+        public IActionResult TeacherList()
+        {
+            var teacherList = context.Teachers.ToList();
+            return View(teacherList);
+        }
+
+        public IActionResult AddTeacher()
+        {
+
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult AddTeacher(TeacherDto teacherDto)
+        {
+            if(teacherDto.ImageFile == null)
+            {
+                ModelState.AddModelError("ImageFile","Resim Seçiniz.");
+            }
+
+            if(!ModelState.IsValid)
+            {
+                return View(teacherDto);
+            }
+
+
+            // Resim dosyasını yüklemek için bir dosya adı oluştur
+            string newFileName = DateTime.Now.ToString("yyyyMMddHHmmssfff"); // burada dosya adı oluşturuluyor Örnek : 20211231235959999
+            newFileName += Path.GetExtension(teacherDto.ImageFile!.FileName); // dosya adının sonuna uzantı ekleniyor Örnek : 20211231235959999.jpg
+
+            // Resmi yükle
+            string imageFullPath = environment.WebRootPath + "/img/" + newFileName; // Resmin yükleneceği yolu belirt ve dosya adını ekle
+            using (var stream = System.IO.File.Create(imageFullPath)) // Dosyayı oluşturuyoruz. Çünkü burada dosyayı sunucuya kaydedeceğiz. Stream sınıfı, dosya işlemleri yapmamızı sağlar.
+            {
+                teacherDto.ImageFile.CopyTo(stream); // Dosyayı yeni dosyaya kopyalıyoruz.
+            }
+
+
+            Teacher teacher = new Teacher
+            {
+                TeacherName = teacherDto.TeacherName,
+                TeacherSurname = teacherDto.TeacherSurname,
+                TeacherMail = teacherDto.TeacherMail,
+                TeacherPhone = teacherDto.TeacherPhone,
+                TeacherAdrress = teacherDto.TeacherAdrress,
+                TeacherGender = teacherDto.TeacherGender,
+                TeacherRegisterDate = DateTime.Now,
+                ImgFileName = newFileName,
+                TeacherBrans = teacherDto.TeacherBrans
+            };
+
+            context.Teachers.Add(teacher);
+            context.SaveChanges();
+            return RedirectToAction("TeacherList");
+        }
+
+        public IActionResult EditTeacher(int Id)
+        {
+            var teacher = context.Teachers.Find(Id);
+            if(teacher == null)
+            {
+                return RedirectToAction("TeacherList");
+            }
+
+            var teacherDto = new TeacherDto
+            {
+                TeacherName = teacher.TeacherName,
+                TeacherSurname = teacher.TeacherSurname,
+                TeacherMail = teacher.TeacherMail,
+                TeacherPhone = teacher.TeacherPhone,
+                TeacherAdrress = teacher.TeacherAdrress,
+                TeacherGender = teacher.TeacherGender,
+                TeacherBrans = teacher.TeacherBrans
+            };
+
+            ViewData["Id"] = Id; // Öğrenci numarasını view'a gönderiyoruz.
+            ViewData["ImgFileName"] = teacher.ImgFileName; // Resim dosya adını view'a gönderiyoruz.
+            
+
+            return View(teacherDto);
+        }
+
+
+
+        [HttpPost]
+        public IActionResult EditTeacher(int id, TeacherDto teacherDto)
+        {
+            var teacher = context.Teachers.Find(id);
+            if (teacher == null)
+            {
+                return RedirectToAction("TeacherList");
+            }
+
+            if (!ModelState.IsValid) // Eğer model doğrulama başarısız olursa
+            {
+                ViewData["Id"] = id; // Öğrenci numarasını view'a gönderiyoruz.
+                ViewData["ImgFileName"] = teacher.ImgFileName; // Resim dosya adını view'a gönderiyoruz.
+                return View(teacherDto); // Hata varsa formu tekrar göster
+            }
+
+            string newFileName = teacher.ImgFileName; // Eğer yeni bir resim yüklenmediyse eski resim dosya adını kullan
+            if (teacherDto.ImageFile != null)
+            {
+                newFileName = DateTime.Now.ToString("yyyyMMddHHmmssfff"); // burada dosya adı oluşturuluyor Örnek : 20211231235959999
+                newFileName += Path.GetExtension(teacherDto.ImageFile!.FileName); // dosya adının sonuna uzantı ekleniyor Örnek : 20211231235959999.jpg
+
+                string imageFullPath = environment.WebRootPath + "/img/" + newFileName; // Resmin yükleneceği yolu belirt ve dosya adını ekle
+                using (var stream = System.IO.File.Create(imageFullPath)) // Dosyayı oluşturuyoruz. Çünkü burada dosyayı sunucuya kaydedeceğiz. Stream sınıfı, dosya işlemleri yapmamızı sağlar.
+                {
+                    teacherDto.ImageFile.CopyTo(stream); // Dosyayı yeni dosyaya kopyalıyoruz.
+                }
+
+                string oldImagePath = environment.WebRootPath + "/img/" + teacher.ImgFileName; // Eski resmin dosya yolunu belirt
+                System.IO.File.Delete(oldImagePath); // Eski resmi siliyoruz çünkü artık kullanılmayacak
+
+            }
+
+            var departments = context.Departments.OrderByDescending(d => d.Id).ToList(); // Bölümleri bölüm numarasına göre sıralıyoruz ve listeye çeviriyoruz.           
+            ViewData["Departments"] = departments; // Bölümleri view'a gönderiyoruz.
+
+            // Student objesine student dtoya atadığımız değerleri atıyoruz.
+
+            teacher.TeacherName = teacherDto.TeacherName;
+            teacher.TeacherSurname = teacherDto.TeacherSurname;
+            teacher.TeacherMail = teacherDto.TeacherMail;
+            teacher.TeacherPhone = teacherDto.TeacherPhone;
+            teacher.TeacherAdrress = teacherDto.TeacherAdrress;
+            teacher.TeacherGender = teacherDto.TeacherGender;
+            teacher.ImgFileName = newFileName;
+            teacher.TeacherBrans = teacherDto.TeacherBrans;
+
+            context.SaveChanges();
+
+            return RedirectToAction("TeacherList");
+        }
+
+        public IActionResult DeleteTeacher(int id)
+        {
+            var teacher = context.Teachers.Find(id);
+            if (teacher == null)
+            {
+                return RedirectToAction("TeacherList");
+            }
+
+            string imagePath = environment.WebRootPath + "/img/" + teacher.ImgFileName; // Resmin dosya yolunu belirt
+            System.IO.File.Delete(imagePath); // Resmi sil
+
+            context.Teachers.Remove(teacher);
+            context.SaveChanges();
+            return RedirectToAction("TeacherList");
+
+
+        }
+
+
+
+
+
+        //-------------------------------------------------------------------------------Teacher Bitiş
     }
 }

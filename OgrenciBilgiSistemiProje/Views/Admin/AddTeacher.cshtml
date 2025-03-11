@@ -1,0 +1,90 @@
+﻿@model TeacherDto
+@{
+	Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<div class="row">
+	<div class="col-md-8 mx-auto rounded border p-3">
+		<h2>Öğretmen Ekle</h2>
+		<form method="post" enctype="multipart/form-data">
+			<div class="row mb-3">
+				<label class="col-sm-4 col-form-label">Ad</label>
+				<div class="col-sm-8">
+					<input class="form-control" asp-for="TeacherName" />
+					<span asp-validation-for="TeacherName" class="text-danger"></span> <!--Validation Hatası Olursa Burada Gösterilecektir.-->
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<label class="col-sm-4 col-form-label">Soyad</label>
+				<div class="col-sm-8">
+					<input class="form-control" asp-for="TeacherSurname" />
+					<span asp-validation-for="TeacherSurname" class="text-danger"></span> <!--Validation Hatası Olursa Burada Gösterilecektir.-->
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<label class="col-sm-4 col-form-label">Email</label>
+				<div class="col-sm-8">
+					<input class="form-control" asp-for="TeacherMail" />
+					<span asp-validation-for="TeacherMail" class="text-danger"></span> <!--Validation Hatası Olursa Burada Gösterilecektir.-->
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<label class="col-sm-4 col-form-label">Telefon</label>
+				<div class="col-sm-8">
+					<input class="form-control" asp-for="TeacherPhone" />
+					<span asp-validation-for="TeacherPhone" class="text-danger"></span> <!--Validation Hatası Olursa Burada Gösterilecektir.-->
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<label class="col-sm-4 col-form-label">Adres</label>
+				<div class="col-sm-8">
+					<textarea class="form-control" asp-for="TeacherAdrress"></textarea>
+					<span asp-validation-for="TeacherAdrress" class="text-danger"></span> <!--Validation Hatası Olursa Burada Gösterilecektir.-->
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<label class="col-sm-4 col-form-label">Cinsiyet</label>
+				<div class="col-sm-8">
+					<select class="form-select" asp-for="TeacherGender">
+						<option value="Erkek">Erkek</option>
+						<option value="Kız">Kız</option>
+					</select>
+					<span asp-validation-for="TeacherGender" class="text-danger"></span> <!--Validation Hatası Olursa Burada Gösterilecektir.-->
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<label class="col-sm-4 col-form-label">Resim</label>
+				<div class="col-sm-8">
+					<input class="form-control" asp-for="ImageFile" />
+					<span asp-validation-for="ImageFile" class="text-danger"></span> <!--Validation Hatası Olursa Burada Gösterilecektir.-->
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<label class="col-sm-4 col-form-label">Brans</label>
+				<div class="col-sm-8">
+					<input class="form-control" asp-for="TeacherBrans" />
+					<span asp-validation-for="TeacherBrans" class="text-danger"></span> <!--Validation Hatası Olursa Burada Gösterilecektir.-->
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="offset-sm-4 col-sm-4 d-grid">
+					<button type="submit" class="btn btn-primary">Gönder</button>
+				</div>
+				<div class="col-sm-4 d-grid">
+					<a class="btn btn-outline-primary" asp-controller="Admin" asp-action="TeacherList" role="button">
+						<!--asp-action = "Index" Index Sayfasına Yönlendirme Yapılacaktır. Çünkü Ürünler Listesine Geri Dönülecektir.-->
+						İptal
+					</a>
+				</div>
+			</div>
+
+		</form>
+	</div>
+</div>
