@@ -42,6 +42,8 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult AddStudent()
         {
+            var departments = context.Departments.OrderByDescending(d => d.Id).ToList(); // Bölümleri bölüm numarasına göre sıralıyoruz ve listeye çeviriyoruz.           
+            ViewData["Departments"] = departments; // Bölümleri view'a gönderiyoruz.
             return View();
         }
 
@@ -68,8 +70,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 studentDto.ImageFile.CopyTo(stream); // Dosyayı yeni dosyaya kopyalıyoruz.
             }
 
-            var departments = context.Departments.OrderByDescending(d => d.Id).ToList(); // Bölümleri bölüm numarasına göre sıralıyoruz ve listeye çeviriyoruz.           
-            ViewData["Departments"] = departments; // Bölümleri view'a gönderiyoruz.
+            
 
             // Öğrenci objesi oluştur ve veritabanına ekle 
             // 
