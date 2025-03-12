@@ -225,6 +225,65 @@ namespace OgrenciBilgiSistemiProje.Controllers
             return RedirectToAction("DepartmentList");
         }
 
+
+
+        public IActionResult DepartmentEdit(int id)
+        {
+            var department = context.Departments.Find(id);
+            if (department == null)
+            {
+                return RedirectToAction("DepartmentList");
+            }
+            var departmentDto = new DepartmentDto
+            {
+                Name = department.Name,
+                Quota = department.Quota
+            };
+            var departments = context.Departments.OrderByDescending(d => d.Id).ToList(); // Bölümleri bölüm numarasına göre sıralıyoruz ve listeye çeviriyoruz.
+            ViewData["Departments"] = departments; // Bölümleri view'a gönderiyoruz.
+            ViewData["Id"] = id; // Bölüm numarasını view'a gönderiyoruz.
+            return View(departmentDto);
+        }
+
+
+        [HttpPost]
+        public IActionResult EditDepartment(int Id, DepartmentDto departmentDto)
+        {
+            var department = context.Departments.Find(Id);
+            if (department == null)
+            {
+                return RedirectToAction("DepartmentList");
+            }
+
+            var departments = context.Departments.OrderByDescending(d => d.Id).ToList(); // Bölümleri bölüm numarasına göre sıralıyoruz ve listeye çeviriyoruz.
+            ViewData["Departments"] = departments; // Bölümleri view'a gönderiyoruz.
+
+            // Student objesine student dtoya atadığımız değerleri atıyoruz.
+
+            department.Name = departmentDto.Name;
+            department.Quota = departmentDto.Quota;
+
+            context.SaveChanges();
+
+            return RedirectToAction("DepartmentList");
+        }
+
+
+        public IActionResult DeleteDepartment(int Id)
+        {
+            var department = context.Departments.Find(Id);
+
+            if (department == null)
+            {
+                return RedirectToAction("DepartmenList");
+            }
+
+            context.Departments.Remove(department);
+
+            context.SaveChanges();
+
+            return RedirectToAction("DepartmentList");
+        }
         //-------------------------------------------------------------------------------Bölüm Bitiş
 
 

@@ -10,6 +10,6 @@ namespace OgrenciBilgiSistemiProje.Models
         [MaxLength(100)]
         public string Name { get; set; } = "";  // Bölüm Adı
 
-        public int Quota { get; set; }  // Kontenjan
+        public int? Quota { get; set; }  // Kontenjan
     }
 }

@@ -46,7 +46,10 @@
 				<td>@department.Id</td>
 				<td>@department.Name</td>
 				<td>@department.Quota</td>
-				
+				<td>
+					<a class="btn btn-primary" asp-controller="Admin" asp-action="DepartmentEdit" asp-route-id="@department.Id">Düzenle</a>
+					<a class="btn btn-danger" asp-controller="Admin" asp-action="DeleteDepartment" onclick="return confirm('(@department.Name) Adlı Bölümü Silmek İstediğinize Emin Misiniz ?');" asp-route-id="@department.Id">Sil</a>
+				</td>
 			</tr>
 		}
 	</tbody>
