@@ -7,6 +7,7 @@ namespace OgrenciBilgiSistemiProje.Services
     {
         public DbSet<Student> Students { get; set; }
         public DbSet<Department> Departments { get; set; }
+        public DbSet<AdminAcc> Admins { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
 
