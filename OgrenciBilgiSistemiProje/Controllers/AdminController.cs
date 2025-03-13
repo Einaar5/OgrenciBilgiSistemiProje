@@ -29,7 +29,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             {
                 //Bu kısım idsine göre arama yapmak için kullanılır.
                 var student = from s in context.Students
-                              where s.StudentName.Contains(searchParam) || s.DepartmentName.Contains(searchParam) || s.StudentSurname.Contains(searchParam) // Öğrenci adı, emaili veya soyadı arama terimini içeriyorsa
+                              where s.StudentName.Contains(searchParam) || s.DepartmentName.Contains(searchParam) || s.StudentSurname.Contains(searchParam) || Convert.ToString(s.StudentId).Contains(searchParam) // Öğrenci adı, emaili, soyadı veya id ile arama terimini içeriyorsa
                               select s; // Arama terimine göre ürünleri çekiyoruz.
 
                 students = student;

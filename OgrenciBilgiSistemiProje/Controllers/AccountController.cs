@@ -28,6 +28,16 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         }
 
+        public IActionResult StuTeaLog() => View(); // Login için view döndürür
+
+        [HttpPost]
+        public IActionResult StuTeaLog(string username, string password) //login işlemi
+        {
+            
+            return View();
+
+        }
+
         public IActionResult Logout() // Çıkış işlemi
         {
             HttpContext.Session.Clear(); // Session'ı temizler
