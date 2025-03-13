@@ -17,6 +17,9 @@ namespace OgrenciBilgiSistemiProje.Models
         public string StudentEmail { get; set; } = "";
 
         [MaxLength(100)]
+        public string Password { get; set; } = "";
+
+        [MaxLength(100)]
         public string StudentPhone { get; set; } = "";
 
         [MaxLength(250)]

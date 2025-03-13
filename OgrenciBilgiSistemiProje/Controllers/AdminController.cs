@@ -48,7 +48,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddStudent(StudentDto studentDto)
+        public IActionResult AddStudent(StudentDto studentDto, DepartmentDto departmentDto)
         {
             if (studentDto.ImageFile == null)
             {
@@ -70,7 +70,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 studentDto.ImageFile.CopyTo(stream); // Dosyayı yeni dosyaya kopyalıyoruz.
             }
 
-            
+
 
             // Öğrenci objesi oluştur ve veritabanına ekle 
             // 
@@ -217,7 +217,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             Department department = new Department
             {
                 Name = departmentDto.Name,
-                Quota = departmentDto.Quota
+                Quota = departmentDto.Quota-- // Kontenjanı bir azaltıyoruz.
             };
 
             context.Departments.Add(department);
