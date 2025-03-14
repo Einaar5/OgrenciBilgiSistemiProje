@@ -27,7 +27,21 @@
                         <li class="nav-item d-flex ms-auto">
                             @if (Context.Session.GetString("username") != null)
                             {
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="LogoutStuTeach">Çıkış Yap</a>
+                                <!-- Example single danger button -->
+                                <div class="btn-group ">
+                                    <button type="button" class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <img src="/img/@Model.ImgFileName" class="rounded-circle" style="width:30px; height:30px;" alt="Alternate Text" />
+										@Model.TeacherName @Model.TeacherSurname
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#">Hesap</a></li>
+                                        <li><a class="dropdown-item" href="#">Bildirimler</a></li>
+                                        <li><a class="dropdown-item" href="#">Duyurular</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="LogoutStuTeach">Çıkış Yap</a></li>
+                                    </ul>
+                                </div>
+                                <a class=" nav-link text-dark" asp-area="" asp-controller="Account" asp-action="LogoutStuTeach">Çıkış</a>
                             }
                         </li>
                     </ul>

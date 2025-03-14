@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using OgrenciBilgiSistemiProje.Models;
 using OgrenciBilgiSistemiProje.Services;
 
 namespace OgrenciBilgiSistemiProje.Controllers
@@ -12,8 +13,10 @@ namespace OgrenciBilgiSistemiProje.Controllers
         {
             _context = context;
         }
+        
         public IActionResult Index()
         {
+            
             var student = _context.Students.FirstOrDefault(x => x.StudentEmail == HttpContext.Session.GetString("username"));
             return View(student);
         }

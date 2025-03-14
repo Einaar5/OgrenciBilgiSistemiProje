@@ -88,6 +88,8 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             };
 
+           
+
             context.Students.Add(student);
             context.SaveChanges();
 
