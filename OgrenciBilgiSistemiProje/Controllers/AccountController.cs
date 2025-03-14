@@ -22,6 +22,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             if (admin != null) // Eğer admin varsa null değilse
             {
                 HttpContext.Session.SetString("username", admin.Username); // Session'a kullanıcı adını ekler
+                HttpContext.Session.SetString("role", "Admin"); // Rolü session'a ekleyin
                 return RedirectToAction("Index", "Admin"); // Admin paneline yönlendirir
             }
             ViewBag.Error = "Kullanıcı adı veya şifre hatalı";
@@ -39,6 +40,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             if (student != null) // Eğer admin varsa null değilse
             {
                 HttpContext.Session.SetString("username", student.StudentEmail); // Session'a kullanıcı adını ekler
+                HttpContext.Session.SetString("role", "Student"); // Rolü session'a ekleyin
                 return RedirectToAction("Index", "Student"); // Admin paneline yönlendirir
             }
             //Sadece öğretmen Kısmı
@@ -46,6 +48,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             if (teacher != null) // Eğer admin varsa null değilse
             {
                 HttpContext.Session.SetString("username", teacher.TeacherMail); // Session'a kullanıcı adını ekler
+                HttpContext.Session.SetString("role", "Teacher"); // Rolü session'a ekleyin
                 return RedirectToAction("Index", "Teacher"); // Admin paneline yönlendirir
             }
 

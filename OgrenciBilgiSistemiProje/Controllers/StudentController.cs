@@ -3,6 +3,7 @@ using OgrenciBilgiSistemiProje.Services;
 
 namespace OgrenciBilgiSistemiProje.Controllers
 {
+   
     public class StudentController : BaseController
     {
         private readonly ApplicationDbContext _context; // Veritabanı bağlantısı

@@ -5,13 +5,36 @@ namespace OgrenciBilgiSistemiProje.Controllers
 {
     public class BaseController : Controller
     {
-        public override void OnActionExecuting(ActionExecutingContext context) // Eğer session'da kullanıcı adı yoksa login sayfasına yönlendirir
+        public override void OnActionExecuting(ActionExecutingContext context)
         {
-            if (string.IsNullOrEmpty(HttpContext.Session.GetString("username"))) // Eğer session'da kullanıcı adı yoksa
+            var username = HttpContext.Session.GetString("username");
+            var role = HttpContext.Session.GetString("role");
+
+            if (string.IsNullOrEmpty(username))
             {
-                context.Result = RedirectToAction("Login", "Account"); // Login sayfasına yönlendirir
+                context.Result = RedirectToAction("Login", "Account");
             }
-            base.OnActionExecuting(context); // Base sınıfın OnActionExecuting metodunu çalıştırır
+            else
+            {
+                // Controller adını al
+                var controllerName = context.Controller.GetType().Name;
+
+                // Rol kontrolü yap
+                if (controllerName == "AdminController" && role != "Admin")
+                {
+                    context.Result = RedirectToAction("Login", "Account");
+                }
+                else if (controllerName == "StudentController" && role != "Student")
+                {
+                    context.Result = RedirectToAction("StuTeaLog", "Account");
+                }
+                else if (controllerName == "TeacherController" && role != "Teacher")
+                {
+                    context.Result = RedirectToAction("StuTeaLog", "Account");
+                }
+            }
+
+            base.OnActionExecuting(context);
         }
     }
 }

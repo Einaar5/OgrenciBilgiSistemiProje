@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using OgrenciBilgiSistemiProje.Services;
+using Microsoft.AspNetCore.Identity;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,10 +16,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString);
 });
 
-
-
-
 builder.Services.AddSession();
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddControllersWithViews();
 
 
 

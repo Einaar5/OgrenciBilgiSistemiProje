@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace OgrenciBilgiSistemiProje.Controllers
 {
-
+    
     public class AdminController : BaseController
     {
         private readonly ApplicationDbContext context;
