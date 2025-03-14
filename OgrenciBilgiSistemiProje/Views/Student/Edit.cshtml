@@ -1,0 +1,95 @@
+﻿@model StudentDto
+
+
+
+
+<div class="col-md-8 mx-auto rounded border p-3 mt-5">
+	<div class="mb-5">
+		<h2>Öğrenci Hesap Düzenleme</h2>
+	</div>
+	<form method="post" enctype="multipart/form-data">
+
+	<div class="row mb-3">
+		<label class="col-sm-4 col-form-label">Ad</label>
+		<div class="col-sm-8">
+			<input class="form-control-plaintext" asp-for="StudentName" disabled />
+			<span asp-validation-for="StudentName" class="text-danger"></span> <!--Validation Hatası Olursa Burada Gösterilecektir.-->
+		</div>
+	</div>
+
+	<div class="row mb-3">
+		<label class="col-sm-4 col-form-label">Soyad</label>
+		<div class="col-sm-8">
+			<input class="form-control-plaintext" asp-for="StudentSurname" disabled />
+			<span asp-validation-for="StudentSurname" class="text-danger"></span> <!--Validation Hatası Olursa Burada Gösterilecektir.-->
+		</div>
+	</div>
+
+	<div class="row mb-3 d-none">
+		<label class="col-sm-4 col-form-label">Email</label>
+		<div class="col-sm-8">
+			<input class="form-control" asp-for="StudentEmail" />
+			<span asp-validation-for="StudentEmail" class="text-danger"></span> <!--Validation Hatası Olursa Burada Gösterilecektir.-->
+		</div>
+	</div>
+
+	<div class="row mb-3">
+		<label class="col-sm-4 col-form-label">Telefon</label>
+		<div class="col-sm-8">
+			<input class="form-control" asp-for="StudentPhone" />
+			<span asp-validation-for="StudentPhone" class="text-danger"></span> <!--Validation Hatası Olursa Burada Gösterilecektir.-->
+		</div>
+	</div>
+
+	<div class="row mb-3">
+		<label class="col-sm-4 col-form-label">Adres</label>
+		<div class="col-sm-8">
+			<textarea class="form-control" asp-for="StudentAddress"></textarea>
+			<span asp-validation-for="StudentAddress" class="text-danger"></span> <!--Validation Hatası Olursa Burada Gösterilecektir.-->
+		</div>
+	</div>
+
+	<div class="row mb-3">
+		<label class="col-sm-4 col-form-label">Cinsiyet</label>
+		<div class="col-sm-8">
+			<input class="form-control-plaintext" asp-for="StudentGender" disabled />
+			<span asp-validation-for="StudentGender" class="text-danger"></span> <!--Validation Hatası Olursa Burada Gösterilecektir.-->
+		</div>
+	</div>
+
+	<div class="row mb-3">
+		<div class=" offset-sm-4 col-sm-8">
+			<img src="/img/@ViewData["ImageFileName"]" width="150" alt="Alternate Text" disabled />  @* Resim Gösterimi *@
+		</div>
+	</div>
+
+
+	<div class="row mb-3">
+		<label class="col-sm-4 col-form-label">Resim</label>
+		<div class="col-sm-8">
+			<input class="form-control" asp-for="ImageFile" />
+			<span asp-validation-for="ImageFile" class="text-danger"></span> <!--Validation Hatası Olursa Burada Gösterilecektir.-->
+		</div>
+	</div>
+
+	<div class="row mb-3">
+		<label class="col-sm-4 col-form-label">Bölüm</label>
+		<div class="col-sm-8">
+			<input class="form-control-plaintext" asp-for="DepartmentName" disabled />
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="offset-sm-4 col-sm-4 d-grid">
+			<button type="submit" class="btn btn-primary">Gönder</button>
+		</div>
+		<div class="col-sm-4 d-grid">
+			<a class="btn btn-outline-primary" asp-controller="Student" asp-action="Index" role="button">
+				<!--asp-action = "Index" Index Sayfasına Yönlendirme Yapılacaktır. Çünkü Ürünler Listesine Geri Dönülecektir.-->
+				İptal
+			</a>
+		</div>
+	</div>
+
+</form>
+</div>
