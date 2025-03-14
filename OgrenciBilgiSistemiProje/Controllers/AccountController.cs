@@ -60,7 +60,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
         public IActionResult Logout() // Çıkış işlemi
         {
             HttpContext.Session.Clear(); // Session'ı temizler
-            return RedirectToAction("Login"); // Login sayfasına yönlendirir
+            return RedirectToAction("Index","Home"); // Login sayfasına yönlendirir
         }
 
         public IActionResult LogoutStuTeach() // Çıkış işlemi

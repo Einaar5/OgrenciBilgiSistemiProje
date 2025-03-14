@@ -69,15 +69,20 @@
                                 <div class="btn-group">
 
                                     <button type="button" class="btn p-0 border-0" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <img src="/img/@Model.ImgFileName" class="rounded-circle" style="width: 40px; height: 40px;" alt="Profile" />
+                                        <img src="/img/@Model.ImgFileName" class="rounded-circle" style="width: 60px; height: 60px;" alt="Profile" />
                                     </button>
                                     <!-- Dropdown menü -->
                                     <ul class="dropdown-menu dropdown-menu-end">
-                                        <li><a class="dropdown-item" href="#">Hesap</a></li>
-                                        <li><a class="dropdown-item" href="#">Bildirimler</a></li>
-                                        <li><a class="dropdown-item" href="#">Duyurular</a></li>
+
+                                        <li><a class="dropdown-item" asp-controller="Teacher" asp-action="Edit">Hesap</a></li>
+
+                                        <li><a class="dropdown-item" asp-controller="Teacher" asp-action="Index">Bildirimler</a></li>
+
+                                        <li><a class="dropdown-item" asp-controller="Teacher" asp-action="Index">Duyurular</a></li>
+
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="LogoutStuTeach">Çıkış Yap</a></li>
+
+                                        <li><a class="dropdown-item" asp-controller="Account" asp-action="LogoutStuTeach">Çıkış Yap</a></li>
                                     </ul>
                                 </div>
                             }

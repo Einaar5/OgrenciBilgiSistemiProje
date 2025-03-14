@@ -1,180 +1,184 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - OgrenciBilgiSistemiProje</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/OgrenciBilgiSistemiProje.styles.css" asp-append-version="true" />
-    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/assets/sidebar/css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>@ViewData["Title"] - OgrenciBilgiSistemiProje</title>
+	<script type="importmap"></script>
+	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/OgrenciBilgiSistemiProje.styles.css" asp-append-version="true" />
+	<link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="/assets/sidebar/css/style.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
 
-    <style>
-       
-        .accordion-button:not(.collapsed) {
-            background-color: #f8f9fa; 
-            color: #000;
-            box-shadow: none; 
-        }
+	<style>
 
-        .accordion-button {
-            background-color: #f8f9fa; 
-            color: #000; 
-            width: 100%;
-            text-align: left; 
-        }
+		.accordion-button:not(.collapsed) {
+			background-color: #f8f9fa;
+			color: #000;
+			box-shadow: none;
+		}
 
-            .accordion-button:focus {
-                box-shadow: none; 
-            }
+		.accordion-button {
+			background-color: #f8f9fa;
+			color: #000;
+			width: 100%;
+			text-align: left;
+		}
 
-        .accordion-item {
-           
-            width: 100%;
-            margin-bottom: 10px; 
-        }
+			.accordion-button:focus {
+				box-shadow: none;
+			}
 
-        .accordion-body {
-            width: 100%; 
-        }
-    </style>
+		.accordion-item {
+			width: 100%;
+			margin-bottom: 10px;
+		}
+
+		.accordion-body {
+			width: 100%;
+		}
+	</style>
 </head>
 <body>
-   
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-           
 
-            <div class="container-fluid px-5 gap-2">
-
-                @* offcanvas *@
-                <button class="btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#staticBackdrop" aria-controls="staticBackdrop">
-                    <i class="fa-solid fa-bars" style="color: #ff4a3d;"></i>
-                </button>
-                <a class="navbar-brand " asp-area="" asp-controller="Student" asp-action="Index">Öğrenci Bilgi Sistemi</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        
-                        <li class="nav-item ms-auto">
-                            @if (Context.Session.GetString("username") != null)
-                            {
-                                <div class="btn-group">
-                                   
-                                    <button type="button" class="btn p-0 border-0" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <img src="/img/@Model.ImageFileName" class="rounded-circle" style="width: 40px; height: 40px;" alt="Profile" />
-                                    </button>
-                                    <!-- Dropdown menü -->
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li><a class="dropdown-item" href="../Views/">Hesap</a></li>
-                                        <li><a class="dropdown-item" href="#">Bildirimler</a></li>
-                                        <li><a class="dropdown-item" href="#">Duyurular</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="LogoutStuTeach">Çıkış Yap</a></li>
-                                    </ul>
-                                </div>
-                            }
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
+	<header>
+		<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
 
 
+			<div class="container-fluid px-5 gap-2">
 
+				@* offcanvas *@
+				<button class="btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#staticBackdrop" aria-controls="staticBackdrop">
+					<i class="fa-solid fa-bars" style="color: #ff4a3d;"></i>
+				</button>
+				<a class="navbar-brand " asp-area="" asp-controller="Student" asp-action="Index">Öğrenci Bilgi Sistemi</a>
+				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+						aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+				<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+					<ul class="navbar-nav flex-grow-1">
 
-    <div class="offcanvas offcanvas-start active" data-bs-backdrop="static" tabindex="-1" id="staticBackdrop" aria-labelledby="staticBackdropLabel">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="staticBackdropLabel">Offcanvas</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body">
-            <div>
-                <div class="accordion" id="accordionExample">
-                    <!-- Accordion Item 1 -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingOne">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                Genel İşlemler
-                            </button>
-                        </h2>
-                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-                            <div class="accordion-body">
-                               
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Student" asp-action="Index">Anasayfa</a>
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Student" asp-action="Edit">Kullanıcı Bilgileri</a>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Accordion Item 2 -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingTwo">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                Ders ve Dönem İşlemleri
-                            </button>
-                        </h2>
-                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
-                            <div class="accordion-body">
-                                Bu, ikinci accordion içeriği. Yatayda tam genişlikli.
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Accordion Item 3 -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingThree">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                                Form İşlemleri
-                            </button>
-                        </h2>
-                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
-                            <div class="accordion-body">
-                                Bu, üçüncü accordion içeriği. Yatayda tam genişlikli.
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Accordion Item 4 -->
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingFour">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
-                                Kullanıcı İşlemleri
-                            </button>
-                        </h2>
-                        <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample">
-                            <div class="accordion-body">
-                                Bu, dördüncü accordion içeriği. Yatayda tam genişlikli.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+						<li class="nav-item ms-auto">
+							@if (Context.Session.GetString("username") != null)
+							{
+								<div class="btn-group">
+
+									<button type="button" class="btn p-0 border-0" data-bs-toggle="dropdown" aria-expanded="false">
+										<img src="/img/@Model.ImageFileName" class="rounded-circle" style="width: 60px; height: 60px;" alt="Profile" />
+									</button>
+
+									<ul class="dropdown-menu dropdown-menu-end">
+
+										<li><a class="dropdown-item" asp-controller="Student" asp-action="Edit">Hesap</a></li>
+
+										<li><a class="dropdown-item" asp-controller="Notifications" asp-action="Index">Bildirimler</a></li>
+
+										<li><a class="dropdown-item" asp-controller="Announcements" asp-action="Index">Duyurular</a></li>
+
+										<li><hr class="dropdown-divider"></li>
+
+										<li><a class="dropdown-item" asp-controller="Account" asp-action="LogoutStuTeach">Çıkış Yap</a></li>
+									</ul>
+								</div>
+							}
+						</li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+	</header>
 
 
 
 
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+	<div class="offcanvas offcanvas-start active" data-bs-backdrop="static" tabindex="-1" id="staticBackdrop" aria-labelledby="staticBackdropLabel">
+		<div class="offcanvas-header">
+			<h5 class="offcanvas-title" id="staticBackdropLabel">Offcanvas</h5>
+			<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+		</div>
+		<div class="offcanvas-body">
+			<div>
+				<div class="accordion" id="accordionExample">
+					<!-- Accordion Item 1 -->
+					<div class="accordion-item">
+						<h2 class="accordion-header" id="headingOne">
+							<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+								Genel İşlemler
+							</button>
+						</h2>
+						<div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+							<div class="accordion-body">
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - OgrenciBilgiSistemiProje - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+								<a class="nav-link text-dark" asp-area="" asp-controller="Student" asp-action="Index">Anasayfa</a>
+								<a class="nav-link text-dark" asp-area="" asp-controller="Student" asp-action="Edit">Kullanıcı Bilgileri</a>
+							</div>
+						</div>
+					</div>
+					<!-- Accordion Item 2 -->
+					<div class="accordion-item">
+						<h2 class="accordion-header" id="headingTwo">
+							<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+								Ders ve Dönem İşlemleri
+							</button>
+						</h2>
+						<div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+							<div class="accordion-body">
+								Bu, ikinci accordion içeriği. Yatayda tam genişlikli.
+							</div>
+						</div>
+					</div>
+					<!-- Accordion Item 3 -->
+					<div class="accordion-item">
+						<h2 class="accordion-header" id="headingThree">
+							<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+								Form İşlemleri
+							</button>
+						</h2>
+						<div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+							<div class="accordion-body">
+								Bu, üçüncü accordion içeriği. Yatayda tam genişlikli.
+							</div>
+						</div>
+					</div>
+					<!-- Accordion Item 4 -->
+					<div class="accordion-item">
+						<h2 class="accordion-header" id="headingFour">
+							<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+								Kullanıcı İşlemleri
+							</button>
+						</h2>
+						<div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample">
+							<div class="accordion-body">
+								Bu, dördüncü accordion içeriği. Yatayda tam genişlikli.
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+	<div class="container">
+		<main role="main" class="pb-3">
+			@RenderBody()
+		</main>
+	</div>
+
+	<footer class="border-top footer text-muted">
+		<div class="container">
+			&copy; 2025 - OgrenciBilgiSistemiProje - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+		</div>
+	</footer>
+	<script src="~/lib/jquery/dist/jquery.min.js"></script>
+	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="~/js/site.js" asp-append-version="true"></script>
+	@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
