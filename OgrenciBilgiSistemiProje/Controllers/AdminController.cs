@@ -338,10 +338,10 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 TeacherSurname = teacherDto.TeacherSurname,
                 TeacherMail = teacherDto.TeacherMail,
                 TeacherPhone = teacherDto.TeacherPhone,
-                TeacherAdrress = teacherDto.TeacherAdrress,
+                TeacherAddress = teacherDto.TeacherAddress,
                 TeacherGender = teacherDto.TeacherGender,
                 TeacherRegisterDate = DateTime.Now,
-                ImgFileName = newFileName,
+                ImageFileName = newFileName,
                 TeacherBrans = teacherDto.TeacherBrans
             };
 
@@ -364,13 +364,13 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 TeacherSurname = teacher.TeacherSurname,
                 TeacherMail = teacher.TeacherMail,
                 TeacherPhone = teacher.TeacherPhone,
-                TeacherAdrress = teacher.TeacherAdrress,
+                TeacherAddress = teacher.TeacherAddress,
                 TeacherGender = teacher.TeacherGender,
                 TeacherBrans = teacher.TeacherBrans
             };
 
             ViewData["Id"] = Id; // Öğrenci numarasını view'a gönderiyoruz.
-            ViewData["ImgFileName"] = teacher.ImgFileName; // Resim dosya adını view'a gönderiyoruz.
+            ViewData["ImgFileName"] = teacher.ImageFileName; // Resim dosya adını view'a gönderiyoruz.
             
 
             return View(teacherDto);
@@ -390,11 +390,11 @@ namespace OgrenciBilgiSistemiProje.Controllers
             if (!ModelState.IsValid) // Eğer model doğrulama başarısız olursa
             {
                 ViewData["Id"] = id; // Öğrenci numarasını view'a gönderiyoruz.
-                ViewData["ImgFileName"] = teacher.ImgFileName; // Resim dosya adını view'a gönderiyoruz.
+                ViewData["ImgFileName"] = teacher.ImageFileName; // Resim dosya adını view'a gönderiyoruz.
                 return View(teacherDto); // Hata varsa formu tekrar göster
             }
 
-            string newFileName = teacher.ImgFileName; // Eğer yeni bir resim yüklenmediyse eski resim dosya adını kullan
+            string newFileName = teacher.ImageFileName; // Eğer yeni bir resim yüklenmediyse eski resim dosya adını kullan
             if (teacherDto.ImageFile != null)
             {
                 newFileName = DateTime.Now.ToString("yyyyMMddHHmmssfff"); // burada dosya adı oluşturuluyor Örnek : 20211231235959999
@@ -406,7 +406,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                     teacherDto.ImageFile.CopyTo(stream); // Dosyayı yeni dosyaya kopyalıyoruz.
                 }
 
-                string oldImagePath = environment.WebRootPath + "/img/" + teacher.ImgFileName; // Eski resmin dosya yolunu belirt
+                string oldImagePath = environment.WebRootPath + "/img/" + teacher.ImageFileName; // Eski resmin dosya yolunu belirt
                 System.IO.File.Delete(oldImagePath); // Eski resmi siliyoruz çünkü artık kullanılmayacak
 
             }
@@ -420,9 +420,9 @@ namespace OgrenciBilgiSistemiProje.Controllers
             teacher.TeacherSurname = teacherDto.TeacherSurname;
             teacher.TeacherMail = teacherDto.TeacherMail;
             teacher.TeacherPhone = teacherDto.TeacherPhone;
-            teacher.TeacherAdrress = teacherDto.TeacherAdrress;
+            teacher.TeacherAddress = teacherDto.TeacherAddress;
             teacher.TeacherGender = teacherDto.TeacherGender;
-            teacher.ImgFileName = newFileName;
+            teacher.ImageFileName = newFileName;
             teacher.TeacherBrans = teacherDto.TeacherBrans;
 
             context.SaveChanges();
@@ -438,7 +438,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return RedirectToAction("TeacherList");
             }
 
-            string imagePath = environment.WebRootPath + "/img/" + teacher.ImgFileName; // Resmin dosya yolunu belirt
+            string imagePath = environment.WebRootPath + "/img/" + teacher.ImageFileName; // Resmin dosya yolunu belirt
             System.IO.File.Delete(imagePath); // Resmi sil
 
             context.Teachers.Remove(teacher);

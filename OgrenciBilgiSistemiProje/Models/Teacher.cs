@@ -18,12 +18,12 @@ namespace OgrenciBilgiSistemiProje.Models
         [MaxLength(100)]
         public string TeacherPhone { get; set; } = "";
         [MaxLength(100)]
-        public string TeacherAdrress { get; set; } = "";
+        public string TeacherAddress { get; set; } = "";
         [MaxLength(100)]
         public string TeacherGender { get; set; } = "";
         public DateTime TeacherRegisterDate { get; set; }
         [MaxLength(100)]
-        public string ImgFileName { get; set; } = "";
+        public string ImageFileName { get; set; } = "";
         [MaxLength(100)]
         public string TeacherBrans { get; set; } = "";
     }

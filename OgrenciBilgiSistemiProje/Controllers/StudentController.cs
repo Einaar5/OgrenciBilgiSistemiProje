@@ -20,6 +20,7 @@ public class StudentController : BaseController
         public IActionResult Index()
         {
             var student = context.Students.FirstOrDefault(x => x.StudentEmail == HttpContext.Session.GetString("username"));
+            ViewData["ImageFileName"] = student.ImageFileName;
             return View(student);
         }
 
@@ -29,7 +30,7 @@ public class StudentController : BaseController
 
             if (student == null)
             {
-                return RedirectToAction("StudentList");
+                return RedirectToAction("StuTeaLog","Account");
             }
             var studentDto = new StudentDto
             {
@@ -41,7 +42,7 @@ public class StudentController : BaseController
                 StudentGender = student.StudentGender,
                 DepartmentName = student.DepartmentName
             };
-
+            
             var departments = context.Departments.OrderByDescending(d => d.Id).ToList(); // Bölümleri bölüm numarasına göre sıralıyoruz ve listeye çeviriyoruz.           
             ViewData["Departments"] = departments; // Bölümleri view'a gönderiyoruz.
             ViewData["ImageFileName"] = student.ImageFileName; // Resim dosya adını view'a gönderiyoruz.
@@ -84,6 +85,7 @@ public class StudentController : BaseController
             student.StudentPhone = studentDto.StudentPhone;
             student.StudentAddress = studentDto.StudentAddress;
             student.ImageFileName = newFileName;
+
 
             context.SaveChanges();
             return RedirectToAction("Index", "Student");

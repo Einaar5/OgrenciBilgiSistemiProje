@@ -15,7 +15,7 @@ namespace OgrenciBilgiSistemiProje.Models
         [MaxLength(100)]
         public string TeacherPhone { get; set; } = "";
         [MaxLength(100)]
-        public string TeacherAdrress { get; set; } = "";
+        public string TeacherAddress { get; set; } = "";
         [MaxLength(100)]
         public string TeacherGender { get; set; } = "";
         public DateTime TeacherRegisterDate { get; set; }
