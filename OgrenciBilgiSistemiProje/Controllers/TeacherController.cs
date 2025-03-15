@@ -39,7 +39,9 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 TeacherPhone = teacher.TeacherPhone,
                 TeacherAddress = teacher.TeacherAddress,
                 TeacherGender = teacher.TeacherGender,
-                TeacherBrans = teacher.TeacherBrans
+                TeacherBrans = teacher.TeacherBrans,
+                TeacherPassword = teacher.TeacherPassword
+
             };
             ViewBag.ImageLayout = teacher.ImageFileName;
             ViewData["ImageFileName"] = teacher.ImageFileName; // Resim dosya adını view'a gönderiyoruz.
@@ -80,6 +82,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             teacher.TeacherPhone = teacherDto.TeacherPhone;
             teacher.TeacherAddress = teacherDto.TeacherAddress;
             teacher.ImageFileName = newFileName;
+            teacher.TeacherPassword = teacherDto.TeacherPassword;
 
             context.SaveChanges(); // Değişiklikleri kaydet
             return RedirectToAction("Index"); // Index sayfasına yönlendir

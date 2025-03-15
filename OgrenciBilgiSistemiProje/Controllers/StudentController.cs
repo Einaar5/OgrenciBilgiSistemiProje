@@ -40,7 +40,9 @@ public class StudentController : BaseController
                 StudentPhone = student.StudentPhone,
                 StudentAddress = student.StudentAddress,
                 StudentGender = student.StudentGender,
-                DepartmentName = student.DepartmentName
+                DepartmentName = student.DepartmentName,
+                Password = student.Password
+
             };
             
             var departments = context.Departments.OrderByDescending(d => d.Id).ToList(); // Bölümleri bölüm numarasına göre sıralıyoruz ve listeye çeviriyoruz.           
@@ -85,6 +87,7 @@ public class StudentController : BaseController
             student.StudentPhone = studentDto.StudentPhone;
             student.StudentAddress = studentDto.StudentAddress;
             student.ImageFileName = newFileName;
+            student.Password = studentDto.Password;
 
 
             context.SaveChanges();

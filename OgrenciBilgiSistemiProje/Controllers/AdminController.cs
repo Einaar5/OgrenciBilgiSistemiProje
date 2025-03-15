@@ -44,6 +44,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
         {
             var departments = context.Departments.OrderByDescending(d => d.Id).ToList(); // Bölümleri bölüm numarasına göre sıralıyoruz ve listeye çeviriyoruz.           
             ViewData["Departments"] = departments; // Bölümleri view'a gönderiyoruz.
+            
             return View();
         }
 
@@ -84,16 +85,26 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 StudentGender = studentDto.StudentGender,
                 StudentRegisterDate = DateTime.Now,
                 ImageFileName = newFileName,
-                DepartmentName = studentDto.DepartmentName
+                DepartmentName = studentDto.DepartmentName,
+                Password = studentDto.Password
+
 
             };
 
             //Burada kontenjan kontrolü yapılıyor ve kontenjan azaltılıyor böylece kontenjanı sıfırlanan bölüme öğrenci eklenemeyecek.
             var department = context.Departments.FirstOrDefault(d => d.Name == studentDto.DepartmentName); // Bölümü veritabanından çek
                                                                                                            //Kontenyaj kontrolü
-            if (department != null)
+            if (department != null && department.Quota > 0) // Eğer bölüm varsa ve kontenjanı sıfırdan büyükse
             {
-                using (var transaction = context.Database.BeginTransaction())
+                if (department.Quota <= 10)
+                {
+                    ViewBag.QuotaWarning = $"Bu bölümün kontenjanı azalmak üzere! (Kalan kontenjan: {department.Quota})";
+                }
+                else
+                {
+                    ViewBag.QuotaWarning = $"Kalan kontenjan: {department.Quota}";
+                }
+                using (var transaction = context.Database.BeginTransaction()) // transaction başlatmak demek birden fazla işlemi bir arada yapmak demektir. Eğer işlemlerden biri hata verirse diğer işlemleri geri alır.
                 {
                     try
                     {
@@ -109,11 +120,14 @@ namespace OgrenciBilgiSistemiProje.Controllers
                     }
                     catch (Exception)
                     {
-                        transaction.Rollback(); // Hata olursa geri al
+                        transaction.Rollback(); // buradada hata olursa geri al işlemini gerçekleştiriyoruz
                         throw; // Hatayı yeniden fırlat
                     }
                 }
             }
+
+            ViewBag.DepartmentQuotaAlert = department.Quota;
+
 
             return RedirectToAction("StudentList");
         }
@@ -133,7 +147,9 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 StudentPhone = student.StudentPhone,
                 StudentAddress = student.StudentAddress,
                 StudentGender = student.StudentGender,
-                DepartmentName = student.DepartmentName
+                DepartmentName = student.DepartmentName,
+                Password = student.Password
+
             };
 
             var departments = context.Departments.OrderByDescending(d => d.Id).ToList(); // Bölümleri bölüm numarasına göre sıralıyoruz ve listeye çeviriyoruz.           
@@ -192,7 +208,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             student.StudentGender = studentDto.StudentGender;
             student.DepartmentName = studentDto.DepartmentName;
             student.ImageFileName = newFileName;
-
+            student.Password = studentDto.Password;
             //Burada kontenjan kontrolü yapılıyor ve kontenjan azaltılıyor böylece kontenjanı sıfırlanan bölüme öğrenci eklenemeyecek.
             var department = context.Departments.FirstOrDefault(d => d.Name == studentDto.DepartmentName); // Bölümü veritabanından çek
                                                                                                            //Kontenyaj kontrolü
@@ -203,7 +219,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                     try
                     {
                         // Öğrenci ekleme ve kontenjan azaltma işlemleri
-                        context.Students.Add(student);
+                        context.Students.Update(student);
                         context.SaveChanges();
 
                         department.Quota -= 1;
@@ -365,10 +381,22 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
 
 
-        public IActionResult TeacherList()
+        public IActionResult TeacherList(string searchParam)
         {
-            var teacherList = context.Teachers.ToList();
-            return View(teacherList);
+            var teachers = context.Teachers.AsQueryable(); // Tüm öğrencileri çekiyoruz ve sorgu yapabilmek için IQueryable türünde bir değişkene atıyoruz.
+            if (!string.IsNullOrWhiteSpace(searchParam)) // Arama terimi boş değilse
+            {
+                //Bu kısım idsine göre arama yapmak için kullanılır.
+                var teacher = from s in context.Teachers
+                              where s.TeacherName.Contains(searchParam) || s.TeacherSurname.Contains(searchParam) || s.TeacherBrans.Contains(searchParam) || Convert.ToString(s.Id).Contains(searchParam) // Öğrenci adı, emaili, soyadı veya id ile arama terimini içeriyorsa
+                              select s; // Arama terimine göre ürünleri çekiyoruz.
+
+                teachers = teacher;
+            }
+            var TeacherList = teachers.OrderByDescending(s => s.Id).ToList(); // Öğrencileri öğrenci numarasına göre sıralıyoruz ve listeye çeviriyoruz.
+            ViewBag.Search = searchParam; // Arama terimini view'a gönderiyoruz.
+            return View(TeacherList);
+            
         }
 
         public IActionResult AddTeacher()
@@ -437,7 +465,9 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 TeacherPhone = teacher.TeacherPhone,
                 TeacherAddress = teacher.TeacherAddress,
                 TeacherGender = teacher.TeacherGender,
-                TeacherBrans = teacher.TeacherBrans
+                TeacherBrans = teacher.TeacherBrans,
+                TeacherPassword = teacher.TeacherPassword
+
             };
 
             ViewData["Id"] = Id; // Öğrenci numarasını view'a gönderiyoruz.
@@ -495,6 +525,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             teacher.TeacherGender = teacherDto.TeacherGender;
             teacher.ImageFileName = newFileName;
             teacher.TeacherBrans = teacherDto.TeacherBrans;
+            teacher.TeacherPassword = teacherDto.TeacherPassword;
 
             context.SaveChanges();
 
