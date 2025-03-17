@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using OgrenciBilgiSistemiProje.Models;
 using OgrenciBilgiSistemiProje.Services;
 
@@ -42,6 +43,11 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 TeacherPassword = teacher.TeacherPassword
 
             };
+
+            // Öğretmenin derslerini buluyoruz.
+            var lesson = context.Lessons.Include(x => x.Teacher).FirstOrDefault(x => x.Teacher.TeacherMail == HttpContext.Session.GetString("username")); // Öğretmenin derslerini buluyoruz.
+
+            ViewBag.LessonName = lesson.LessonName; // Ders adını view'a gönderiyoruz.
             ViewBag.ImageLayout = teacher.ImageFileName;
             ViewData["ImageFileName"] = teacher.ImageFileName; // Resim dosya adını view'a gönderiyoruz.
             return View(teacherDto); // ÖğrenciDto'yu view'a gönderiyoruz.

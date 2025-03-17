@@ -31,5 +31,7 @@ namespace OgrenciBilgiSistemiProje.Models
         public DateTime TeacherRegisterDate { get; set; }
 
         public IFormFile? ImageFile { get; set; }
+
+       
     }
 }

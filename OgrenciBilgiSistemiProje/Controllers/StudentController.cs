@@ -38,7 +38,7 @@ public class StudentController : BaseController
 
         public IActionResult Edit()
         {
-            var student = context.Students.FirstOrDefault(x => x.StudentEmail == HttpContext.Session.GetString("username"));
+            var student = context.Students.Include(s=>s.Department).FirstOrDefault(x => x.StudentEmail == HttpContext.Session.GetString("username"));
 
             if (student == null)
             {
@@ -60,7 +60,8 @@ public class StudentController : BaseController
             var departments = context.Departments.OrderByDescending(d => d.Id).ToList(); // Bölümleri bölüm numarasına göre sıralıyoruz ve listeye çeviriyoruz.           
             ViewData["Departments"] = departments; // Bölümleri view'a gönderiyoruz.
             ViewData["ImageFileName"] = student.ImageFileName; // Resim dosya adını view'a gönderiyoruz.
-
+                                                               // DepartmentName'i ViewData'ya ekleyebilirsiniz
+            ViewData["DepartmentName"] = student.Department.Name;
 
             return View(studentDto);
         }

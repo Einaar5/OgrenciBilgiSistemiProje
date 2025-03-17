@@ -25,11 +25,11 @@ namespace OgrenciBilgiSistemiProje.Controllers
         // Öğrenci listesi
         public IActionResult StudentList(string searchParam)
         {
-            var students = context.Students.AsQueryable(); // Tüm öğrencileri çekiyoruz ve sorgu yapabilmek için IQueryable türünde bir değişkene atıyoruz.
+            var students = context.Students.Include(s => s.Department).AsQueryable(); // Burada öğrencileri çekiyoruz ve sorgu yapabilmek için IQueryable türünde bir değişkene atıyoruz ve Department ilişkisini yüklüyoruz.
             if (!string.IsNullOrWhiteSpace(searchParam)) // Arama terimi boş değilse
             {
                 //Bu kısım idsine göre arama yapmak için kullanılır.
-                var student = from s in context.Students
+                var student = from s in context.Students.Include(s => s.Department) // Department ilişkisini yükle
                               where s.StudentName.Contains(searchParam) || Convert.ToString(s.DepartmentId).Contains(searchParam) || s.StudentSurname.Contains(searchParam) || Convert.ToString(s.StudentId).Contains(searchParam) // Öğrenci adı, emaili, soyadı veya id ile arama terimini içeriyorsa
                               select s; // Arama terimine göre ürünleri çekiyoruz.
 
@@ -38,6 +38,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             var StudentList = students.OrderByDescending(s => s.StudentId).ToList(); // Öğrencileri öğrenci numarasına göre sıralıyoruz ve listeye çeviriyoruz.
             ViewBag.Search = searchParam; // Arama terimini view'a gönderiyoruz.
+            
             return View(StudentList);
         }
 

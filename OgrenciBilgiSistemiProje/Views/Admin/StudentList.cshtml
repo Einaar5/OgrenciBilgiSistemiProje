@@ -57,7 +57,7 @@
 				<td>@student.StudentGender</td>
 				<td>@student.StudentRegisterDate.ToString("dd/MM/yyyy") </td>
 				<td><img src="/img/@student.ImageFileName" width="100" alt="Alternate Text" /></td>
-				<td>@student.DepartmentId</td>
+				<td>@student.Department?.Name</td>
 				 
 				<td>
 					<a class="btn btn-primary" asp-controller="Admin" asp-action="EditStudent" asp-route-id="@student.StudentId" >Düzenle</a>

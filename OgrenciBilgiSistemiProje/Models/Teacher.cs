@@ -33,6 +33,7 @@ namespace OgrenciBilgiSistemiProje.Models
         [MaxLength(100)]
         public string ImageFileName { get; set; } = "";
 
+       
         // Öğretmenin verdiği derslerle ilişki
         public virtual ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
     }
