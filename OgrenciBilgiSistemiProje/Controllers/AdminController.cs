@@ -2,6 +2,7 @@
 using OgrenciBilgiSistemiProje.Services;
 using OgrenciBilgiSistemiProje.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace OgrenciBilgiSistemiProje.Controllers
 {
@@ -29,7 +30,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             {
                 //Bu kısım idsine göre arama yapmak için kullanılır.
                 var student = from s in context.Students
-                              where s.StudentName.Contains(searchParam) || s.DepartmentName.Contains(searchParam) || s.StudentSurname.Contains(searchParam) || Convert.ToString(s.StudentId).Contains(searchParam) // Öğrenci adı, emaili, soyadı veya id ile arama terimini içeriyorsa
+                              where s.StudentName.Contains(searchParam) || Convert.ToString(s.DepartmentId).Contains(searchParam) || s.StudentSurname.Contains(searchParam) || Convert.ToString(s.StudentId).Contains(searchParam) // Öğrenci adı, emaili, soyadı veya id ile arama terimini içeriyorsa
                               select s; // Arama terimine göre ürünleri çekiyoruz.
 
                 students = student;
@@ -42,39 +43,45 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult AddStudent()
         {
-            var departments = context.Departments.OrderByDescending(d => d.Id).ToList(); // Bölümleri bölüm numarasına göre sıralıyoruz ve listeye çeviriyoruz.           
-            ViewData["Departments"] = departments; // Bölümleri view'a gönderiyoruz.
-            
-            return View();
+            ViewBag.Departments = context.Departments.OrderByDescending(d => d.Id).ToList(); // Bölümleri bölüm numarasına göre sıralıyoruz ve listeye çeviriyoruz.           
+            return View(new StudentDto());
         }
 
         [HttpPost]
-        public IActionResult AddStudent(StudentDto studentDto, DepartmentDto departmentDto)
+        public async Task<IActionResult> AddStudent(StudentDto studentDto)
         {
             if (studentDto.ImageFile == null)
             {
                 ModelState.AddModelError("ImageFile", "Resim seçiniz.");
             }
-            if (!ModelState.IsValid) // Eğer model doğrulama başarısız olursa
+
+            // Model doğrulamasını kontrol et
+            if (!ModelState.IsValid)
             {
+                // Doğrulama hatalarını log’la (isteğe bağlı, hata ayıklama için)
+                var errors = ModelState.Values.SelectMany(v => v.Errors).ToList();
+                foreach (var error in errors)
+                {
+                    Console.WriteLine(error.ErrorMessage); // Hataları konsola yazdır (debug için)
+                }
+
+                // Departmanları tekrar yükle ve formu göster
+                ViewBag.Departments = context.Departments.OrderByDescending(d => d.Id).ToList();
                 return View(studentDto); // Hata varsa formu tekrar göster
             }
 
             // Resim dosyasını yüklemek için bir dosya adı oluştur
-            string newFileName = DateTime.Now.ToString("yyyyMMddHHmmssfff"); // burada dosya adı oluşturuluyor Örnek : 20211231235959999
-            newFileName += Path.GetExtension(studentDto.ImageFile!.FileName); // dosya adının sonuna uzantı ekleniyor Örnek : 20211231235959999.jpg
+            string newFileName = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+            newFileName += Path.GetExtension(studentDto.ImageFile!.FileName);
 
             // Resmi yükle
-            string imageFullPath = environment.WebRootPath + "/img/" + newFileName; // Resmin yükleneceği yolu belirt ve dosya adını ekle
-            using (var stream = System.IO.File.Create(imageFullPath)) // Dosyayı oluşturuyoruz. Çünkü burada dosyayı sunucuya kaydedeceğiz. Stream sınıfı, dosya işlemleri yapmamızı sağlar.
+            string imageFullPath = Path.Combine(environment.WebRootPath, "img", newFileName);
+            using (var stream = System.IO.File.Create(imageFullPath))
             {
-                studentDto.ImageFile.CopyTo(stream); // Dosyayı yeni dosyaya kopyalıyoruz.
+                await studentDto.ImageFile.CopyToAsync(stream); // Async olarak kopyala
             }
 
-
-
-            // Öğrenci objesi oluştur ve veritabanına ekle 
-            // 
+            // Öğrenci objesi oluştur ve veritabanına ekle
             Student student = new Student
             {
                 StudentName = studentDto.StudentName,
@@ -85,16 +92,20 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 StudentGender = studentDto.StudentGender,
                 StudentRegisterDate = DateTime.Now,
                 ImageFileName = newFileName,
-                DepartmentName = studentDto.DepartmentName,
+                DepartmentId = studentDto.DepartmentId, // DepartmentId'yi doğru şekilde ata
                 Password = studentDto.Password
-
-
             };
 
-            //Burada kontenjan kontrolü yapılıyor ve kontenjan azaltılıyor böylece kontenjanı sıfırlanan bölüme öğrenci eklenemeyecek.
-            var department = context.Departments.FirstOrDefault(d => d.Name == studentDto.DepartmentName); // Bölümü veritabanından çek
-                                                                                                           //Kontenyaj kontrolü
-            if (department != null && department.Quota > 0) // Eğer bölüm varsa ve kontenjanı sıfırdan büyükse
+            // Kontenjan kontrolü ve işlem
+            var department = context.Departments.FirstOrDefault(d => d.Id == studentDto.DepartmentId);
+            if (department == null)
+            {
+                ModelState.AddModelError("DepartmentId", "Geçerli bir bölüm seçiniz.");
+                ViewBag.Departments = context.Departments.OrderByDescending(d => d.Id).ToList();
+                return View(studentDto);
+            }
+
+            if (department.Quota > 0)
             {
                 if (department.Quota <= 10)
                 {
@@ -104,30 +115,35 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 {
                     ViewBag.QuotaWarning = $"Kalan kontenjan: {department.Quota}";
                 }
-                using (var transaction = context.Database.BeginTransaction()) // transaction başlatmak demek birden fazla işlemi bir arada yapmak demektir. Eğer işlemlerden biri hata verirse diğer işlemleri geri alır.
+
+                using (var transaction = context.Database.BeginTransaction())
                 {
                     try
                     {
-                        // Öğrenci ekleme ve kontenjan azaltma işlemleri
                         context.Students.Add(student);
-                        context.SaveChanges();
+                        await context.SaveChangesAsync(); // Async olarak kaydet
 
                         department.Quota -= 1;
                         context.Departments.Update(department);
-                        context.SaveChanges();
+                        await context.SaveChangesAsync(); // Async olarak kaydet
 
                         transaction.Commit(); // İşlemleri onayla
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        transaction.Rollback(); // buradada hata olursa geri al işlemini gerçekleştiriyoruz
-                        throw; // Hatayı yeniden fırlat
+                        transaction.Rollback(); // Hata olursa geri al
+                        ModelState.AddModelError("", "Bir hata oluştu: " + ex.Message);
+                        ViewBag.Departments = context.Departments.OrderByDescending(d => d.Id).ToList();
+                        return View(studentDto);
                     }
                 }
             }
-
-            ViewBag.DepartmentQuotaAlert = department.Quota;
-
+            else
+            {
+                ModelState.AddModelError("DepartmentId", "Bu bölümün kontenjanı dolmuştur.");
+                ViewBag.Departments = context.Departments.OrderByDescending(d => d.Id).ToList();
+                return View(studentDto);
+            }
 
             return RedirectToAction("StudentList");
         }
@@ -147,7 +163,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 StudentPhone = student.StudentPhone,
                 StudentAddress = student.StudentAddress,
                 StudentGender = student.StudentGender,
-                DepartmentName = student.DepartmentName,
+                DepartmentId = student.DepartmentId,
                 Password = student.Password
 
             };
@@ -206,11 +222,11 @@ namespace OgrenciBilgiSistemiProje.Controllers
             student.StudentPhone = studentDto.StudentPhone;
             student.StudentAddress = studentDto.StudentAddress;
             student.StudentGender = studentDto.StudentGender;
-            student.DepartmentName = studentDto.DepartmentName;
+            student.DepartmentId = studentDto.DepartmentId;
             student.ImageFileName = newFileName;
             student.Password = studentDto.Password;
             //Burada kontenjan kontrolü yapılıyor ve kontenjan azaltılıyor böylece kontenjanı sıfırlanan bölüme öğrenci eklenemeyecek.
-            var department = context.Departments.FirstOrDefault(d => d.Name == studentDto.DepartmentName); // Bölümü veritabanından çek
+            var department = context.Departments.FirstOrDefault(d => d.Id == studentDto.DepartmentId); // Bölümü veritabanından çek
                                                                                                            //Kontenyaj kontrolü
             if (department != null)
             {
@@ -251,7 +267,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             System.IO.File.Delete(imagePath); // Resmi sil
 
             //Burada kontenjan kontrolü yapılıyor ve kontenjan azaltılıyor böylece kontenjanı sıfırlanan bölüme öğrenci eklenemeyecek.
-            var department = context.Departments.FirstOrDefault(d => d.Name == student.DepartmentName); // Bölümü veritabanından çek
+            var department = context.Departments.FirstOrDefault(d => d.Id == student.DepartmentId); // Bölümü veritabanından çek
                                                                                                         //Kontenyaj kontrolü
             using (var transaction = context.Database.BeginTransaction())
             {
@@ -388,7 +404,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             {
                 //Bu kısım idsine göre arama yapmak için kullanılır.
                 var teacher = from s in context.Teachers
-                              where s.TeacherName.Contains(searchParam) || s.TeacherSurname.Contains(searchParam) || s.TeacherBrans.Contains(searchParam) || Convert.ToString(s.Id).Contains(searchParam) // Öğrenci adı, emaili, soyadı veya id ile arama terimini içeriyorsa
+                              where s.TeacherName.Contains(searchParam) || s.TeacherSurname.Contains(searchParam) || Convert.ToString(s.Id).Contains(searchParam) // Öğrenci adı, emaili, soyadı veya id ile arama terimini içeriyorsa
                               select s; // Arama terimine göre ürünleri çekiyoruz.
 
                 teachers = teacher;
@@ -440,8 +456,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 TeacherAddress = teacherDto.TeacherAddress,
                 TeacherGender = teacherDto.TeacherGender,
                 TeacherRegisterDate = DateTime.Now,
-                ImageFileName = newFileName,
-                TeacherBrans = teacherDto.TeacherBrans
+                ImageFileName = newFileName
             };
 
             context.Teachers.Add(teacher);
@@ -465,7 +480,6 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 TeacherPhone = teacher.TeacherPhone,
                 TeacherAddress = teacher.TeacherAddress,
                 TeacherGender = teacher.TeacherGender,
-                TeacherBrans = teacher.TeacherBrans,
                 TeacherPassword = teacher.TeacherPassword
 
             };
@@ -524,7 +538,6 @@ namespace OgrenciBilgiSistemiProje.Controllers
             teacher.TeacherAddress = teacherDto.TeacherAddress;
             teacher.TeacherGender = teacherDto.TeacherGender;
             teacher.ImageFileName = newFileName;
-            teacher.TeacherBrans = teacherDto.TeacherBrans;
             teacher.TeacherPassword = teacherDto.TeacherPassword;
 
             context.SaveChanges();
@@ -555,5 +568,91 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
 
         //-------------------------------------------------------------------------------Teacher Bitiş
+
+
+        //-------------------------------------------------------------------------------Lesson Başla
+
+        public IActionResult LessonList(string searchParam)
+        {
+            /*
+            var lessons = context.Lessons.AsQueryable(); // Tüm öğrencileri çekiyoruz ve sorgu yapabilmek için IQueryable türünde bir değişkene atıyoruz.
+            if (!string.IsNullOrWhiteSpace(searchParam)) // Arama terimi boş değilse
+            {
+                //Bu kısım idsine göre arama yapmak için kullanılır.
+                var lesson = from s in context.Lessons
+                              where s.LessonName.Contains(searchParam) || Convert.ToString(s.LessonId).Contains(searchParam) // Öğrenci adı, emaili, soyadı veya id ile arama terimini içeriyorsa
+                              select s; // Arama terimine göre ürünleri çekiyoruz.
+
+                lessons = lesson;
+            }
+            var LessonList = lessons.OrderByDescending(s => s.LessonId).ToList(); // Öğrencileri öğrenci numarasına göre sıralıyoruz ve listeye çeviriyoruz.
+            ViewBag.Search = searchParam; // Arama terimini view'a gönderiyoruz.
+            return View(LessonList);
+            */
+
+            
+            var lessons = context.Lessons
+                .Include(l => l.Department) // Department ilişkisini yükle
+                .Include(l => l.Teacher)   // Teacher ilişkisini yükle
+                .OrderByDescending(l => l.LessonId)
+                .ToList();
+
+            return View(lessons);
+            
+        }
+
+        public IActionResult AddLesson()
+        {
+            var departments = context.Departments?.OrderByDescending(d => d.Id).ToList() ?? new List<Department>();
+            var teachers = context.Teachers?.OrderByDescending(t => t.Id).ToList() ?? new List<Teacher>();
+
+            if (departments == null || teachers == null)
+            {
+                // Log veya hata mesajı (isteğe bağlı)
+                Console.WriteLine("Departments veya Teachers yüklenemedi. Varsayılan boş liste kullanıldı.");
+            }
+
+            ViewBag.Departments = departments;
+            ViewBag.Teachers = teachers;
+            return View(new LessonDto());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddLesson(LessonDto lessonDto)
+        {
+            // Model doğrulamasını kontrol et
+            if (!ModelState.IsValid)
+            {
+                // Doğrulama hatalarını log’la (isteğe bağlı, hata ayıklama için)
+                var errors = ModelState.Values.SelectMany(v => v.Errors).ToList();
+                foreach (var error in errors)
+                {
+                    Console.WriteLine(error.ErrorMessage); // Hataları konsola yazdır (debug için)
+                }
+
+                // Departmanları ve öğretmenleri tekrar yükle ve formu göster
+                ViewBag.Departments = context.Departments.OrderByDescending(d => d.Id).ToList();
+                ViewBag.Teachers = context.Teachers.OrderByDescending(t => t.Id).ToList();
+                return View(lessonDto); // Hata varsa formu tekrar göster
+            }
+
+            // Ders objesi oluştur ve veritabanına ekle
+            Lesson lesson = new Lesson
+            {
+                LessonName = lessonDto.LessonName,
+                Credit = lessonDto.Credit,
+                DepartmentId = lessonDto.DepartmentId,
+                TeacherId = lessonDto.TeacherId
+            };
+
+            context.Lessons.Add(lesson);
+            await context.SaveChangesAsync();
+
+            return RedirectToAction("Index"); // Başarılıysa ana sayfaya yönlendir (veya LessonList gibi bir action)
+        }
+
+
+        //-------------------------------------------------------------------------------Lesson Bitir
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using OgrenciBilgiSistemiProje.Models;
 using OgrenciBilgiSistemiProje.Services;
 
@@ -19,8 +20,19 @@ public class StudentController : BaseController
 
         public IActionResult Index()
         {
-            var student = context.Students.FirstOrDefault(x => x.StudentEmail == HttpContext.Session.GetString("username"));
-            ViewData["ImageFileName"] = student.ImageFileName;
+            // Öğrenciyi bul ve Department bilgisini de dahil et
+            var student = context.Students
+                .Include(s => s.Department) // Department bilgisini dahil et
+                .FirstOrDefault(x => x.StudentEmail == HttpContext.Session.GetString("username"));
+
+            if (student != null)
+            {
+                ViewData["ImageFileName"] = student.ImageFileName;
+
+                // DepartmentName'i ViewData'ya ekleyebilirsiniz
+                ViewData["DepartmentName"] = student.Department.Name;
+            }
+
             return View(student);
         }
 
@@ -40,7 +52,7 @@ public class StudentController : BaseController
                 StudentPhone = student.StudentPhone,
                 StudentAddress = student.StudentAddress,
                 StudentGender = student.StudentGender,
-                DepartmentName = student.DepartmentName,
+                DepartmentId = student.DepartmentId,
                 Password = student.Password
 
             };

@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 namespace OgrenciBilgiSistemiProje.Models
 {
@@ -33,13 +35,12 @@ namespace OgrenciBilgiSistemiProje.Models
         [MaxLength(100)]
         public string ImageFileName { get; set; } = "";
 
-        [MaxLength(100)]
-        public string DepartmentName { get; set; } = ""; // ="" ile boş değer atadık. yoksa null hatası alırız.
+        // Department ile ilişki
+        [ForeignKey("Department")]
+        public int DepartmentId { get; set; }
+        public virtual Department Department { get; set; }
 
-
-
-
-
-
+        // Notlarla ilişki
+        public virtual ICollection<Grade> Grades { get; set; } = new List<Grade>();
     }
 }

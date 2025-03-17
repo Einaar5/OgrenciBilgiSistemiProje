@@ -1,0 +1,58 @@
+﻿@model List<Lesson>
+@{
+	Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<h2 class="text-center mb-5 ">Dersler Listesi</h2>
+
+<div class="row mb-5">
+	<div class="col">
+		<a class="btn btn-success" asp-controller="Admin" asp-action="AddLesson">Dersler Kayıt</a>
+	</div>
+	<div class="col">
+	</div>
+</div>
+
+<div>
+	<div class="d-flex flex-row align-items-center justify-content-end mb-3">
+		<!-- Arama Formu -->
+		<form asp-controller="Admin" asp-action="LessonList" method="get" class="mr-2">
+			<div class="input-group">
+				<input type="text" class="form-control" placeholder="Ders Adı"searchParam" value="@ViewBag.Search">
+				<button class="btn btn-outline-secondary" type="submit">Ara</button>
+			</div>
+		</form>
+
+		<!-- Temizle Butonu -->
+		<form asp-controller="Admin" asp-action="LessonList" method="get">
+			<button class="btn btn-outline-secondary" type="submit" name="searchParam" value="">Temizle</button>
+		</form>
+	</div>
+</div>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Ders No</th>
+            <th>Ders Adı</th>
+            <th>Kredi</th>
+            <th>Bölüm</th>
+            <th>Öğretmen</th>
+            <th>İşlemler</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var lesson in Model)
+        {
+            <tr>
+                <td>@lesson.LessonId</td>
+                <td>@lesson.LessonName</td>
+                <td>@lesson.Credit</td>
+                <td>@lesson.Department?.Name</td>
+                <td>@(lesson.Teacher != null ? $"{lesson.Teacher.TeacherName} {lesson.Teacher.TeacherSurname}" : "Atanmamış")</td>
+                <td>
+                    <a class="btn btn-primary" asp-controller="Admin" asp-action="EditLesson" asp-route-id="@lesson.LessonId">Düzenle</a>
+                    <a class="btn btn-danger" asp-controller="Admin" asp-action="DeleteLesson" onclick="return confirm('(@lesson.LessonName) Adlı Dersi Silmek İstediğinize Emin Misiniz ?');" asp-route-id="@lesson.LessonId">Sil</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

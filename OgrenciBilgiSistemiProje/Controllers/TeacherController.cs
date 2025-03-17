@@ -39,7 +39,6 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 TeacherPhone = teacher.TeacherPhone,
                 TeacherAddress = teacher.TeacherAddress,
                 TeacherGender = teacher.TeacherGender,
-                TeacherBrans = teacher.TeacherBrans,
                 TeacherPassword = teacher.TeacherPassword
 
             };

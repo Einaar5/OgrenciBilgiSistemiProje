@@ -12,8 +12,8 @@ using OgrenciBilgiSistemiProje.Services;
 namespace OgrenciBilgiSistemiProje.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250313182849_PasswordUpdate")]
-    partial class PasswordUpdate
+    [Migration("20250317144545_UpdateDepartmentNameToDepartmentId")]
+    partial class UpdateDepartmentNameToDepartmentId
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -67,6 +67,69 @@ namespace OgrenciBilgiSistemiProje.Migrations
                     b.ToTable("Departments");
                 });
 
+            modelBuilder.Entity("OgrenciBilgiSistemiProje.Models.Grade", b =>
+                {
+                    b.Property<int>("GradeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GradeId"));
+
+                    b.Property<double?>("Average")
+                        .HasColumnType("float");
+
+                    b.Property<int?>("Final")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LessonId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Midterm")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("GradeId");
+
+                    b.HasIndex("LessonId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("Grades");
+                });
+
+            modelBuilder.Entity("OgrenciBilgiSistemiProje.Models.Lesson", b =>
+                {
+                    b.Property<int>("LessonId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LessonId"));
+
+                    b.Property<int?>("Credit")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("LessonName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("TeacherId")
+                        .HasColumnType("int");
+
+                    b.HasKey("LessonId");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("Lessons");
+                });
+
             modelBuilder.Entity("OgrenciBilgiSistemiProje.Models.Student", b =>
                 {
                     b.Property<int>("StudentId")
@@ -75,10 +138,8 @@ namespace OgrenciBilgiSistemiProje.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StudentId"));
 
-                    b.Property<string>("DepartmentName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
 
                     b.Property<string>("ImageFileName")
                         .IsRequired()
@@ -125,6 +186,8 @@ namespace OgrenciBilgiSistemiProje.Migrations
 
                     b.HasKey("StudentId");
 
+                    b.HasIndex("DepartmentId");
+
                     b.ToTable("Students");
                 });
 
@@ -136,17 +199,12 @@ namespace OgrenciBilgiSistemiProje.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ImgFileName")
+                    b.Property<string>("ImageFileName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("TeacherAdrress")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("TeacherBrans")
+                    b.Property<string>("TeacherAddress")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -162,6 +220,11 @@ namespace OgrenciBilgiSistemiProje.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("TeacherName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("TeacherPassword")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -182,6 +245,75 @@ namespace OgrenciBilgiSistemiProje.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Teachers");
+                });
+
+            modelBuilder.Entity("OgrenciBilgiSistemiProje.Models.Grade", b =>
+                {
+                    b.HasOne("OgrenciBilgiSistemiProje.Models.Lesson", "Lesson")
+                        .WithMany("Grades")
+                        .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OgrenciBilgiSistemiProje.Models.Student", "Student")
+                        .WithMany("Grades")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lesson");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("OgrenciBilgiSistemiProje.Models.Lesson", b =>
+                {
+                    b.HasOne("OgrenciBilgiSistemiProje.Models.Department", "Department")
+                        .WithMany("Lessons")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OgrenciBilgiSistemiProje.Models.Teacher", "Teacher")
+                        .WithMany("Lessons")
+                        .HasForeignKey("TeacherId");
+
+                    b.Navigation("Department");
+
+                    b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("OgrenciBilgiSistemiProje.Models.Student", b =>
+                {
+                    b.HasOne("OgrenciBilgiSistemiProje.Models.Department", "Department")
+                        .WithMany("Students")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+                });
+
+            modelBuilder.Entity("OgrenciBilgiSistemiProje.Models.Department", b =>
+                {
+                    b.Navigation("Lessons");
+
+                    b.Navigation("Students");
+                });
+
+            modelBuilder.Entity("OgrenciBilgiSistemiProje.Models.Lesson", b =>
+                {
+                    b.Navigation("Grades");
+                });
+
+            modelBuilder.Entity("OgrenciBilgiSistemiProje.Models.Student", b =>
+                {
+                    b.Navigation("Grades");
+                });
+
+            modelBuilder.Entity("OgrenciBilgiSistemiProje.Models.Teacher", b =>
+                {
+                    b.Navigation("Lessons");
                 });
 #pragma warning restore 612, 618
         }

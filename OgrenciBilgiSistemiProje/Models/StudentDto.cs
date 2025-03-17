@@ -29,9 +29,8 @@ namespace OgrenciBilgiSistemiProje.Models
 
         public DateTime StudentRegisterDate { get; set; }
 
-        public IFormFile? ImageFile { get; set; } //Burada IFormFile Kullanmamızın Sebebi Kullanıcıdan Gelen Dosyayı Almamızdır.
-                                                  //IFormFile? İle Dosyanın Boş Gelebileceğini Belirttik.
-        [MaxLength(100)]
-        public string DepartmentName { get; set; } = "";
+        public IFormFile? ImageFile { get; set; }
+
+        public int DepartmentId { get; set; } // DepartmentName yerine DepartmentId
     }
 }

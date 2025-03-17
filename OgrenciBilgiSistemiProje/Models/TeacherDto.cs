@@ -6,23 +6,30 @@ namespace OgrenciBilgiSistemiProje.Models
     {
         [Key]
         public int Id { get; set; }
+
         [MaxLength(100)]
         public string TeacherName { get; set; } = "";
+
         [MaxLength(100)]
         public string TeacherSurname { get; set; } = "";
+
         [MaxLength(100)]
         public string TeacherMail { get; set; } = "";
+
         [MaxLength(100)]
         public string TeacherPassword { get; set; } = "";
+
         [MaxLength(100)]
         public string TeacherPhone { get; set; } = "";
+
         [MaxLength(100)]
         public string TeacherAddress { get; set; } = "";
+
         [MaxLength(100)]
         public string TeacherGender { get; set; } = "";
+
         public DateTime TeacherRegisterDate { get; set; }
+
         public IFormFile? ImageFile { get; set; }
-        [MaxLength(100)]
-        public string TeacherBrans { get; set; } = "";
     }
 }

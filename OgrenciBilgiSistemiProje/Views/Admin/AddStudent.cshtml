@@ -5,7 +5,7 @@
 <div class="row">
 	<div class="col-md-8 mx-auto rounded border p-3">
 		<h2>Öğrenci Ekle</h2>
-		<form method="post" enctype="multipart/form-data">
+		<form asp-action="AddStudent" asp-controller="Admin" method="post" enctype="multipart/form-data">
 			<div class="row mb-3">
 				<label class="col-sm-4 col-form-label">Ad</label>
 				<div class="col-sm-8">
@@ -77,13 +77,13 @@
 			<div class="row mb-3">
 				<label class="col-sm-4 col-form-label">Bölüm</label>
 				<div class="col-sm-8">
-					<select class="form-select" asp-for="DepartmentName">
+					<select class="form-select" asp-for="DepartmentId">
 						<option value="">Lütfen bir bölüm seçin</option>
 						@if (ViewData["Departments"] is List<OgrenciBilgiSistemiProje.Models.Department> departmentList)
 						{
 							@foreach (var department in departmentList)
 							{
-								<option value="@department.Name">@department.Name</option>
+								<option value="@department.Id">@department.Name</option>
 							}
 						}
 					</select>
@@ -106,10 +106,7 @@
 					<button type="submit" class="btn btn-primary">Gönder</button>
 				</div>
 				<div class="col-sm-4 d-grid">
-					<a class="btn btn-outline-primary" asp-controller="Admin" asp-action="StudentList" role="button">
-						<!--asp-action = "Index" Index Sayfasına Yönlendirme Yapılacaktır. Çünkü Ürünler Listesine Geri Dönülecektir.-->
-						İptal
-					</a>
+					<a class="btn btn-outline-primary" asp-controller="Admin" asp-action="StudentList" role="button">İptal</a>
 				</div>
 			</div>
 
