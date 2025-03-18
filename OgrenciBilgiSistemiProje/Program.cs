@@ -10,15 +10,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 
+// burada veritabaný baðlantýsý yapýlýyor
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     options.UseSqlServer(connectionString);
 });
 
-builder.Services.AddSession();
-builder.Services.AddDistributedMemoryCache();
-builder.Services.AddControllersWithViews();
+builder.Services.AddSession(); // Session kullanabilmek için ekledik. çünkü session default olarak gelmiyor.
+builder.Services.AddDistributedMemoryCache(); //
+builder.Services.AddControllersWithViews(); // Controller ve view'larý kullanabilmek için ekledik.
 
 
 
@@ -36,10 +37,10 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseSession();
-app.UseAuthorization();
+app.UseAuthorization(); // Yetkilendirme iþlemleri için ekledik.
 
 
-app.MapStaticAssets();
+app.MapStaticAssets(); // Static dosyalarý kullanabilmek için ekledik.
 
 app.MapControllerRoute(
     name: "default",

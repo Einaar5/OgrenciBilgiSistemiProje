@@ -19,11 +19,11 @@ namespace OgrenciBilgiSistemiProje.Services
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // İlişkisel yapılandırmalar
-            modelBuilder.Entity<Student>()
-                .HasOne(s => s.Department)
-                .WithMany(d => d.Students)
-                .HasForeignKey(s => s.DepartmentId);
+            // İlişkisel yapılandırmalar           
+            modelBuilder.Entity<Student>() // burada student tablosu için ilişkisel yapılandırmalar yapılıyor
+                .HasOne(s => s.Department) // bir öğrenci bir bölüme aittir
+                .WithMany(d => d.Students) // bir bölümde birden fazla öğrenci olabilir
+                .HasForeignKey(s => s.DepartmentId); // öğrenci tablosunda bölüm id'si tutuluyor
 
             modelBuilder.Entity<Lesson>()
                 .HasOne(l => l.Department)

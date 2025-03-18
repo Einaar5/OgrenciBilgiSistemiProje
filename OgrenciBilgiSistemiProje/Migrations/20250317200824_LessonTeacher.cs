@@ -10,7 +10,7 @@ namespace OgrenciBilgiSistemiProje.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
+            migrationBuilder.AddColumn<int>( 
                 name: "LessonId",
                 table: "Teachers",
                 type: "int",

@@ -457,6 +457,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 TeacherSurname = teacherDto.TeacherSurname,
                 TeacherMail = teacherDto.TeacherMail,
                 TeacherPhone = teacherDto.TeacherPhone,
+                TeacherPassword = teacherDto.TeacherPassword,
                 TeacherAddress = teacherDto.TeacherAddress,
                 TeacherGender = teacherDto.TeacherGender,
                 TeacherRegisterDate = DateTime.Now,
