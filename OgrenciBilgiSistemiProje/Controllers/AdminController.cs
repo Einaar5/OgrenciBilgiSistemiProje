@@ -122,18 +122,41 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 {
                     try
                     {
+                        // Öğrenciyi veritabanına ekle
                         context.Students.Add(student);
                         await context.SaveChangesAsync(); // Async olarak kaydet
 
+                        // Öğrencinin bölümündeki dersleri bul
+                        var lessons = context.Lessons.Where(l => l.DepartmentId == student.DepartmentId).ToList();
+
+                        // Her ders için Grade tablosuna kayıt ekler ve öğrenciye atar yani ne kadar derse sahipse department 
+                        foreach (var lesson in lessons)
+                        {
+                            Grade grade = new Grade
+                            {
+                                StudentId = student.StudentId, // Yeni eklenen öğrencinin ID'si
+                                LessonId = lesson.LessonId, // Dersin ID'si
+                                Midterm = 0, // Vize notu (varsayılan değer)
+                                Final = 0, // Final notu (varsayılan değer)
+                                Average = 0 // Ortalama (varsayılan değer)
+                            };
+                            context.Grades.Add(grade);
+                        }
+
+                        // Kontenjanı güncelle
                         department.Quota -= 1;
                         context.Departments.Update(department);
-                        await context.SaveChangesAsync(); // Async olarak kaydet
 
-                        transaction.Commit(); // İşlemleri onayla
+                        // Tüm değişiklikleri kaydet
+                        await context.SaveChangesAsync();
+
+                        // İşlemleri onayla
+                        transaction.Commit();
                     }
                     catch (Exception ex)
                     {
-                        transaction.Rollback(); // Hata olursa geri al
+                        // Hata olursa geri al
+                        transaction.Rollback();
                         ModelState.AddModelError("", "Bir hata oluştu: " + ex.Message);
                         ViewBag.Departments = context.Departments.OrderByDescending(d => d.Id).ToList();
                         return View(studentDto);

@@ -23,20 +23,20 @@ namespace OgrenciBilgiSistemiProje.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string username, string password)
         {
-            var admin = _context.Admins.FirstOrDefault(x => x.Username == username && x.Password == password);
+            var admin = _context.Admins.FirstOrDefault(x => x.Username == username && x.Password == password); // Kullanıcı adı ve şifre kontrolü
 
             if (admin != null)
             {
-                var claims = new List<Claim>
+                var claims = new List<Claim> // burada bir Claim listesi oluşturulur ve içine kullanıcı adı ve rol bilgisi eklenir
         {
-            new Claim(ClaimTypes.Name, username),
-            new Claim(ClaimTypes.Role, "Admin")
+            new Claim(ClaimTypes.Name, username), // Kullanıcı adı bilgisini tutar (Cookie için) 
+            new Claim(ClaimTypes.Role, "Admin") // Rol bilgisini tutar (Cookie için)
         };
 
-                var identity = new ClaimsIdentity(claims, "CookieAuth");
-                var principal = new ClaimsPrincipal(identity);
+                var identity = new ClaimsIdentity(claims, "CookieAuth"); // burada kimlik oluşturulur
+                var principal = new ClaimsPrincipal(identity); // burada kimlik temsilcisi oluşturulur
 
-                await HttpContext.SignInAsync("CookieAuth", principal);
+                await HttpContext.SignInAsync("CookieAuth", principal); // burada Cookie oluşturulur ve kullanıcı giriş yapar
 
                 return RedirectToAction("Index", "Admin");
             }

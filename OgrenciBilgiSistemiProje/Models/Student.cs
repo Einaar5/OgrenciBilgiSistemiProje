@@ -32,7 +32,6 @@ namespace OgrenciBilgiSistemiProje.Models
 
         public DateTime StudentRegisterDate { get; set; }
 
-       
 
         [MaxLength(100)]
         public string ImageFileName { get; set; } = "";
