@@ -99,7 +99,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             };
 
             // Kontenjan kontrolü ve işlem
-            var department = context.Departments.FirstOrDefault(d => d.Id == studentDto.DepartmentId);
+            var department = context.Departments.FirstOrDefault(d => d.Id == studentDto.DepartmentId); 
             if (department == null)
             {
                 ModelState.AddModelError("DepartmentId", "Geçerli bir bölüm seçiniz.");
@@ -118,7 +118,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                     ViewBag.QuotaWarning = $"Kalan kontenjan: {department.Quota}";
                 }
 
-                using (var transaction = context.Database.BeginTransaction())
+                using (var transaction = context.Database.BeginTransaction()) // burada transection demek birden fazla işlemi bir arada yapmak demektir. Eğer işlemlerden biri başarısız olursa diğer işlemleri geri alır.
                 {
                     try
                     {

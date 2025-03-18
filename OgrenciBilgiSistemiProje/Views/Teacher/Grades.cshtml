@@ -1,0 +1,70 @@
+﻿@model List<Grade> 
+@{
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+}
+
+<div class="container mt-5">
+    <h2>Notlar</h2>
+
+    <!-- Not Giriş Formu -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Not Girişi</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Grades" method="post">
+                <div class="form-group">
+                    <label for="StudentId">Öğrenci Seçiniz</label>
+                    <select class="form-control" id="StudentId" name="StudentId" required>
+                        <option value="">-- Öğrenci Seçin --</option>
+                        @foreach (var student in ViewBag.Students)
+                        {
+                            <option value="@student.StudentId">@student.StudentName @student.StudentSurname</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="Midterm">Vize Notu</label>
+                    <input type="number" class="form-control" id="Midterm" name="Midterm" required>
+                </div>
+                <div class="form-group">
+                    <label for="Final">Final Notu</label>
+                    <input type="number" class="form-control" id="Final" name="Final" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Notu Kaydet</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notlar Tablosu -->
+    <div class="card">
+        <div class="card-header">
+            <h4>Ders Notları</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Öğrenci Adı</th>
+                        <th>Ders Adı</th>
+                        <th>Vize</th>
+                        <th>Final</th>
+                        <th>Ortalama</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var grade in Model)
+                    {
+                        <tr>
+                            <td>@grade.Student.StudentName @grade.Student.StudentSurname</td>
+                            <td>@grade.Lesson.LessonName</td>
+                            <td>@grade.Midterm</td>
+                            <td>@grade.Final</td>
+                            <td>@grade.Average</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
