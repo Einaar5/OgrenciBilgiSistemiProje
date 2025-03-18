@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OgrenciBilgiSistemiProje.Models;
@@ -6,8 +7,9 @@ using OgrenciBilgiSistemiProje.Services;
 
 namespace OgrenciBilgiSistemiProje.Controllers
 {
-   
-public class StudentController : BaseController
+
+    [Authorize(Roles = "Student")] // Sadece öğrenci rolündeki kullanıcılar bu controller'a erişebilir
+    public class StudentController : Controller
     {
         private readonly ApplicationDbContext context; // Veritabanı bağlantısı
         private readonly IWebHostEnvironment environment;
@@ -20,10 +22,11 @@ public class StudentController : BaseController
 
         public IActionResult Index()
         {
+            var studentUsername = HttpContext.User.Identity.Name; // Kullanıcı adını alıyoruz.
             // Öğrenciyi bul ve Department bilgisini de dahil et
             var student = context.Students
                 .Include(s => s.Department) // Department bilgisini dahil et
-                .FirstOrDefault(x => x.StudentEmail == HttpContext.Session.GetString("username"));
+                .FirstOrDefault(x => x.StudentEmail == studentUsername);
 
             if (student != null)
             {
@@ -38,7 +41,8 @@ public class StudentController : BaseController
 
         public IActionResult Edit()
         {
-            var student = context.Students.Include(s=>s.Department).FirstOrDefault(x => x.StudentEmail == HttpContext.Session.GetString("username"));
+            var studentUsername = HttpContext.User.Identity.Name; // Kullanıcı adını alıyoruz.
+            var student = context.Students.Include(s=>s.Department).FirstOrDefault(x => x.StudentEmail == studentUsername);
 
             if (student == null)
             {
@@ -70,7 +74,8 @@ public class StudentController : BaseController
         [HttpPost]
         public IActionResult Edit(StudentDto studentDto)
         {
-            var student = context.Students.FirstOrDefault(x => x.StudentEmail == HttpContext.Session.GetString("username"));
+            var studentUsername = HttpContext.User.Identity.Name; // Kullanıcı adını alıyoruz.
+            var student = context.Students.FirstOrDefault(x => x.StudentEmail == studentUsername);
             if (student == null)
             {
                 return RedirectToAction("Index", "Student");

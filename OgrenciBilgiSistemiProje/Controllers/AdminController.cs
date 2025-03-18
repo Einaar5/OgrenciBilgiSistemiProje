@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace OgrenciBilgiSistemiProje.Controllers
 {
-
-    public class AdminController : BaseController
+    [Authorize(Roles = "Admin")] // Sadece admin rolündeki kullanıcılar bu controller'a erişebilir
+    public class AdminController : Controller
     {
         private readonly ApplicationDbContext context;
         private readonly IWebHostEnvironment environment;

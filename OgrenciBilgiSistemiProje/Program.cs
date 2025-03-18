@@ -22,6 +22,12 @@ builder.Services.AddDistributedMemoryCache(); //
 builder.Services.AddControllersWithViews(); // Controller ve view'larý kullanabilmek için ekledik.
 
 
+builder.Services.AddAuthentication("CookieAuth")
+    .AddCookie("CookieAuth", options =>
+    {
+        options.LoginPath = "/Account/StuTeaLog"; // Login olunmadýðýnda yönlendirilecek sayfa
+        options.AccessDeniedPath = "/Account/StuTeaLog"; // Yetkisiz eriþimde yönlendirilecek sayfa
+    });
 
 var app = builder.Build();
 

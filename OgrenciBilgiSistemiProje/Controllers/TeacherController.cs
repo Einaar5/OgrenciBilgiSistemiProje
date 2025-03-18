@@ -7,9 +7,10 @@ using OgrenciBilgiSistemiProje.Services;
 
 namespace OgrenciBilgiSistemiProje.Controllers
 {
-    
-    public class TeacherController : BaseController
+    [Authorize(Roles = "Teacher")] // Sadece öğretmen rolündeki kullanıcılar bu controller'a erişebilir
+    public class TeacherController : Controller
     {
+        
         private readonly ApplicationDbContext context; // Veritabanı bağlantısı
         private readonly IWebHostEnvironment environment;
 
@@ -20,14 +21,16 @@ namespace OgrenciBilgiSistemiProje.Controllers
         }
         public IActionResult Index()
         {
-            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == HttpContext.Session.GetString("username")); // Kullanıcı adına göre öğrenciyi buluyoruz.
+            var teacherUsername = HttpContext.User.Identity.Name; // Kullanıcı adını alıyoruz.
+            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername); // Kullanıcı adına göre öğrenciyi buluyoruz.
             ViewData["ImageFileName"] = teacher.ImageFileName;
             return View(teacher); // Öğrenciyi view'a gönderiyoruz.
         }
 
         public IActionResult Edit()
         {
-            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == HttpContext.Session.GetString("username")); // Kullanıcı adına göre öğrenciyi buluyoruz.
+            var teacherUsername = HttpContext.User.Identity.Name; // Kullanıcı adını alıyoruz.
+            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername); // Kullanıcı adına göre öğrenciyi buluyoruz.
             if (teacher == null)
             {
                 return RedirectToAction("StuTeaLog", "Account"); // Eğer öğrenci yoksa login sayfasına yönlendiriyoruz.
@@ -45,7 +48,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             };
 
             // Öğretmenin derslerini buluyoruz.
-            var lesson = context.Lessons.Include(x => x.Teacher).FirstOrDefault(x => x.Teacher.TeacherMail == HttpContext.Session.GetString("username")); // Öğretmenin derslerini buluyoruz.
+            var lesson = context.Lessons.Include(x => x.Teacher).FirstOrDefault(x => x.Teacher.TeacherMail == teacherUsername); // Öğretmenin derslerini buluyoruz.
 
             ViewBag.LessonName = lesson.LessonName; // Ders adını view'a gönderiyoruz.
             ViewBag.ImageLayout = teacher.ImageFileName;
@@ -56,7 +59,8 @@ namespace OgrenciBilgiSistemiProje.Controllers
         [HttpPost]
         public IActionResult Edit(TeacherDto teacherDto)
         {
-            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == HttpContext.Session.GetString("username"));
+            var teacherUsername = HttpContext.User.Identity.Name; // Kullanıcı adını alıyoruz.
+            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername);
             if (teacher == null)
             {
                 return RedirectToAction("StuTeaLog", "Account");
