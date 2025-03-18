@@ -21,6 +21,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             return View();
         }
 
+        #region Öğrenci Başlangıç
         //-------------------------------------------------------------------------------Öğrenci Başlangıç
         // Öğrenci listesi
         public IActionResult StudentList(string searchParam)
@@ -299,7 +300,10 @@ namespace OgrenciBilgiSistemiProje.Controllers
         }
 
         //-------------------------------------------------------------------------------Öğrenci Bitiş
+        #endregion
 
+
+        #region Bölüm Başlangıç
         //-------------------------------------------------------------------------------Bölüm Başlangıç
 
         public IActionResult DepartmentList()
@@ -391,12 +395,11 @@ namespace OgrenciBilgiSistemiProje.Controllers
             return RedirectToAction("DepartmentList");
         }
         //-------------------------------------------------------------------------------Bölüm Bitiş
+        #endregion
 
 
-
+        #region Öğretmen Başlangıç
         //-------------------------------------------------------------------------------Teacher Başlangıç
-
-
 
         public IActionResult TeacherList(string searchParam)
         {
@@ -564,13 +567,12 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         }
 
-
-
-
-
         //-------------------------------------------------------------------------------Teacher Bitiş
 
+        #endregion
 
+
+        #region Ders Başlangıç
         //-------------------------------------------------------------------------------Lesson Başla
 
         public IActionResult LessonList(string searchParam)
@@ -649,11 +651,68 @@ namespace OgrenciBilgiSistemiProje.Controllers
             context.Lessons.Add(lesson);
             await context.SaveChangesAsync();
 
-            return RedirectToAction("Index"); // Başarılıysa ana sayfaya yönlendir (veya LessonList gibi bir action)
+            return RedirectToAction("LessonList"); // Başarılıysa ana sayfaya yönlendir (veya LessonList gibi bir action)
         }
 
+        public IActionResult EditLesson(int id)
+        {
+            var lesson = context.Lessons.Find(id);
+            if (lesson == null)
+            {
+                return RedirectToAction("LessonList");
+            }
+
+           
+            var lessonDto = new LessonDto
+            {
+                LessonName = lesson.LessonName,
+                Credit = lesson.Credit
+            };
+
+            return View(lessonDto);
+        }
+
+        [HttpPost]
+        public IActionResult EditLesson(int id, LessonDto lessonDto)
+        {
+            var lesson = context.Lessons.Find(id);
+            if (lesson == null)
+            {
+                return RedirectToAction("LessonList");
+            }
+
+            if (!ModelState.IsValid) // Eğer model doğrulama başarısız olursa
+            {
+                ViewData["LessonId"] = id; // Öğrenci numarasını view'a gönderiyoruz.
+                return View(lessonDto); // Hata varsa formu tekrar göster
+            }
+
+            // Student objesine student dtoya atadığımız değerleri atıyoruz.
+
+            lesson.LessonName = lessonDto.LessonName;
+            lesson.Credit = lessonDto.Credit;
+
+            context.SaveChanges();
+
+            
+            return RedirectToAction("LessonList");
+        }
+
+        public IActionResult DeleteLesson(int id)
+        {
+            var lesson = context.Lessons.Find(id);
+            if (lesson == null)
+            {
+                return RedirectToAction("LessonList");
+            }
+
+            context.Remove(lesson);
+            context.SaveChanges();
+
+            return RedirectToAction("LessonList");
+        }
 
         //-------------------------------------------------------------------------------Lesson Bitir
-
+        #endregion
     }
 }
