@@ -584,8 +584,16 @@ namespace OgrenciBilgiSistemiProje.Controllers
             string imagePath = environment.WebRootPath + "/img/" + teacher.ImageFileName; // Resmin dosya yolunu belirt
             System.IO.File.Delete(imagePath); // Resmi sil
 
-            context.Teachers.Remove(teacher);
-            context.SaveChanges();
+            try
+            {
+                context.Teachers.Remove(teacher);
+                context.SaveChanges();
+            }
+            catch 
+            {
+                @ViewBag.Error = "Bu öğretmene ait dersler bulunmaktadır. Öğretmeni silemezsiniz.";
+
+            }
             return RedirectToAction("TeacherList");
 
 
@@ -730,8 +738,16 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return RedirectToAction("LessonList");
             }
 
-            context.Remove(lesson);
-            context.SaveChanges();
+            try
+            {
+                context.Remove(lesson);
+                context.SaveChanges();
+            }
+            catch (Exception)
+            {
+                @ViewBag.Error = "Bu dersi silemezsiniz. Bu dersi alan öğrenciler var.";
+
+            }
 
             return RedirectToAction("LessonList");
         }

@@ -110,7 +110,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             }
 
             // Öğretmenin derslerini alıyoruz.
-            var lessons = context.Lessons
+            var lessons = context.Lessons // burada dersler tablosundan öğretmenin derslerini alıyoruz
                 .Include(x => x.Teacher)
                 .Where(x => x.Teacher.TeacherMail == teacherUsername)
                 .ToList();
@@ -128,6 +128,8 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 .Where(s => studentIds.Contains(s.StudentId)) // Sadece notu olan öğrencileri al
                 .ToList();
 
+            ViewBag.ImageLayout = teacher.ImageFileName;
+            ViewData["ImageFileName"] = teacher.ImageFileName;
             return View(grades); // Notları view'a gönderiyoruz.
         }
 
