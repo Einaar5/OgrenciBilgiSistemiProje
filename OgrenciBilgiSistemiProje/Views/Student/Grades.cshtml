@@ -1,0 +1,27 @@
+﻿@model List<Grade>
+@{
+    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
+}
+
+<h2>Dönem Notlarım</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Ders Adı</th>
+            <th>Vize Notu</th>
+            <th>Final Notu</th>
+            <th>Ortalama</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var score in Model)
+        {
+            <tr>
+                <td>@score.Lesson?.LessonName</td>
+                <td>@(score.Midterm?.ToString() ?? "Girilmedi")</td>
+                <td>@(score.Final?.ToString() ?? "Girilmedi")</td>
+                <td>@(score.Average.ToString() ?? "Girilmedi")</td>
+            </tr>
+        }
+    </tbody>
+</table>

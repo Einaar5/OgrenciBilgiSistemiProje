@@ -109,6 +109,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return RedirectToAction("StuTeaLog", "Account"); // Eğer öğretmen yoksa login sayfasına yönlendiriyoruz.
             }
 
+
             // Öğretmenin derslerini alıyoruz.
             var lessons = context.Lessons // burada dersler tablosundan öğretmenin derslerini alıyoruz
                 .Include(x => x.Teacher)
@@ -122,6 +123,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 .Where(x => lessons.Select(l => l.LessonId).Contains(x.LessonId))
                 .ToList();
 
+
             // Öğretmenin derslerine kayıtlı öğrencileri alıyoruz.
             var studentIds = grades.Select(g => g.StudentId).Distinct().ToList();
             ViewBag.Students = context.Students
@@ -130,60 +132,80 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             ViewBag.ImageLayout = teacher.ImageFileName;
             ViewData["ImageFileName"] = teacher.ImageFileName;
+            ViewBag.TeacherLessons = teacher?.Lessons?.ToList() ?? new List<Lesson>();
             return View(grades); // Notları view'a gönderiyoruz.
         }
 
         [HttpPost]
+        [Authorize(Roles = "Teacher")]
         public IActionResult Grades(GradeDto gradeDto)
         {
-            var teacherUsername = HttpContext.User.Identity.Name; // Kullanıcı adını alıyoruz.
-            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername); // Öğretmeni buluyoruz.
+            // 1. Öğretmen doğrulama
+            var teacherUsername = HttpContext.User.Identity.Name;
+            var teacher = context.Teachers
+                .Include(t => t.Lessons)
+                .FirstOrDefault(t => t.TeacherMail == teacherUsername);
+
             if (teacher == null)
             {
-                return RedirectToAction("StuTeaLog", "Account"); // Eğer öğretmen yoksa login sayfasına yönlendiriyoruz.
+                return Unauthorized(); // 401 hatası daha uygun
             }
 
-            // Öğretmenin derslerini alıyoruz.
-            var lessons = context.Lessons
-                .Include(x => x.Teacher)
-                .Where(x => x.Teacher.TeacherMail == teacherUsername)
-                .ToList();
+            // 2. Seçilen dersin öğretmene ait olup olmadığını kontrol
+            var selectedLesson = teacher.Lessons.FirstOrDefault(l => l.LessonId == gradeDto.LessonId);
+            if (selectedLesson == null)
+            {
+                ModelState.AddModelError("LessonId", "Bu dersi vermiyorsunuz");
+                return View(gradeDto); // Aynı sayfaya hata mesajıyla dön
+            }
 
-            // Öğrenciyi buluyoruz.
-            var student = context.Students.FirstOrDefault(x => x.StudentId == gradeDto.StudentId);
+            // 3. Öğrenci kontrolü
+            var student = context.Students
+                .FirstOrDefault(s => s.StudentId == gradeDto.StudentId);
             if (student == null)
             {
-                return RedirectToAction("Grades"); // Öğrenci yoksa notlar sayfasına yönlendiriyoruz.
+                ModelState.AddModelError("StudentId", "Öğrenci bulunamadı");
+                return View(gradeDto);
             }
 
-            // Öğretmenin derslerine ait notları güncelliyoruz veya yeni not ekliyoruz.
-            foreach (var lesson in lessons)
+            // 4. Not işlemleri (sadece seçilen ders için)
+            var grade = context.Grades
+                .FirstOrDefault(g => g.StudentId == gradeDto.StudentId
+                                 && g.LessonId == gradeDto.LessonId);
+
+            // Ortalama hesaplama düzeltildi
+            var average = (gradeDto.Midterm * 0.4) + (gradeDto.Final * 0.6);
+
+            if (grade == null)
             {
-                var grade = context.Grades.FirstOrDefault(x => x.StudentId == student.StudentId && x.LessonId == lesson.LessonId);
-                if (grade == null)
+                context.Grades.Add(new Grade
                 {
-                    grade = new Grade // Eğer not yoksa yeni bir not oluşturuyoruz.
-                    {
-                        StudentId = student.StudentId,
-                        LessonId = lesson.LessonId,
-                        Midterm = gradeDto.Midterm,
-                        Final = gradeDto.Final,
-                        Average = (gradeDto.Midterm + gradeDto.Final) / 2 // Ortalama hesaplıyoruz.
-                    };
-                    context.Grades.Add(grade); // Notu ekliyoruz.
-                }
-                else
-                {
-                    // Eğer not varsa, notları güncelliyoruz.
-                    grade.Midterm = gradeDto.Midterm;
-                    grade.Final = gradeDto.Final;
-                    grade.Average = (gradeDto.Midterm + gradeDto.Final) / 2; // Ortalama hesaplıyoruz.
-                    context.Grades.Update(grade); // Notu güncelliyoruz.
-                }
+                    StudentId = gradeDto.StudentId,
+                    LessonId = gradeDto.LessonId,
+                    Midterm = gradeDto.Midterm,
+                    Final = gradeDto.Final,
+                    Average = average
+                });
+            }
+            else
+            {
+                grade.Midterm = gradeDto.Midterm;
+                grade.Final = gradeDto.Final;
+                grade.Average = average;
             }
 
-            context.SaveChanges(); // Değişiklikleri kaydediyoruz.
-            return RedirectToAction("Grades"); // Notlar sayfasına yönlendiriyoruz.
+            try
+            {
+                context.SaveChanges();
+                TempData["SuccessMessage"] = "Notlar başarıyla kaydedildi";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Kayıt sırasında hata oluştu";
+                // Loglama yapılabilir
+            }
+
+            return RedirectToAction("Grades");
         }
     }
 }

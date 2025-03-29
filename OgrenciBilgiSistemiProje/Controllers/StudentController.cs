@@ -71,6 +71,8 @@ namespace OgrenciBilgiSistemiProje.Controllers
         }
 
 
+        // Öğrenci Edit Sayfası için 
+
         [HttpPost]
         public IActionResult Edit(StudentDto studentDto)
         {
@@ -110,6 +112,30 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             context.SaveChanges();
             return RedirectToAction("Index", "Student");
+        }
+
+
+
+        public IActionResult Grades()
+        {
+           
+            var studentUsername = HttpContext.User.Identity.Name;
+            var student = context.Students.FirstOrDefault(x => x.StudentEmail == studentUsername);
+            if (student == null)
+            {
+                return RedirectToAction("Index", "Student");
+            }
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+
+            var studentID = student.StudentId; // öğrenci idsini alıyoruz
+            ViewData["ImageFileName"] = student.ImageFileName;
+            var grades = context.Grades.Where(s=>s.StudentId == studentID)
+            .Include(l=> l.Lesson).ToList(); // Burada StudentId sine göre grades tablosunu çekip Lessonu dahil ediyoruz böylece Viewde Lesson.LessonName ile adını çağırabiliyoruz
+
+            return View(grades);
         }
     }
 }

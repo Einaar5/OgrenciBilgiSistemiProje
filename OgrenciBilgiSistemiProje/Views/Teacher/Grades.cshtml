@@ -24,6 +24,16 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label for="LessonId">Ders Seçiniz</label>
+                    <select class="form-control" id="LessonId" name="LessonId" required>
+                        <option value="">-- Ders Seçin --</option>
+                        @foreach (var lesson in ViewBag.TeacherLessons) // Öğretmenin dersleri ViewBag'den alınır
+                        {
+                            <option value="@lesson.LessonId">@lesson.LessonName</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="Midterm">Vize Notu</label>
                     <input type="number" class="form-control" id="Midterm" name="Midterm" required>
                 </div>

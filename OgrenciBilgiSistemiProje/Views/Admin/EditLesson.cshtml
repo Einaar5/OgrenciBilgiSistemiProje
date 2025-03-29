@@ -1,48 +1,92 @@
-﻿@model LessonDto
+﻿@model OgrenciBilgiSistemiProje.Models.LessonDto
 @{
-	Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
+
 <div class="row">
-	<div class="col-md-8 mx-auto rounded border p-3">
-		<h2>Öğrenci Ekle</h2>
-		<form method="post" enctype="multipart/form-data">
+    <div class="col-md-8 mx-auto rounded border p-3">
+        <h2>Ders Düzenle</h2>
+        <form asp-action="EditLesson" asp-controller="Admin" method="post">
+            <input type="hidden" asp-for="LessonId" />
 
-			<div class="row mb-3">
-				<label class="col-sm-4 col-form-label">Ders No (ID)</label>
-				<div class="col-sm-8">
-					<input class="form-control-plaintext" value="@ViewData["LessonId"]" />
-				</div>
-			</div>
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Ders Adı</label>
+                <div class="col-sm-8">
+                    <input class="form-control" asp-for="LessonName" />
+                    <span asp-validation-for="LessonName" class="text-danger"></span>
+                </div>
+            </div>
 
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Kredi</label>
+                <div class="col-sm-8">
+                    <input class="form-control" asp-for="Credit" type="number" />
+                    <span asp-validation-for="Credit" class="text-danger"></span>
+                </div>
+            </div>
 
-			<div class="row mb-3">
-				<label class="col-sm-4 col-form-label">Ders Adı</label>
-				<div class="col-sm-8">
-					<input class="form-control" asp-for="LessonName" />
-					<span asp-validation-for="LessonName" class="text-danger"></span> <!--Validation Hatası Olursa Burada Gösterilecektir.-->
-				</div>
-			</div>
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Bölüm</label>
+                <div class="col-sm-8">
+                    <select class="form-select" asp-for="DepartmentId">
+                        <option value="">Lütfen bir bölüm seçin</option>
+                        @{
+                            var departmentList = ViewBag.Departments as List<OgrenciBilgiSistemiProje.Models.Department>;
+                            if (departmentList != null)
+                            {
+                                foreach (var department in departmentList)
+                                {
+                                    <option value="@department.Id">@department.Name</option>
+                                }
+                            }
+                            else
+                            {
+                                <option value="">Bölümler yüklenemedi</option>
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="DepartmentId" class="text-danger"></span>
+                </div>
+            </div>
 
-			<div class="row mb-3">
-				<label class="col-sm-4 col-form-label">Credit</label>
-				<div class="col-sm-8">
-					<input class="form-control" asp-for="Credit" />
-					<span asp-validation-for="Credit" class="text-danger"></span> <!--Validation Hatası Olursa Burada Gösterilecektir.-->
-				</div>
-			</div>
+            <div class="row mb-3">
+                <label class="col-sm-4 col-form-label">Öğretmen</label>
+                <div class="col-sm-8">
+                    <select class="form-select" asp-for="TeacherId">
+                        <option value="">Lütfen bir öğretmen seçin</option>
+                        @{
+                            var teacherList = ViewBag.Teachers as List<OgrenciBilgiSistemiProje.Models.Teacher>;
+                            if (teacherList != null)
+                            {
+                                foreach (var teacher in teacherList)
+                                {
+                                    <option value="@teacher.Id">@teacher.TeacherName @teacher.TeacherSurname</option>
+                                }
+                            }
+                            else
+                            {
+                                <option value="">Öğretmenler yüklenemedi</option>
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="TeacherId" class="text-danger"></span>
+                </div>
+            </div>
 
-			<div class="row">
-				<div class="offset-sm-4 col-sm-4 d-grid">
-					<button type="submit" class="btn btn-primary">Gönder</button>
-				</div>
-				<div class="col-sm-4 d-grid">
-					<a class="btn btn-outline-primary" asp-controller="Admin" asp-action="LessonList" role="button">
-						<!--asp-action = "Index" Index Sayfasına Yönlendirme Yapılacaktır. Çünkü Ürünler Listesine Geri Dönülecektir.-->
-						İptal
-					</a>
-				</div>
-			</div>
-
-		</form>
-	</div>
+            <div class="row">
+                <div class="offset-sm-4 col-sm-4 d-grid">
+                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                </div>
+                <div class="col-sm-4 d-grid">
+                    <a class="btn btn-outline-primary" asp-controller="Admin" asp-action="LessonList" role="button">İptal</a>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

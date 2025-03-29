@@ -39,7 +39,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             var StudentList = students.OrderByDescending(s => s.StudentId).ToList(); // Öğrencileri öğrenci numarasına göre sıralıyoruz ve listeye çeviriyoruz.
             ViewBag.Search = searchParam; // Arama terimini view'a gönderiyoruz.
-            
+
             return View(StudentList);
         }
 
@@ -99,7 +99,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             };
 
             // Kontenjan kontrolü ve işlem
-            var department = context.Departments.FirstOrDefault(d => d.Id == studentDto.DepartmentId); 
+            var department = context.Departments.FirstOrDefault(d => d.Id == studentDto.DepartmentId);
             if (department == null)
             {
                 ModelState.AddModelError("DepartmentId", "Geçerli bir bölüm seçiniz.");
@@ -252,7 +252,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             student.Password = studentDto.Password;
             //Burada kontenjan kontrolü yapılıyor ve kontenjan azaltılıyor böylece kontenjanı sıfırlanan bölüme öğrenci eklenemeyecek.
             var department = context.Departments.FirstOrDefault(d => d.Id == studentDto.DepartmentId); // Bölümü veritabanından çek
-                                                                                                           //Kontenyaj kontrolü
+                                                                                                       //Kontenyaj kontrolü
             if (department != null)
             {
                 using (var transaction = context.Database.BeginTransaction())
@@ -293,7 +293,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             //Burada kontenjan kontrolü yapılıyor ve kontenjan azaltılıyor böylece kontenjanı sıfırlanan bölüme öğrenci eklenemeyecek.
             var department = context.Departments.FirstOrDefault(d => d.Id == student.DepartmentId); // Bölümü veritabanından çek
-                                                                                                        //Kontenyaj kontrolü
+                                                                                                    //Kontenyaj kontrolü
             using (var transaction = context.Database.BeginTransaction())
             {
                 try
@@ -439,7 +439,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             var TeacherList = teachers.OrderByDescending(s => s.Id).ToList(); // Öğrencileri öğrenci numarasına göre sıralıyoruz ve listeye çeviriyoruz.
             ViewBag.Search = searchParam; // Arama terimini view'a gönderiyoruz.
             return View(TeacherList);
-            
+
         }
 
         public IActionResult AddTeacher()
@@ -589,7 +589,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 context.Teachers.Remove(teacher);
                 context.SaveChanges();
             }
-            catch 
+            catch
             {
                 @ViewBag.Error = "Bu öğretmene ait dersler bulunmaktadır. Öğretmeni silemezsiniz.";
 
@@ -625,7 +625,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             return View(LessonList);
             */
 
-            
+
             var lessons = context.Lessons
                 .Include(l => l.Department) // Department ilişkisini yükle
                 .Include(l => l.Teacher)   // Teacher ilişkisini yükle
@@ -633,7 +633,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 .ToList();
 
             return View(lessons);
-            
+
         }
 
         public IActionResult AddLesson()
@@ -688,25 +688,33 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult EditLesson(int id)
         {
+            var departments = context.Departments?.OrderByDescending(d => d.Id).ToList() ?? new List<Department>();
+            var teachers = context.Teachers?.OrderByDescending(t => t.Id).ToList() ?? new List<Teacher>();
             var lesson = context.Lessons.Find(id);
             if (lesson == null)
             {
                 return RedirectToAction("LessonList");
             }
 
-           
+            ViewBag.Departments = departments;
+            ViewBag.Teachers = teachers;
+            ViewData["LessonId"] = id; // LessonId'yi ViewData'ya ekleyin
             var lessonDto = new LessonDto
             {
                 LessonName = lesson.LessonName,
-                Credit = lesson.Credit
+                Credit = lesson.Credit,
+                DepartmentId = lesson.DepartmentId,
+                TeacherId = lesson.TeacherId
             };
-
             return View(lessonDto);
         }
+
 
         [HttpPost]
         public IActionResult EditLesson(int id, LessonDto lessonDto)
         {
+           
+
             var lesson = context.Lessons.Find(id);
             if (lesson == null)
             {
@@ -723,11 +731,12 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             lesson.LessonName = lessonDto.LessonName;
             lesson.Credit = lessonDto.Credit;
-
+            lesson.DepartmentId = lessonDto.DepartmentId;
+            lesson.TeacherId = lessonDto.TeacherId;
             context.SaveChanges();
-
-            
             return RedirectToAction("LessonList");
+
+
         }
 
         public IActionResult DeleteLesson(int id)
