@@ -1,80 +1,148 @@
-﻿@model List<Grade> 
+﻿@model List<Grade>
 @{
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
 }
 
-<div class="container mt-5">
-    <h2>Notlar</h2>
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Öğrenci Not Yönetimi</h2>
 
     <!-- Not Giriş Formu -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h4>Not Girişi</h4>
+    <div class="card shadow mb-4">
+        <div class="card-header bg-warning text-white">
+            <h4 class="mb-0"><i class="fas fa-edit me-2"></i>Not Giriş Paneli</h4>
         </div>
         <div class="card-body">
-            <form asp-action="Grades" method="post">
-                <div class="form-group">
-                    <label for="StudentId">Öğrenci Seçiniz</label>
-                    <select class="form-control" id="StudentId" name="StudentId" required>
-                        <option value="">-- Öğrenci Seçin --</option>
-                        @foreach (var student in ViewBag.Students)
-                        {
-                            <option value="@student.StudentId">@student.StudentName @student.StudentSurname</option>
-                        }
-                    </select>
+            <form asp-action="Grades" method="post" class="needs-validation" novalidate>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="StudentId" class="form-label">Öğrenci Seçimi</label>
+                        <select class="form-select" id="StudentId" name="StudentId" required>
+                            <option value="" selected disabled>-- Öğrenci Seçiniz --</option>
+                            @foreach (var student in ViewBag.Students)
+                            {
+                                <option value="@student.StudentId">@student.StudentName @student.StudentSurname (No: @student.StudentId)</option>
+                            }
+                        </select>
+                        <div class="invalid-feedback">Lütfen öğrenci seçiniz</div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="LessonId" class="form-label">Ders Seçimi</label>
+                        <select class="form-select" id="LessonId" name="LessonId" required>
+                            <option value="" selected disabled>-- Ders Seçiniz --</option>
+                            @foreach (var lesson in ViewBag.TeacherLessons)
+                            {
+                                <option value="@lesson.LessonId">@lesson.LessonName (Kredi: @lesson.Credit)</option>
+                            }
+                        </select>
+                        <div class="invalid-feedback">Lütfen ders seçiniz</div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="LessonId">Ders Seçiniz</label>
-                    <select class="form-control" id="LessonId" name="LessonId" required>
-                        <option value="">-- Ders Seçin --</option>
-                        @foreach (var lesson in ViewBag.TeacherLessons) // Öğretmenin dersleri ViewBag'den alınır
-                        {
-                            <option value="@lesson.LessonId">@lesson.LessonName</option>
-                        }
-                    </select>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="Midterm" class="form-label">Vize Notu (0-100)</label>
+                        <input type="number" class="form-control" id="Midterm" name="Midterm"
+                               min="0" max="100" required>
+                        <div class="invalid-feedback">Lütfen geçerli bir not giriniz (0-100)</div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="Final" class="form-label">Final Notu (0-100)</label>
+                        <input type="number" class="form-control" id="Final" name="Final"
+                               min="0" max="100" required>
+                        <div class="invalid-feedback">Lütfen geçerli bir not giriniz (0-100)</div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="Midterm">Vize Notu</label>
-                    <input type="number" class="form-control" id="Midterm" name="Midterm" required>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="reset" class="btn btn-outline-secondary me-md-2">
+                        <i class="fas fa-undo me-1"></i> Temizle
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-1"></i> Notu Kaydet
+                    </button>
                 </div>
-                <div class="form-group">
-                    <label for="Final">Final Notu</label>
-                    <input type="number" class="form-control" id="Final" name="Final" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Notu Kaydet</button>
             </form>
         </div>
     </div>
 
     <!-- Notlar Tablosu -->
-    <div class="card">
-        <div class="card-header">
-            <h4>Ders Notları</h4>
+    <div class="card shadow">
+        <div class="card-header bg-warning text-white">
+            <h4 class="mb-0"><i class="fas fa-list-alt me-2"></i>Not Listesi</h4>
         </div>
         <div class="card-body">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Öğrenci Adı</th>
-                        <th>Ders Adı</th>
-                        <th>Vize</th>
-                        <th>Final</th>
-                        <th>Ortalama</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var grade in Model)
-                    {
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered">
+                    <thead class="table-light">
                         <tr>
-                            <td>@grade.Student.StudentName @grade.Student.StudentSurname</td>
-                            <td>@grade.Lesson.LessonName</td>
-                            <td>@grade.Midterm</td>
-                            <td>@grade.Final</td>
-                            <td>@grade.Average</td>
+                            <th>Öğrenci</th>
+                            <th>Ders</th>
+                            <th>Vize</th>
+                            <th>Final</th>
+                            <th>Ortalama</th>
+                            <th>Durum</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var grade in Model)
+                        {
+                            var average = grade.Average;
+                            var statusClass = average >= 50 ? "text-success" : "text-danger";
+                            var statusIcon = average >= 50 ? "fa-check-circle" : "fa-times-circle";
+                            var statusText = average >= 50 ? "Geçti" : "Kaldı";
+
+                            <tr>
+                                <td>@grade.Student.StudentName @grade.Student.StudentSurname</td>
+                                <td>@grade.Lesson.LessonName</td>
+                                <td>@grade.Midterm?.ToString("0.##")</td>
+                                <td>@grade.Final?.ToString("0.##")</td>
+                                <td class="fw-bold @statusClass">@average)</td>
+                                <td class="@statusClass">
+                                    <i class="fas @statusIcon me-1"></i> @statusText
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Özet Bilgi -->
+            <div class="mt-3 p-3 bg-light rounded">
+                <div class="row">
+                    <div class="col-md-4">
+                        <span class="fw-bold">Toplam Kayıt:</span> @Model.Count
+                    </div>
+                    <div class="col-md-4">
+                        <span class="fw-bold">Geçenler:</span> @Model.Count(g => g.Average >= 50)
+                    </div>
+                    <div class="col-md-4">
+                        <span class="fw-bold">Genel Ortalama:</span>
+                        @Model.Average(g => g.Average)
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Client-side form validation
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+    </script>
+}
