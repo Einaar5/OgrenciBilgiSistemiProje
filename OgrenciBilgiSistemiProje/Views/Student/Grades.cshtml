@@ -3,25 +3,50 @@
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
 }
 
-<h2>Dönem Notlarım</h2>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Ders Adı</th>
-            <th>Vize Notu</th>
-            <th>Final Notu</th>
-            <th>Ortalama</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var score in Model)
-        {
-            <tr>
-                <td>@score.Lesson?.LessonName</td>
-                <td>@(score.Midterm?.ToString() ?? "Girilmedi")</td>
-                <td>@(score.Final?.ToString() ?? "Girilmedi")</td>
-                <td>@(score.Average.ToString() ?? "Girilmedi")</td>
-            </tr>
+<div class="container mt-4">
+    <h2 class="mb-4">Dönem Notlarım</h2>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Ders Adı</th>
+                    <th>Vize Notu</th>
+                    <th>Final Notu</th>
+                    <th>Ortalama</th>
+                    <th>Durum</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var score in Model) 
+                {
+                    var rowClass = score.Average >= 50 ? "table-success" : "table-danger";
+                    var statusText = score.Average >= 50 ? "Geçti" : "Kaldı";
+                    var statusIcon = score.Average >= 50 ? "✓" : "✗";
+
+                    <tr class="@rowClass">
+                        <td>@score.Lesson?.LessonName</td>
+                        <td>@(score.Midterm?.ToString("0.00") ?? "Girilmedi")</td>
+                        <td>@(score.Final?.ToString("0.00") ?? "Girilmedi")</td>
+                        <td>@(score.Average)</td>
+                        <td>
+                            <span class="badge @(score.Average >= 50 ? "bg-success" : "bg-danger")">
+                                @statusIcon @statusText
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-3">
+        @{
+            var overallAverage = Model.Any() ? Model.Average(g => g.Average) : 0;
+            var overallStatus = overallAverage >= 50 ? "Geçti" : "Kaldı";
         }
-    </tbody>
-</table>
+        <div class="alert @(overallAverage >= 50 ? "alert-success" : "alert-danger")">
+            <strong>Genel Ortalama:</strong> @overallAverage - @overallStatus
+        </div>
+    </div>
+    </table>

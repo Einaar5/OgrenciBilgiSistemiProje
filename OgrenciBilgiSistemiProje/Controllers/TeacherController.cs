@@ -184,14 +184,14 @@ namespace OgrenciBilgiSistemiProje.Controllers
                     LessonId = gradeDto.LessonId,
                     Midterm = gradeDto.Midterm,
                     Final = gradeDto.Final,
-                    Average = average
+                    Average = (float?)average
                 });
             }
             else
             {
                 grade.Midterm = gradeDto.Midterm;
                 grade.Final = gradeDto.Final;
-                grade.Average = average;
+                grade.Average = (float?)average;
             }
 
             try

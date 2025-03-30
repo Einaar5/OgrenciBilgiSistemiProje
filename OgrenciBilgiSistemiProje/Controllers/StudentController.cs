@@ -130,12 +130,22 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return View();
             }
 
+            
+
             var studentID = student.StudentId; // öğrenci idsini alıyoruz
             ViewData["ImageFileName"] = student.ImageFileName;
             var grades = context.Grades.Where(s=>s.StudentId == studentID)
             .Include(l=> l.Lesson).ToList(); // Burada StudentId sine göre grades tablosunu çekip Lessonu dahil ediyoruz böylece Viewde Lesson.LessonName ile adını çağırabiliyoruz
 
-            return View(grades);
+            var gradesColor = context.Grades.Select(a => a.Average).ToList();
+            
+            if(gradesColor.Average() < 50)
+            {
+                ViewBag.GradesColor = "bg-danger";
+            }
+            
+
+                return View(grades);
         }
     }
 }

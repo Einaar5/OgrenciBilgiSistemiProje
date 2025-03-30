@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OgrenciBilgiSistemiProje.Services;
 
@@ -11,9 +12,11 @@ using OgrenciBilgiSistemiProje.Services;
 namespace OgrenciBilgiSistemiProje.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250330125607_intgradetofloat")]
+    partial class intgradetofloat
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -75,14 +78,14 @@ namespace OgrenciBilgiSistemiProje.Migrations
                     b.Property<float?>("Average")
                         .HasColumnType("real");
 
-                    b.Property<int?>("Final")
-                        .HasColumnType("int");
+                    b.Property<float?>("Final")
+                        .HasColumnType("real");
 
                     b.Property<int>("LessonId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("Midterm")
-                        .HasColumnType("int");
+                    b.Property<float?>("Midterm")
+                        .HasColumnType("real");
 
                     b.Property<int>("StudentId")
                         .HasColumnType("int");

@@ -18,6 +18,6 @@ namespace OgrenciBilgiSistemiProje.Models
 
         public int? Midterm { get; set; } // Vize notu
         public int? Final { get; set; }   // Final notu
-        public double? Average { get; set; } // Ortalama (isteğe bağlı, hesaplanabilir)
+        public float? Average { get; set; } // Ortalama (isteğe bağlı, hesaplanabilir)
     }
 }
