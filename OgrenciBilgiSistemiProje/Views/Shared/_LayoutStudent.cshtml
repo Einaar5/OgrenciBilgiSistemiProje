@@ -1,183 +1,316 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>@ViewData["Title"] - OgrenciBilgiSistemiProje</title>
-	<script type="importmap"></script>
-	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-	<link rel="stylesheet" href="~/OgrenciBilgiSistemiProje.styles.css" asp-append-version="true" />
-	<link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet">
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-	<link rel="stylesheet" href="/assets/sidebar/css/style.css">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Öğrenci Bilgi Sistemi</title>
 
-	<style>
+    <!-- CSS Links -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/OgrenciBilgiSistemiProje.styles.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
 
-		.accordion-button:not(.collapsed) {
-			background-color: #f8f9fa;
-			color: #000;
-			box-shadow: none;
-		}
+    <style>
+        :root {
+            --bs-primary: #dc3545; /* Bootstrap danger rengi */
+            --bs-primary-rgb: 220, 53, 69;
+        }
 
-		.accordion-button {
-			background-color: #f8f9fa;
-			color: #000;
-			width: 100%;
-			text-align: left;
-		}
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+        }
 
-			.accordion-button:focus {
-				box-shadow: none;
-			}
+        /* Navbar */
+        .navbar {
+            background-color: var(--bs-primary) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
 
-		.accordion-item {
-			width: 100%;
-			margin-bottom: 10px;
-		}
+        .navbar-brand {
+            font-weight: 600;
+        }
 
-		.accordion-body {
-			width: 100%;
-		}
-	</style>
+        /* Sidebar */
+        .offcanvas-start {
+            width: 280px;
+            transform: none !important;
+            visibility: visible !important;
+            position: fixed !important;
+        }
+
+        .sidebar-header {
+            background-color: var(--bs-primary);
+            color: white;
+        }
+
+        .offcanvas-header .btn-close {
+            display: none;
+        }
+
+        .nav-link {
+            border-radius: 4px;
+            margin: 0.25rem 0;
+        }
+
+            .nav-link:hover, .nav-link:focus {
+                background-color: rgba(var(--bs-primary-rgb), 0.1);
+                color: var(--bs-primary);
+            }
+
+            .nav-link.active {
+                background-color: var(--bs-primary);
+                color: white !important;
+            }
+
+            .nav-link i {
+                color: var(--bs-primary);
+                width: 24px;
+                text-align: center;
+                margin-right: 8px;
+            }
+
+            .nav-link.active i {
+                color: white !important;
+            }
+
+        /* Profile Image */
+        .profile-img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border: 2px solid rgba(255,255,255,0.5);
+            transition: all 0.3s ease;
+        }
+
+        .hover-effect:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(220, 53, 69, 0.5);
+            border-color: #dc3545;
+        }
+
+        /* Dropdown açıkken stil */
+        .dropdown-toggle:after {
+            transition: transform 0.2s ease;
+        }
+
+        .dropdown-toggle[aria-expanded="true"] .profile-img {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.3);
+        }
+
+        /* Online durum göstergesi */
+        .online-status {
+            width: 12px;
+            height: 12px;
+        }
+
+        /* Badges */
+        .badge-danger {
+            background-color: var(--bs-primary);
+        }
+
+        /* Buttons */
+        .btn-outline-danger {
+            border-color: var(--bs-primary);
+            color: var(--bs-primary);
+        }
+
+            .btn-outline-danger:hover {
+                background-color: var(--bs-primary);
+                color: white;
+            }
+
+        /* Cards */
+        .card-danger {
+            border-top: 3px solid var(--bs-primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            transition: all 0.3s ease;
+        }
+
+        /* MOBİL STİLLERİ */
+        @@media (max-width: 992px) {
+            .offcanvas-start
+
+        {
+            transform: translateX(-100%) !important;
+            visibility: hidden !important;
+        }
+
+        .offcanvas-start.show {
+            transform: translateX(0) !important;
+            visibility: visible !important;
+        }
+
+        .main-content {
+            margin-left: 0;
+        }
+
+        .offcanvas-header .btn-close {
+            display: block;
+        }
+
+        }
+    </style>
 </head>
 <body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-dark">
+            <div class="container-fluid px-4">
+                <!-- SADECE MOBİLDE GÖSTER -->
+                <button class="btn btn-sm d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu">
+                    <i class="fas fa-bars fa-lg text-white"></i>
+                </button>
 
-	<header>
-		<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+                <!-- Brand -->
+                <a class="navbar-brand ms-2" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-graduation-cap me-2"></i>Öğrenci Bilgi Sistemi
+                </a>
 
+                <!-- User Dropdown -->
+                <div class="ms-auto">
+                    <div class="dropdown">
+                        <button class="btn p-0 border-0 dropdown-toggle" type="button" id="userDropdown"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="/img/@ViewData["ImageFileName"]" class="profile-img rounded-circle" alt="Profil" />
 
-			<div class="container-fluid px-5 gap-2">
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li><h6 class="dropdown-header">Hesap Yönetimi</h6></li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="Student" asp-action="Edit">
+                                    <i class="fas fa-user-cog me-2 text-danger"></i>Profil Düzenle
+                                </a>
+                            </li>
 
-				@* offcanvas *@
-				<button class="btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#staticBackdrop" aria-controls="staticBackdrop">
-					<i class="fa-solid fa-bars" style="color: #ff4a3d;"></i>
-				</button>
-				<a class="navbar-brand " asp-area="" asp-controller="Student" asp-action="Index">Öğrenci Bilgi Sistemi</a>
-				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-						aria-expanded="false" aria-label="Toggle navigation">
-					<span class="navbar-toggler-icon"></span>
-				</button>
-				<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-					<ul class="navbar-nav flex-grow-1">
+                            <li><hr class="dropdown-divider"></li>
 
-						<li class="nav-item ms-auto">
-							
-								<div class="btn-group">
+                            <li>
+                                <a class="dropdown-item" asp-controller="Notifications" asp-action="Index">
+                                    <i class="fas fa-bell me-2 text-danger"></i>Bildirimler
+                                    <span class="badge bg-danger float-end">3</span>
+                                </a>
+                            </li>
 
-									<button type="button" class="btn p-0 border-0" data-bs-toggle="dropdown" aria-expanded="false">
-										<img src="/img/@ViewData["ImageFileName"]" class="rounded-circle" style="width: 60px; height: 60px;" alt="Profile" />
-									</button>
+                            <li>
+                                <a class="dropdown-item" asp-controller="Announcements" asp-action="Index">
+                                    <i class="fas fa-bullhorn me-2 text-danger"></i>Duyurular
+                                </a>
+                            </li>
 
-									<ul class="dropdown-menu dropdown-menu-end">
+                            <li><hr class="dropdown-divider"></li>
 
-										<li><a class="dropdown-item" asp-controller="Student" asp-action="Edit">Hesap</a></li>
+                            <li>
+                                <a class="dropdown-item text-danger" asp-controller="Account" asp-action="LogoutStuTeach">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Çıkış Yap
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
 
-										<li><a class="dropdown-item" asp-controller="Notifications" asp-action="Index">Bildirimler</a></li>
+    <!-- Sidebar -->
+    <div class="offcanvas offcanvas-start d-lg-block" tabindex="0" id="sidebarMenu">
+        <div class="offcanvas-header sidebar-header">
+            <h5 class="offcanvas-title">
+                <i class="fas fa-user-graduate me-2"></i>Öğrenci Paneli
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body p-0">
+            <nav class="nav flex-column p-3">
+                <a class="nav-link text-dark " asp-controller="Student" asp-action="Index">
+                    <i class="fas fa-tachometer-alt"></i>Anasayfa
+                </a>
+                <a class="nav-link text-dark" asp-controller="Student" asp-action="Edit">
+                    <i class="fas fa-user-edit"></i>Profil Bilgileri
+                </a>
 
-										<li><a class="dropdown-item" asp-controller="Announcements" asp-action="Index">Duyurular</a></li>
+                <hr class="my-2">
 
-										<li><hr class="dropdown-divider"></li>
+                <h6 class="px-3 mt-2 text-uppercase text-muted small fw-bold">Akademik İşlemler</h6>
+                <a class="nav-link text-dark" asp-controller="Student" asp-action="Grades">
+                    <i class="fas fa-clipboard-list"></i>Not Bilgileri
+                </a>
+                <a class="nav-link text-dark" asp-controller="Student" asp-action="Courses">
+                    <i class="fas fa-calendar-alt"></i>Ders Programı
+                </a>
 
-										<li><a class="dropdown-item" asp-controller="Account" asp-action="LogoutStuTeach">Çıkış Yap</a></li>
-									</ul>
-								</div>
-							
-						</li>
-					</ul>
-				</div>
-			</div>
-		</nav>
-	</header>
+                <hr class="my-2">
 
+                <h6 class="px-3 mt-2 text-uppercase text-muted small fw-bold">Form İşlemleri</h6>
+                <a class="nav-link text-dark" href="#">
+                    <i class="fas fa-file-signature"></i>Ders Kayıt Formu
+                </a>
+                <a class="nav-link text-dark" href="#">
+                    <i class="fas fa-file-upload"></i>Belge Yükleme
+                </a>
+            </nav>
+        </div>
+    </div>
 
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container-fluid px-5 py-3">
+           
 
+            <main role="main" class="p-5">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
 
-	<div class="offcanvas offcanvas-start active" data-bs-backdrop="static" tabindex="-1" id="staticBackdrop" aria-labelledby="staticBackdropLabel">
-		<div class="offcanvas-header">
-			<h5 class="offcanvas-title" id="staticBackdropLabel">Offcanvas</h5>
-			<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-		</div>
-		<div class="offcanvas-body">
-			<div>
-				<div class="accordion" id="accordionExample">
-					<!-- Accordion Item 1 -->
-					<div class="accordion-item">
-						<h2 class="accordion-header" id="headingOne">
-							<button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-								Genel İşlemler
-							</button>
-						</h2>
-						<div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-							<div class="accordion-body">
+    <!-- Footer -->
+    <footer class="footer bg-light border-top py-3 mt-auto">
+        <div class="container-fluid px-4">
+            <div class="d-flex align-items-center justify-content-between">
+                <span class="text-muted">
+                    &copy; @DateTime.Now.Year - Öğrenci Bilgi Sistemi
+                </span>
+                <div>
+                    <a href="#" class="text-decoration-none me-3">Gizlilik Politikası</a>
+                    <a href="#" class="text-decoration-none">Yardım</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
-								<a class="nav-link text-dark" asp-area="" asp-controller="Student" asp-action="Index">Anasayfa</a>
-								<a class="nav-link text-dark" asp-area="" asp-controller="Student" asp-action="Edit">Kullanıcı Bilgileri</a>
-							</div>
-						</div>
-					</div>
-					<!-- Accordion Item 2 -->
-					<div class="accordion-item">
-						<h2 class="accordion-header" id="headingTwo">
-							<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-								Ders ve Dönem İşlemleri
-							</button>
-						</h2>
-						<div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
-							<div class="accordion-body">
-								<a class="nav-link text-dark" asp-area="" asp-controller="Student" asp-action="Grades">Dönem Notları</a>
-							</div>
-						</div>
-					</div>
-					<!-- Accordion Item 3 -->
-					<div class="accordion-item">
-						<h2 class="accordion-header" id="headingThree">
-							<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-								Form İşlemleri
-							</button>
-						</h2>
-						<div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
-							<div class="accordion-body">
-								Bu, üçüncü accordion içeriği. Yatayda tam genişlikli.
-							</div>
-						</div>
-					</div>
-					<!-- Accordion Item 4 -->
-					<div class="accordion-item">
-						<h2 class="accordion-header" id="headingFour">
-							<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
-								Kullanıcı İşlemleri
-							</button>
-						</h2>
-						<div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample">
-							<div class="accordion-body">
-								Bu, dördüncü accordion içeriği. Yatayda tam genişlikli.
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
 
+    <script>
+        // Aktif menü öğesini vurgula
+        $(document).ready(function() {
+            var currentUrl = window.location.pathname;
+            $('.nav-link').each(function() {
+                if ($(this).attr('href') === currentUrl) {
+                    $(this).addClass('active');
+                } else {
+                    $(this).removeClass('active');
+                }
+            });
 
+            // Mobilde offcanvas otomatik kapatma
+            $('.nav-link').on('click', function() {
+                if (window.innerWidth < 992) {
+                    var offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('sidebarMenu'));
+                    offcanvas.hide();
+                }
+            });
+        });
+    </script>
 
-
-	<div class="container">
-		<main role="main" class="pb-3">
-			@RenderBody()
-		</main>
-	</div>
-
-	<footer class="border-top footer text-muted">
-		<div class="container">
-			&copy; 2025 - OgrenciBilgiSistemiProje - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-		</div>
-	</footer>
-	<script src="~/lib/jquery/dist/jquery.min.js"></script>
-	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-	<script src="~/js/site.js" asp-append-version="true"></script>
-	@await RenderSectionAsync("Scripts", required: false)
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
