@@ -13,6 +13,6 @@ namespace OgrenciBilgiSistemiProje.Models
 
         public int DepartmentId { get; set; }
 
-        public int? TeacherId { get; set; }
+        public int? TeacherId { get; set; } 
     }
 }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OgrenciBilgiSistemiProje.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateDepartmentNameToDepartmentId : Migration
+    public partial class NewMigration2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -85,7 +85,7 @@ namespace OgrenciBilgiSistemiProje.Migrations
                         column: x => x.DepartmentId,
                         principalTable: "Departments",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -107,12 +107,41 @@ namespace OgrenciBilgiSistemiProje.Migrations
                         column: x => x.DepartmentId,
                         principalTable: "Departments",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Lessons_Teachers_TeacherId",
                         column: x => x.TeacherId,
                         principalTable: "Teachers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CourseList",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CourseDay = table.Column<int>(type: "int", nullable: false),
+                    CourseTime = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DepartmentId = table.Column<int>(type: "int", nullable: false),
+                    LessonId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CourseList", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CourseList_Departments_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalTable: "Departments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_CourseList_Lessons_LessonId",
+                        column: x => x.LessonId,
+                        principalTable: "Lessons",
+                        principalColumn: "LessonId",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -125,7 +154,7 @@ namespace OgrenciBilgiSistemiProje.Migrations
                     LessonId = table.Column<int>(type: "int", nullable: false),
                     Midterm = table.Column<int>(type: "int", nullable: true),
                     Final = table.Column<int>(type: "int", nullable: true),
-                    Average = table.Column<double>(type: "float", nullable: true)
+                    Average = table.Column<float>(type: "real", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -135,14 +164,24 @@ namespace OgrenciBilgiSistemiProje.Migrations
                         column: x => x.LessonId,
                         principalTable: "Lessons",
                         principalColumn: "LessonId",
-                        onDelete: ReferentialAction.NoAction); // Cascade yerine NoAction
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Grades_Students_StudentId",
                         column: x => x.StudentId,
                         principalTable: "Students",
                         principalColumn: "StudentId",
-                        onDelete: ReferentialAction.NoAction); // Cascade yerine NoAction
-            });
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseList_DepartmentId",
+                table: "CourseList",
+                column: "DepartmentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CourseList_LessonId",
+                table: "CourseList",
+                column: "LessonId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Grades_LessonId",
@@ -175,6 +214,9 @@ namespace OgrenciBilgiSistemiProje.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Admins");
+
+            migrationBuilder.DropTable(
+                name: "CourseList");
 
             migrationBuilder.DropTable(
                 name: "Grades");

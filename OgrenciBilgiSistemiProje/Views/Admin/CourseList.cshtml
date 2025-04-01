@@ -1,0 +1,54 @@
+﻿@model List<CourseList>
+
+@{
+    ViewData["Title"] = "Ders Programı";
+}
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<h2>Ders Programı</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Gün</th>
+            <th>Saat</th>
+            <th>Ders</th>
+            <th>Öğretmen</th>
+            <th>Bölüm</th>
+            <th>İşlemler</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model ?? new List<CourseList>())
+        {
+            <tr>
+                <td>@GetDayName(item.CourseDay)</td>
+                <td>@item.CourseTime</td>
+                <td>@item.Lesson?.LessonName</td>
+                <td>@item.Lesson?.Teacher?.TeacherName</td>
+                <td>@item.Department?.Name</td>
+                <td>
+                    <a asp-action="EditCourseList" asp-route-id="@item.Id" class="btn btn-warning">Düzenle</a>
+                    <a asp-action="DeleteCourseList" asp-route-id="@item.Id" class="btn btn-danger" onclick="return confirm('Silmek istediğinize emin misiniz?')">Sil</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@functions {
+    string GetDayName(int day)
+    {
+        return day switch
+        {
+            1 => "Pazartesi",
+            2 => "Salı",
+            3 => "Çarşamba",
+            4 => "Perşembe",
+            5 => "Cuma",
+            _ => "Bilinmeyen Gün"
+        };
+    }
+}

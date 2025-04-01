@@ -1,0 +1,56 @@
+﻿@model CourseListDto
+
+@{
+	Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<h2>Yeni Ders Programı Ekle</h2>
+
+<form asp-action="AddCourse" method="post">
+	<div class="form-group">
+		<label asp-for="CourseDay" class="control-label"></label>
+		<select asp-for="CourseDay" class="form-control">
+			<option value="1">Pazartesi</option>
+			<option value="2">Salı</option>
+			<option value="3">Çarşamba</option>
+			<option value="4">Perşembe</option>
+			<option value="5">Cuma</option>
+		</select>
+		<span asp-validation-for="CourseDay" class="text-danger"></span>
+	</div>
+
+	<div class="form-group">
+		<label asp-for="CourseTime" class="control-label"></label>
+		<select asp-for="CourseTime" class="form-control">
+			<option value="09:10 - 10:00">09:10 - 10:00</option>
+			<option value="10:10 - 11:00">10:10 - 11:00</option>
+			<option value="11:10 - 12:00">11:10 - 12:00</option>
+			<option value="12:10 - 13:00">12:10 - 13:00</option>
+			<option value="13:10 - 14:00">13:10 - 14:00</option>
+			<option value="14:10 - 15:00">14:10 - 15:00</option>
+			<option value="15:10 - 16:00">15:10 - 16:00</option>
+			<option value="16:10 - 17:00">16:10 - 17:00</option>
+			<option value="17:10 - 18:00">17:10 - 18:00</option>
+		</select>
+		<span asp-validation-for="CourseTime" class="text-danger"></span>
+	</div>
+
+
+	<div class="form-group">
+		<label asp-for="DepartmentId" class="control-label"></label>
+		<select asp-for="DepartmentId" class="form-control" asp-items="@(new SelectList(ViewBag.Departments, "Id", "Name"))">
+			<option value="">-- Bölüm Seçin --</option>
+		</select>
+		<span asp-validation-for="DepartmentId" class="text-danger"></span>
+	</div>
+
+	<div class="form-group">
+		<label asp-for="LessonId" class="control-label"></label>
+		<select asp-for="LessonId" class="form-control" asp-items="@(new SelectList(ViewBag.Lesson, "LessonId", "LessonName"))">
+			<option value="">-- Ders Seçin --</option>
+		</select>
+		<span asp-validation-for="LessonId" class="text-danger"></span>
+	</div>
+
+	<button type="submit" class="btn btn-primary">Kaydet</button>
+	<a asp-action="CourseList" class="btn btn-secondary">İptal</a>
+</form>

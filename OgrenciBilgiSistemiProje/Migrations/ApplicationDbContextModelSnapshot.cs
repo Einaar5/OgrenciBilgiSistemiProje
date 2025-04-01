@@ -43,6 +43,36 @@ namespace OgrenciBilgiSistemiProje.Migrations
                     b.ToTable("Admins");
                 });
 
+            modelBuilder.Entity("OgrenciBilgiSistemiProje.Models.CourseList", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CourseDay")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CourseTime")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LessonId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("LessonId");
+
+                    b.ToTable("CourseList");
+                });
+
             modelBuilder.Entity("OgrenciBilgiSistemiProje.Models.Department", b =>
                 {
                     b.Property<int>("Id")
@@ -244,18 +274,37 @@ namespace OgrenciBilgiSistemiProje.Migrations
                     b.ToTable("Teachers");
                 });
 
+            modelBuilder.Entity("OgrenciBilgiSistemiProje.Models.CourseList", b =>
+                {
+                    b.HasOne("OgrenciBilgiSistemiProje.Models.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OgrenciBilgiSistemiProje.Models.Lesson", "Lesson")
+                        .WithMany()
+                        .HasForeignKey("LessonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+
+                    b.Navigation("Lesson");
+                });
+
             modelBuilder.Entity("OgrenciBilgiSistemiProje.Models.Grade", b =>
                 {
                     b.HasOne("OgrenciBilgiSistemiProje.Models.Lesson", "Lesson")
                         .WithMany("Grades")
                         .HasForeignKey("LessonId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("OgrenciBilgiSistemiProje.Models.Student", "Student")
                         .WithMany("Grades")
                         .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Lesson");
@@ -268,12 +317,13 @@ namespace OgrenciBilgiSistemiProje.Migrations
                     b.HasOne("OgrenciBilgiSistemiProje.Models.Department", "Department")
                         .WithMany("Lessons")
                         .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("OgrenciBilgiSistemiProje.Models.Teacher", "Teacher")
                         .WithMany("Lessons")
-                        .HasForeignKey("TeacherId");
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Department");
 
@@ -285,7 +335,7 @@ namespace OgrenciBilgiSistemiProje.Migrations
                     b.HasOne("OgrenciBilgiSistemiProje.Models.Department", "Department")
                         .WithMany("Students")
                         .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Department");

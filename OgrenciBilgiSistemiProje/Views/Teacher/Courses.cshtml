@@ -1,0 +1,40 @@
+﻿@model List<CourseList>
+
+<h2>Ders Programım</h2>
+@{
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+}
+
+@{
+    // Gün isimleri
+    var days = new string[] { "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma" };
+}
+
+@for (int day = 1; day <= 5; day++)
+{
+    var dayCourses = Model.Where(c => c.CourseDay == day).ToList();
+
+    if (dayCourses.Any())
+    {
+        <h4>@days[day - 1]</h4>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Saat</th>
+                    <th>Ders</th>
+                    <th>Bölüm</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var course in dayCourses)
+                {
+                    <tr>
+                        <td>@course.CourseTime</td>
+                        <td>@course.Lesson?.LessonName</td>
+                        <th>@course.Department?.Name</th>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}

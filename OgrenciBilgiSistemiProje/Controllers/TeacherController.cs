@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.DependencyResolver;
 using OgrenciBilgiSistemiProje.Models;
 using OgrenciBilgiSistemiProje.Services;
 
@@ -207,5 +208,31 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             return RedirectToAction("Grades");
         }
+
+
+        public IActionResult Courses()
+        {
+            var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adına göre id alıyoruz
+            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername);
+            ViewBag.ImageLayout = teacher.ImageFileName;
+            ViewData["ImageFileName"] = teacher.ImageFileName;
+            var teacherId = context.Teachers
+                .Where(x => x.TeacherMail == teacherUsername)
+                .Select(x => x.Id)
+                .FirstOrDefault();
+
+            // Öğretmenin derslerini günlere göre grupla
+            var courses = context.CourseList
+                .Where(c => c.Lesson.TeacherId == teacherId)
+                .Include(c => c.Lesson)
+                .Include(c=>c.Department)
+                .OrderBy(c => c.CourseDay)
+                .ThenBy(c => c.CourseTime)
+                .ToList();
+
+            return View(courses);
+
+        }
+
     }
 }

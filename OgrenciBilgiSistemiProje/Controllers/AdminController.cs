@@ -713,7 +713,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
         [HttpPost]
         public IActionResult EditLesson(int id, LessonDto lessonDto)
         {
-           
+
 
             var lesson = context.Lessons.Find(id);
             if (lesson == null)
@@ -763,5 +763,179 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         //-------------------------------------------------------------------------------Lesson Bitir
         #endregion
+
+
+
+        public IActionResult CourseList()
+        {
+            var courses = context.CourseList
+          .Include(c => c.Lesson)
+              .ThenInclude(l => l.Teacher)
+          .Include(c => c.Department)
+          .ToList();
+
+            if (courses == null)
+            {
+                return View(new List<CourseList>()); // Boş liste döndür
+            }
+
+            return View(courses);
+        }
+
+        // Yeni CourseList ekleme formu
+        public IActionResult AddCourse()
+        {
+            // Null kontrolü ekleyerek ViewBag'leri doldurun
+            ViewBag.Departments = context.Departments?.ToList() ?? new List<Department>();
+            ViewBag.Lesson = context.Lessons?
+                .Include(l => l.Teacher) // Teacher bilgisini de yükle
+                .ToList() ?? new List<Lesson>();
+
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult AddCourse(CourseListDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Departments = context.Departments?.ToList() ?? new List<Department>();
+                ViewBag.Lessons = context.Lessons?.ToList() ?? new List<Lesson>();
+                return View(dto);
+            }
+
+            var lesson = context.Lessons
+                .Include(l => l.Teacher)
+                .FirstOrDefault(l => l.LessonId == dto.LessonId);
+
+            if (lesson == null || lesson.Teacher == null)
+            {
+                ModelState.AddModelError("", "Ders veya öğretmen bilgisi bulunamadı");
+                ViewBag.Departments = context.Departments?.ToList() ?? new List<Department>();
+                ViewBag.Lessons = context.Lessons?.ToList() ?? new List<Lesson>();
+                return View(dto);
+            }
+
+            var courseList = new CourseList
+            {
+                CourseDay = dto.CourseDay,
+                CourseTime = dto.CourseTime,
+                LessonId = dto.LessonId,
+                DepartmentId = dto.DepartmentId
+            };
+
+            try
+            {
+                context.CourseList.Add(courseList);
+                context.SaveChanges();
+                return RedirectToAction("CourseList");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Kayıt sırasında hata oluştu: {ex.Message}");
+                ViewBag.Departments = context.Departments?.ToList() ?? new List<Department>();
+                ViewBag.Lessons = context.Lessons?.ToList() ?? new List<Lesson>();
+                return View(dto);
+            }
+        }
+
+        public IActionResult EditCourseList(int id)
+        {
+            var courseList = context.CourseList
+         .Include(c => c.Lesson)
+         .Include(c => c.Department)
+         .FirstOrDefault(c => c.Id == id);
+
+            if (courseList == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.Departments = context.Departments?.ToList() ?? new List<Department>();
+            ViewBag.Lessons = context.Lessons?
+                .Include(l => l.Teacher)
+                .ToList() ?? new List<Lesson>();
+
+            var dto = new CourseListDto
+            {
+                Id = courseList.Id,
+                CourseDay = courseList.CourseDay,
+                CourseTime = courseList.CourseTime,
+                DepartmentId = courseList.DepartmentId,
+                LessonId = courseList.LessonId
+            };
+
+            return View(dto);
+        }
+
+        // CourseList düzenleme işlemi
+        [HttpPost]
+        public IActionResult EditCourseList(CourseListDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Departments = context.Departments?.ToList() ?? new List<Department>();
+                ViewBag.Lessons = context.Lessons?.ToList() ?? new List<Lesson>();
+                return View(dto);
+            }
+
+            var courseList = context.CourseList.Find(dto.Id);
+            if (courseList == null)
+            {
+                return NotFound();
+            }
+
+            // Lesson kontrolü
+            var lesson = context.Lessons.Find(dto.LessonId);
+            if (lesson == null)
+            {
+                ModelState.AddModelError("LessonId", "Geçersiz ders seçimi");
+                ViewBag.Departments = context.Departments?.ToList() ?? new List<Department>();
+                ViewBag.Lessons = context.Lessons?.ToList() ?? new List<Lesson>();
+                return View(dto);
+            }
+
+            courseList.CourseDay = dto.CourseDay;
+            courseList.CourseTime = dto.CourseTime;
+            courseList.DepartmentId = dto.DepartmentId;
+            courseList.LessonId = dto.LessonId;
+
+            try
+            {
+                context.SaveChanges();
+                return RedirectToAction("CourseList");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", $"Güncelleme sırasında hata oluştu: {ex.Message}");
+                ViewBag.Departments = context.Departments?.ToList() ?? new List<Department>();
+                ViewBag.Lessons = context.Lessons?.ToList() ?? new List<Lesson>();
+                return View(dto);
+            }
+        }
+
+        // CourseList silme
+        public IActionResult DeleteCourseList(int id)
+        {
+            var courseList = context.CourseList.Find(id);
+            if (courseList == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                context.CourseList.Remove(courseList);
+                context.SaveChanges();
+                return RedirectToAction("CourseList");
+            }
+            catch (Exception ex)
+            {
+                // Hata mesajını göster
+                TempData["ErrorMessage"] = $"Silme işlemi sırasında hata oluştu: {ex.Message}";
+                return RedirectToAction("CourseList");
+            }
+        }
+
     }
 }
