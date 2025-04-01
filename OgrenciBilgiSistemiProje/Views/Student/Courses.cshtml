@@ -1,0 +1,38 @@
+﻿@model List<CourseList>
+
+<h2>Ders Programım</h2>
+
+@{
+    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
+}
+
+@{
+    // Gün isimleri
+    var days = new string[] { "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma" };
+}
+
+@foreach (var day in Model.GroupBy(c => c.CourseDay).OrderBy(g => g.Key))
+{
+    <h3>@days[day.Key - 1]</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Saat</th>
+                <th>Ders</th>
+                <th>Öğretmen</th>
+                <th>Bölüm</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var course in day.OrderBy(c => c.CourseTime))
+            {
+                <tr>
+                    <td>@course.CourseTime</td>
+                    <td>@course.Lesson?.LessonName</td>
+                    <td>@course.Lesson?.Teacher?.TeacherName  @course.Lesson.Teacher.TeacherSurname</td>
+                    <td>@course.Department?.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

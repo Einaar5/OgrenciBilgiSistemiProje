@@ -147,5 +147,42 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
                 return View(grades);
         }
+
+
+        public IActionResult Courses()
+        {
+            // Öğrenci bilgilerini al
+            var studentUsername = HttpContext.User.Identity?.Name;
+            if (string.IsNullOrEmpty(studentUsername))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Öğrenciyi ve bölümünü bul
+            var student = context.Students
+                .Include(s => s.Department) // Bölüm bilgisini de yüklüyoruz
+                .FirstOrDefault(s => s.StudentEmail == studentUsername);
+
+            if (student == null)
+            {
+                return NotFound("Öğrenci bulunamadı");
+            }
+
+            // ViewBag ve ViewData atamaları
+            ViewBag.ImageLayout = student.ImageFileName;
+            ViewData["ImageFileName"] = student.ImageFileName;
+
+            // Öğrencinin bölümüne ait dersleri getir
+            var courses = context.CourseList
+                .Include(c => c.Lesson)
+                .Include (c => c.Lesson.Teacher)
+                .Include(c => c.Department)
+                .Where(c => c.DepartmentId == student.DepartmentId) // Sadece öğrencinin bölümündeki dersler
+                .OrderBy(c => c.CourseDay)
+                .ThenBy(c => c.CourseTime)
+                .ToList();
+
+            return View(courses);
+        }
     }
 }
