@@ -1,313 +1,319 @@
 ﻿<!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Öğretmen Paneli</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/OgrenciBilgiSistemiProje.styles.css" asp-append-version="true" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>@ViewData["Title"] - Öğretmen Paneli</title>
+	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/OgrenciBilgiSistemiProje.styles.css" asp-append-version="true" />
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
 
-    <style>
-        :root {
-            --bs-primary: #dc3545; /* Bootstrap danger rengi */
-            --bs-primary-rgb: 220, 53, 69;
-        }
+	<style>
+		:root {
+			--bs-primary: #dc3545; /* Bootstrap danger rengi */
+			--bs-primary-rgb: 220, 53, 69;
+		}
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #f8f9fa;
-        }
+		body {
+			font-family: 'Poppins', sans-serif;
+			background-color: #f8f9fa;
+		}
 
-        /* Navbar */
-        .navbar {
-            background-color: var(--bs-primary) !important;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
+		/* Navbar */
+		.navbar {
+			background-color: var(--bs-primary) !important;
+			box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+		}
 
-        .navbar-brand {
-            font-weight: 600;
-            color: white !important;
-        }
+		.navbar-brand {
+			font-weight: 600;
+			color: white !important;
+		}
 
-        /* Sidebar */
-        .offcanvas-start {
-            width: 280px;
-            transform: none !important;
-            visibility: visible !important;
-            position: fixed !important;
-        }
+		/* Sidebar */
+		.offcanvas-start {
+			width: 280px;
+			transform: none !important;
+			visibility: visible !important;
+			position: fixed !important;
+			z-index: 0; /* Ana içerik altında kalacak */
+			height: 100vh;
+			background-color: white; /* Arka plan rengi eklendi */
+		}
 
-        .offcanvas-header {
-            background-color: var(--bs-primary);
-            color: white;
-        }
+		.offcanvas-header {
+			background-color: var(--bs-primary);
+			color: white;
+		}
 
-            .offcanvas-header .btn-close {
-                display: none;
-                filter: invert(1);
-            }
+			.offcanvas-header .btn-close {
+				display: none;
+				filter: invert(1);
+			}
 
-        /* Accordion Stilleri */
-        .accordion-button {
-            background-color: #f8f9fa;
-            color: #000;
-            width: 100%;
-            text-align: left;
-        }
+		/* Accordion Stilleri */
+		.accordion-button {
+			background-color: #f8f9fa;
+			color: #000;
+			width: 100%;
+			text-align: left;
+		}
 
-            .accordion-button:not(.collapsed) {
-                background-color: rgba(var(--bs-primary-rgb), 0.1);
-                color: var(--bs-primary);
-                box-shadow: none;
-            }
+			.accordion-button:not(.collapsed) {
+				background-color: rgba(var(--bs-primary-rgb), 0.1);
+				color: var(--bs-primary);
+				box-shadow: none;
+			}
 
-            .accordion-button:focus {
-                box-shadow: none;
-                border-color: rgba(var(--bs-primary-rgb), 0.3);
-            }
+			.accordion-button:focus {
+				box-shadow: none;
+				border-color: rgba(var(--bs-primary-rgb), 0.3);
+			}
 
-        .accordion-item {
-            width: 100%;
-            margin-bottom: 10px;
-            border: 1px solid rgba(0,0,0,0.1);
-        }
+		.accordion-item {
+			width: 100%;
+			margin-bottom: 10px;
+			border: 1px solid rgba(0,0,0,0.1);
+		}
 
-        .accordion-body {
-            width: 100%;
-            padding: 0.5rem 1.25rem;
-        }
+		.accordion-body {
+			width: 100%;
+			padding: 0.5rem 1.25rem;
+		}
 
-        .nav-link {
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            margin: 0.25rem 0;
-        }
+		.nav-link {
+			padding: 0.5rem 1rem;
+			border-radius: 4px;
+			margin: 0.25rem 0;
+		}
 
-            .nav-link:hover, .nav-link:focus {
-                background-color: rgba(var(--bs-primary-rgb), 0.1);
-                color: var(--bs-primary);
-            }
+			.nav-link:hover, .nav-link:focus {
+				background-color: rgba(var(--bs-primary-rgb), 0.1);
+				color: var(--bs-primary);
+			}
 
-            .nav-link.active {
-                background-color: var(--bs-primary);
-                color: white !important;
-            }
+			.nav-link.active {
+				background-color: var(--bs-primary);
+				color: white !important;
+			}
 
-        /* Profile Image */
-        .profile-img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border: 2px solid rgba(255,255,255,0.5);
-            transition: all 0.3s ease;
-        }
+		/* Profile Image */
+		.profile-img {
+			width: 50px;
+			height: 50px;
+			object-fit: cover;
+			border: 2px solid rgba(255,255,255,0.5);
+			transition: all 0.3s ease;
+		}
 
-            .profile-img:hover {
-                transform: scale(1.05);
-                box-shadow: 0 0 15px rgba(220, 53, 69, 0.5);
-                border-color: #dc3545;
-            }
+			.profile-img:hover {
+				transform: scale(1.05);
+				box-shadow: 0 0 15px rgba(220, 53, 69, 0.5);
+				border-color: #dc3545;
+			}
 
-        /* Dropdown */
-        .dropdown-menu {
-            border: 1px solid rgba(var(--bs-primary-rgb), 0.2);
-        }
+		/* Dropdown */
+		.dropdown-menu {
+			border: 1px solid rgba(var(--bs-primary-rgb), 0.2);
+		}
 
-        .dropdown-item:hover {
-            background-color: rgba(var(--bs-primary-rgb), 0.1);
-            color: var(--bs-primary);
-        }
+		.dropdown-item:hover {
+			background-color: rgba(var(--bs-primary-rgb), 0.1);
+			color: var(--bs-primary);
+		}
 
-        /* Main Content */
-        .main-content {
-            margin-left: 280px;
-            transition: all 0.3s ease;
-        }
+		/* Main Content */
+		.main-content {
+			margin-left: 280px;
+			transition: all 0.3s ease;
+			position: relative;
+			z-index: 1; /* Sidebar'ın üstünde olacak */
+			background-color: #f8f9fa; /* Body ile aynı arka plan */
+			min-height: 100vh;
+		}
 
-        /* MOBİL STİLLERİ */
-        @@media (max-width: 992px) {
-            .offcanvas-start
+		/* MOBİL STİLLERİ */
+		@@media (max-width: 992px) {
+			.offcanvas-start {
+				transform: translateX(-100%) !important;
+				visibility: hidden !important;
+				z-index: 1045; /* Mobilde üste çıkacak */
+			}
 
-        {
-            transform: translateX(-100%) !important;
-            visibility: hidden !important;
-        }
+				.offcanvas-start.show {
+					transform: translateX(0) !important;
+					visibility: visible !important;
+				}
 
-        .offcanvas-start.show {
-            transform: translateX(0) !important;
-            visibility: visible !important;
-        }
+			.main-content {
+				margin-left: 0;
+			}
 
-        .main-content {
-            margin-left: 0;
-        }
+			.offcanvas-header .btn-close {
+				display: block;
+			}
 
-        .offcanvas-header .btn-close {
-            display: block;
-        }
-
-        .navbar-toggler {
-            color: white;
-        }
-
-        }
-    </style>
+			.navbar-toggler {
+				color: white;
+			}
+		}
+	</style>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-dark">
-            <div class="container-fluid px-4">
-                <!-- SADECE MOBİLDE GÖSTER -->
-                <button class="btn btn-sm d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#studentSidebar">
-                    <i class="fas fa-bars fa-lg text-white"></i>
-                </button>
+	<header>
+		<nav class="navbar navbar-expand-sm navbar-dark">
+			<div class="container-fluid px-4">
+				<!-- SADECE MOBİLDE GÖSTER -->
+				<button class="btn btn-sm d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#studentSidebar">
+					<i class="fas fa-bars fa-lg text-white"></i>
+				</button>
 
-                <!-- Brand -->
-                <a class="navbar-brand ms-2" asp-controller="Teacher" asp-action="Index">
-                    <i class="fas fa-chalkboard-teacher me-2"></i>Öğretmen Paneli
-                </a>
+				<!-- Brand -->
+				<a class="navbar-brand ms-2" asp-controller="Teacher" asp-action="Index">
+					<i class="fas fa-chalkboard-teacher me-2"></i>Öğretmen Paneli
+				</a>
 
-                <!-- User Dropdown -->
-                <div class="ms-auto">
-                    <div class="dropdown">
-                        <button class="btn p-0 border-0 dropdown-toggle" type="button" id="userDropdown"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="/img/@ViewData["ImageFileName"]"
-                                 class="profile-img rounded-circle"
-                                 alt="Profil"
-                                 onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=@ViewData["UserName"]&background=dc3545&color=fff&size=128'" />
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow">
-                            <li><h6 class="dropdown-header">Hesap Yönetimi</h6></li>
-                            <li>
-                                <a class="dropdown-item" asp-controller="Teacher" asp-action="Edit">
-                                    <i class="fas fa-user-cog me-2 text-danger"></i>Profil Düzenle
-                                </a>
-                            </li>
+				<!-- User Dropdown -->
+				<div class="ms-auto">
+					<div class="dropdown">
+						<button class="btn p-0 border-0 dropdown-toggle" type="button" id="userDropdown"
+								data-bs-toggle="dropdown" aria-expanded="false">
+							<img src="/img/@ViewData["ImageFileName"]"
+								 class="profile-img rounded-circle"
+								 alt="Profil"
+								 onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=@ViewData["UserName"]&background=dc3545&color=fff&size=128'" />
+						</button>
+						<ul class="dropdown-menu dropdown-menu-end shadow">
+							<li><h6 class="dropdown-header">Hesap Yönetimi</h6></li>
+							<li>
+								<a class="dropdown-item" asp-controller="Teacher" asp-action="Edit">
+									<i class="fas fa-user-cog me-2 text-danger"></i>Profil Düzenle
+								</a>
+							</li>
 
-                            <li><hr class="dropdown-divider"></li>
+							<li><hr class="dropdown-divider"></li>
 
-                            <li>
-                                <a class="dropdown-item" asp-controller="Teacher" asp-action="Index">
-                                    <i class="fas fa-bell me-2 text-danger"></i>Bildirimler
-                                </a>
-                            </li>
+							<li>
+								<a class="dropdown-item" asp-controller="Teacher" asp-action="Index">
+									<i class="fas fa-bell me-2 text-danger"></i>Bildirimler
+								</a>
+							</li>
 
-                            <li>
-                                <a class="dropdown-item" asp-controller="Teacher" asp-action="Index">
-                                    <i class="fas fa-bullhorn me-2 text-danger"></i>Duyurular
-                                </a>
-                            </li>
+							<li>
+								<a class="dropdown-item" asp-controller="Teacher" asp-action="Index">
+									<i class="fas fa-bullhorn me-2 text-danger"></i>Duyurular
+								</a>
+							</li>
 
-                            <li><hr class="dropdown-divider"></li>
+							<li><hr class="dropdown-divider"></li>
 
-                            <li>
-                                <a class="dropdown-item text-danger" asp-controller="Account" asp-action="LogoutStuTeach">
-                                    <i class="fas fa-sign-out-alt me-2"></i>Çıkış Yap
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </nav>
-    </header>
+							<li>
+								<a class="dropdown-item text-danger" asp-controller="Account" asp-action="LogoutStuTeach">
+									<i class="fas fa-sign-out-alt me-2"></i>Çıkış Yap
+								</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</nav>
+	</header>
 
-    <div class="offcanvas offcanvas-start" tabindex="-1" id="studentSidebar">
-        <div class="offcanvas-header sidebar-header">
-            <h5 class="offcanvas-title">
-                <i class="fas fa-user-graduate me-2"></i>Öğretmen Paneli
-            </h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body p-0">
-            <nav class="nav flex-column p-3">
-                <a class="nav-link text-dark active" asp-controller="Teacher" asp-action="Index">
-                    <i class="fas fa-tachometer-alt"></i>Anasayfa
-                </a>
-                <a class="nav-link text-dark" asp-controller="Teacher" asp-action="Edit">
-                    <i class="fas fa-user-edit"></i>Profil Bilgileri
-                </a>
+	<div class="d-flex flex-nowrap">
+		<!-- Ana flex container -->
+		<!-- Sidebar -->
+		<div class="offcanvas offcanvas-start d-block position-fixed" tabindex="0" id="studentSidebar" style="width: 280px; min-height: 100vh;">
+			<div class="offcanvas-header sidebar-header">
+				<h5 class="offcanvas-title">
+					<i class="fas fa-user-graduate me-2"></i>Öğretmen Paneli
+				</h5>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+			</div>
+			<div class="offcanvas-body p-0">
+				<nav class="nav flex-column p-3">
+					<a class="nav-link text-dark active" asp-controller="Teacher" asp-action="Index">
+						<i class="fas fa-tachometer-alt"></i>Anasayfa
+					</a>
+					<a class="nav-link text-dark" asp-controller="Teacher" asp-action="Edit">
+						<i class="fas fa-user-edit"></i>Profil Bilgileri
+					</a>
 
-                <hr class="my-2">
+					<hr class="my-2">
 
-                <h6 class="px-3 mt-2 text-uppercase text-muted small fw-bold">Akademik İşlemler</h6>
-                <a class="nav-link text-dark" asp-controller="Teacher" asp-action="Grades">
-                    <i class="fas fa-clipboard-list"></i>Not Bilgileri
-                </a>
-                <a class="nav-link text-dark" asp-controller="Teacher" asp-action="Courses">
-                    <i class="fas fa-calendar-alt"></i>Ders Programı
-                </a>
+					<h6 class="px-3 mt-2 text-uppercase text-muted small fw-bold">Akademik İşlemler</h6>
+					<a class="nav-link text-dark" asp-controller="Teacher" asp-action="Grades">
+						<i class="fas fa-clipboard-list"></i>Not Bilgileri
+					</a>
+					<a class="nav-link text-dark" asp-controller="Teacher" asp-action="Courses">
+						<i class="fas fa-calendar-alt"></i>Ders Programı
+					</a>
 
-                <hr class="my-2">
+					<hr class="my-2">
 
-                <h6 class="px-3 mt-2 text-uppercase text-muted small fw-bold">Form İşlemleri</h6>
-                <a class="nav-link text-dark" href="#">
-                    <i class="fas fa-file-signature"></i>Ders Kayıt Formu
-                </a>
-                <a class="nav-link text-dark" href="#">
-                    <i class="fas fa-file-upload"></i>Belge Yükleme
-                </a>
-            </nav>
-        </div>
-    </div>
+					<h6 class="px-3 mt-2 text-uppercase text-muted small fw-bold">Form İşlemleri</h6>
+					<a class="nav-link text-dark" href="#">
+						<i class="fas fa-file-signature"></i>Ders Kayıt Formu
+					</a>
+					<a class="nav-link text-dark" href="#">
+						<i class="fas fa-file-upload"></i>Belge Yükleme
+					</a>
+				</nav>
+			</div>
+		</div>
 
-   
-    <!-- Main Content -->
-    <div class="main-content">
-        <div class="container px-4 py-3">
-           
+		<!-- Main Content -->
+		<div class="main-content flex-grow-1" style="overflow-x: auto;">
+			<div class="container px-4 py-3">
+				<main role="main">
+					@RenderBody()
+				</main>
+			</div>
+		</div>
+	</div>
 
-            <main role="main">
-                @RenderBody()
-            </main>
-        </div>
-    </div>
+	<!-- Footer -->
+	<footer class="footer bg-light border-top py-3 mt-auto">
+		<div class="container">
+			<div class="d-flex align-items-center justify-content-between">
+				<span class="text-muted">
+					&copy; @DateTime.Now.Year - Öğretmen Bilgi Sistemi
+				</span>
+				<div>
+					<a href="#" class="text-decoration-none me-3">Gizlilik Politikası</a>
+					<a href="#" class="text-decoration-none">Yardım</a>
+				</div>
+			</div>
+		</div>
+	</footer>
 
-    <!-- Footer -->
-    <footer class="footer bg-light border-top py-3 mt-auto">
-        <div class="container">
-            <div class="d-flex align-items-center justify-content-between">
-                <span class="text-muted">
-                    &copy; @DateTime.Now.Year - Öğretmen Bilgi Sistemi
-                </span>
-                <div>
-                    <a href="#" class="text-decoration-none me-3">Gizlilik Politikası</a>
-                    <a href="#" class="text-decoration-none">Yardım</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+	<script src="~/lib/jquery/dist/jquery.min.js"></script>
+	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="~/js/site.js" asp-append-version="true"></script>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+	<script>
+		// Aktif menü öğesini vurgula
+		$(document).ready(function() {
+			var currentUrl = window.location.pathname;
+			$('.nav-link').each(function() {
+				if ($(this).attr('href') === currentUrl) {
+					$(this).addClass('active');
+				} else {
+					$(this).removeClass('active');
+				}
+			});
 
-    <script>
-                // Aktif menü öğesini vurgula
-        $(document).ready(function() {
-            var currentUrl = window.location.pathname;
-            $('.nav-link').each(function() {
-                if ($(this).attr('href') === currentUrl) {
-                    $(this).addClass('active');
-                } else {
-                    $(this).removeClass('active');
-                }
-            });
+			// Mobilde offcanvas otomatik kapatma
+			if (window.innerWidth < 992) {
+				$('.nav-link').on('click', function() {
+					var offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('studentSidebar'));
+					offcanvas.hide();
+				});
+			}
+		});
+	</script>
 
-            // Mobilde offcanvas otomatik kapatma
-            if (window.innerWidth < 992) {
-                $('.nav-link').on('click', function() {
-                    var offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('studentSidebar'));
-                    offcanvas.hide();
-                });
-            }
-        });
-    </script>
-
-    @await RenderSectionAsync("Scripts", required: false)
+	@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

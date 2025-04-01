@@ -21,7 +21,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
         }
         public IActionResult Index()
         {
-            var teacherUsername = HttpContext.User.Identity.Name; // Kullanıcı adını alıyoruz.
+            var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
             var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername); // Kullanıcı adına göre öğrenciyi buluyoruz.
             ViewData["ImageFileName"] = teacher.ImageFileName;
             return View(teacher); // Öğrenciyi view'a gönderiyoruz.
@@ -29,7 +29,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult Edit()
         {
-            var teacherUsername = HttpContext.User.Identity.Name; // Kullanıcı adını alıyoruz.
+            var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
             var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername); // Kullanıcı adına göre öğrenciyi buluyoruz.
             if (teacher == null)
             {
@@ -59,7 +59,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
         [HttpPost]
         public IActionResult Edit(TeacherDto teacherDto)
         {
-            var teacherUsername = HttpContext.User.Identity.Name; // Kullanıcı adını alıyoruz.
+            var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
             var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername);
             if (teacher == null)
             {
@@ -102,7 +102,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult Grades()
         {
-            var teacherUsername = HttpContext.User.Identity.Name; // Kullanıcı adını alıyoruz.
+            var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
             var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername); // Öğretmeni buluyoruz.
             if (teacher == null)
             {
@@ -141,7 +141,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
         public IActionResult Grades(GradeDto gradeDto)
         {
             // 1. Öğretmen doğrulama
-            var teacherUsername = HttpContext.User.Identity.Name;
+            var teacherUsername = HttpContext.User.Identity?.Name;
             var teacher = context.Teachers
                 .Include(t => t.Lessons)
                 .FirstOrDefault(t => t.TeacherMail == teacherUsername);
