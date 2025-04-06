@@ -39,7 +39,7 @@ namespace OgrenciBilgiSistemiProje.Models
         // Department ile ilişki
         [ForeignKey("Department")]
         public int DepartmentId { get; set; }
-        public virtual Department Department { get; set; }
+        public virtual Department? Department { get; set; }
 
         // Notlarla ilişki
         public virtual ICollection<Grade> Grades { get; set; } = new List<Grade>();

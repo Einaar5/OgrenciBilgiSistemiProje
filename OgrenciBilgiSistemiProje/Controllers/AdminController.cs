@@ -52,38 +52,35 @@ namespace OgrenciBilgiSistemiProje.Controllers
         [HttpPost]
         public async Task<IActionResult> AddStudent(StudentDto studentDto)
         {
+            // Resim kontrolü
             if (studentDto.ImageFile == null)
             {
                 ModelState.AddModelError("ImageFile", "Resim seçiniz.");
             }
 
-            // Model doğrulamasını kontrol et
+            // Model doğrulaması
             if (!ModelState.IsValid)
             {
-                // Doğrulama hatalarını log’la (isteğe bağlı, hata ayıklama için)
                 var errors = ModelState.Values.SelectMany(v => v.Errors).ToList();
                 foreach (var error in errors)
                 {
-                    Console.WriteLine(error.ErrorMessage); // Hataları konsola yazdır (debug için)
+                    Console.WriteLine($"Validation Error: {error.ErrorMessage}");
                 }
 
-                // Departmanları tekrar yükle ve formu göster
-                ViewBag.Departments = context.Departments.OrderByDescending(d => d.Id).ToList();
-                return View(studentDto); // Hata varsa formu tekrar göster
+                ViewBag.Departments = await context.Departments.OrderByDescending(d => d.Id).ToListAsync();
+                return View(studentDto);
             }
 
-            // Resim dosyasını yüklemek için bir dosya adı oluştur
-            string newFileName = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-            newFileName += Path.GetExtension(studentDto.ImageFile!.FileName);
-
-            // Resmi yükle
+            // Resim yükleme
+            string newFileName = DateTime.Now.ToString("yyyyMMddHHmmssfff") + Path.GetExtension(studentDto.ImageFile!.FileName);
             string imageFullPath = Path.Combine(environment.WebRootPath, "img", newFileName);
+
             using (var stream = System.IO.File.Create(imageFullPath))
             {
-                await studentDto.ImageFile.CopyToAsync(stream); // Async olarak kopyala
+                await studentDto.ImageFile.CopyToAsync(stream);
             }
 
-            // Öğrenci objesi oluştur ve veritabanına ekle
+            // Öğrenci oluştur
             Student student = new Student
             {
                 StudentName = studentDto.StudentName,
@@ -94,85 +91,102 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 StudentGender = studentDto.StudentGender,
                 StudentRegisterDate = DateTime.Now,
                 ImageFileName = newFileName,
-                DepartmentId = studentDto.DepartmentId, // DepartmentId'yi doğru şekilde ata
+                DepartmentId = studentDto.DepartmentId,
                 Password = studentDto.Password
             };
 
-            // Kontenjan kontrolü ve işlem
-            var department = context.Departments.FirstOrDefault(d => d.Id == studentDto.DepartmentId);
+            // Department kontrolü (Lessons ile birlikte)
+            var department = await context.Departments
+                .Include(d => d.Lessons) // CRITICAL: Lessons'ı include et
+                .FirstOrDefaultAsync(d => d.Id == studentDto.DepartmentId);
+
             if (department == null)
             {
                 ModelState.AddModelError("DepartmentId", "Geçerli bir bölüm seçiniz.");
-                ViewBag.Departments = context.Departments.OrderByDescending(d => d.Id).ToList();
+                ViewBag.Departments = await context.Departments.OrderByDescending(d => d.Id).ToListAsync();
                 return View(studentDto);
             }
 
-            if (department.Quota > 0)
+            // Ders kontrolü
+            if (!department.Lessons.Any())
             {
-                if (department.Quota <= 10)
-                {
-                    ViewBag.QuotaWarning = $"Bu bölümün kontenjanı azalmak üzere! (Kalan kontenjan: {department.Quota})";
-                }
-                else
-                {
-                    ViewBag.QuotaWarning = $"Kalan kontenjan: {department.Quota}";
-                }
-
-                using (var transaction = context.Database.BeginTransaction()) // burada transection demek birden fazla işlemi bir arada yapmak demektir. Eğer işlemlerden biri başarısız olursa diğer işlemleri geri alır.
-                {
-                    try
-                    {
-                        // Öğrenciyi veritabanına ekle
-                        context.Students.Add(student);
-                        await context.SaveChangesAsync(); // Async olarak kaydet
-
-                        // Öğrencinin bölümündeki dersleri bul
-                        var lessons = context.Lessons.Where(l => l.DepartmentId == student.DepartmentId).ToList();
-
-                        // Her ders için Grade tablosuna kayıt ekler ve öğrenciye atar yani ne kadar derse sahipse department 
-                        foreach (var lesson in lessons)
-                        {
-                            Grade grade = new Grade
-                            {
-                                StudentId = student.StudentId, // Yeni eklenen öğrencinin ID'si
-                                LessonId = lesson.LessonId, // Dersin ID'si
-                                Midterm = 0, // Vize notu (varsayılan değer)
-                                Final = 0, // Final notu (varsayılan değer)
-                                Average = 0 // Ortalama (varsayılan değer)
-                            };
-                            context.Grades.Add(grade);
-                        }
-
-                        // Kontenjanı güncelle
-                        department.Quota -= 1;
-                        context.Departments.Update(department);
-
-                        // Tüm değişiklikleri kaydet
-                        await context.SaveChangesAsync();
-
-                        // İşlemleri onayla
-                        transaction.Commit();
-                    }
-                    catch (Exception ex)
-                    {
-                        // Hata olursa geri al
-                        transaction.Rollback();
-                        ModelState.AddModelError("", "Bir hata oluştu: " + ex.Message);
-                        ViewBag.Departments = context.Departments.OrderByDescending(d => d.Id).ToList();
-                        return View(studentDto);
-                    }
-                }
+                ModelState.AddModelError("DepartmentId", "Bu bölümde tanımlı ders bulunmamaktadır!");
+                ViewBag.Departments = await context.Departments.OrderByDescending(d => d.Id).ToListAsync();
+                return View(studentDto);
             }
-            else
+
+            // Kontenjan kontrolü
+            if (department.Quota <= 0)
             {
                 ModelState.AddModelError("DepartmentId", "Bu bölümün kontenjanı dolmuştur.");
-                ViewBag.Departments = context.Departments.OrderByDescending(d => d.Id).ToList();
+                ViewBag.Departments = await context.Departments.OrderByDescending(d => d.Id).ToListAsync();
                 return View(studentDto);
+            }
+
+            // Kontenjan uyarısı
+            ViewBag.QuotaWarning = department.Quota <= 10
+                ? $"Bu bölümün kontenjanı azalmak üzere! (Kalan kontenjan: {department.Quota})"
+                : $"Kalan kontenjan: {department.Quota}";
+
+            // Transaction başlat
+            using (var transaction = await context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    // 1. Öğrenciyi ekle
+                    context.Students.Add(student);
+                    await context.SaveChangesAsync();
+
+                    Console.WriteLine($"Öğrenci eklendi. ID: {student.StudentId}");
+                    Console.WriteLine($"Bölümdeki ders sayısı: {department.Lessons.Count}");
+
+                    // 2. Tüm dersler için grade kaydı oluştur
+                    foreach (var lesson in department.Lessons)
+                    {
+                        Console.WriteLine($"Ders ID: {lesson.LessonId} için grade oluşturuluyor...");
+
+                        var grade = new Grade
+                        {
+                            StudentId = student.StudentId,
+                            LessonId = lesson.LessonId,
+                            Midterm = 0,
+                            Final = 0,
+                            Average = 0
+                        };
+                        await context.Grades.AddAsync(grade);
+                    }
+
+                    // 3. Kontenjanı güncelle
+                    department.Quota -= 1;
+                    context.Departments.Update(department);
+
+                    // 4. Tüm değişiklikleri kaydet
+                    await context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    Console.WriteLine("İşlem başarıyla tamamlandı");
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+
+                    // Hata durumunda yüklenen resmi sil
+                    if (System.IO.File.Exists(imageFullPath))
+                    {
+                        System.IO.File.Delete(imageFullPath);
+                    }
+
+                    Console.WriteLine($"HATA: {ex.Message}");
+                    Console.WriteLine($"StackTrace: {ex.StackTrace}");
+
+                    ModelState.AddModelError("", "Kayıt sırasında hata oluştu: " + ex.Message);
+                    ViewBag.Departments = await context.Departments.OrderByDescending(d => d.Id).ToListAsync();
+                    return View(studentDto);
+                }
             }
 
             return RedirectToAction("StudentList");
         }
-
         public IActionResult EditStudent(int id)
         {
             var student = context.Students.Find(id);

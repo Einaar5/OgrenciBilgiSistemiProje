@@ -5,6 +5,11 @@ namespace OgrenciBilgiSistemiProje.Services
 {
     public class ApplicationDbContext : DbContext
     {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        {
+        }
+
+        // DbSet'ler
         public DbSet<Student> Students { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
@@ -12,63 +17,83 @@ namespace OgrenciBilgiSistemiProje.Services
         public DbSet<Lesson> Lessons { get; set; }
         public DbSet<Grade> Grades { get; set; }
         public DbSet<CourseList> CourseList { get; set; }
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-        {
-
-        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Student-Department ilişkisi
-            modelBuilder.Entity<Student>()
-                .HasOne(s => s.Department)
-                .WithMany(d => d.Students)
-                .HasForeignKey(s => s.DepartmentId)
-                .OnDelete(DeleteBehavior.Restrict);
+            base.OnModelCreating(modelBuilder);
 
-            // Lesson-Department ilişkisi
-            modelBuilder.Entity<Lesson>()
-                .HasOne(l => l.Department)
-                .WithMany(d => d.Lessons)
-                .HasForeignKey(l => l.DepartmentId)
-                .OnDelete(DeleteBehavior.Restrict);
+            // Student yapılandırması
+            modelBuilder.Entity<Student>(entity =>
+            {
+                entity.HasOne(s => s.Department)
+                      .WithMany(d => d.Students)
+                      .HasForeignKey(s => s.DepartmentId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
 
-            // Lesson-Teacher ilişkisi
-            modelBuilder.Entity<Lesson>()
-                .HasOne(l => l.Teacher)
-                .WithMany(t => t.Lessons)
-                .HasForeignKey(l => l.TeacherId)
-                .OnDelete(DeleteBehavior.Restrict);
+            // Lesson yapılandırması
+            modelBuilder.Entity<Lesson>(entity =>
+            {
+                entity.HasOne(l => l.Department)
+                      .WithMany(d => d.Lessons)
+                      .HasForeignKey(l => l.DepartmentId)
+                      .OnDelete(DeleteBehavior.Restrict);
 
-            // Grade-Student ilişkisi
-            modelBuilder.Entity<Grade>()
-                .HasOne(g => g.Student)
-                .WithMany(s => s.Grades)
-                .HasForeignKey(g => g.StudentId)
-                .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(l => l.Teacher)
+                      .WithMany(t => t.Lessons)
+                      .HasForeignKey(l => l.TeacherId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
 
-            // Grade-Lesson ilişkisi
-            modelBuilder.Entity<Grade>()
-                .HasOne(g => g.Lesson)
-                .WithMany(l => l.Grades)
-                .HasForeignKey(g => g.LessonId)
-                .OnDelete(DeleteBehavior.Restrict);
+            // Grade yapılandırması
+            modelBuilder.Entity<Grade>(entity =>
+            {
+                entity.HasOne(g => g.Student)
+                      .WithMany(s => s.Grades)
+                      .HasForeignKey(g => g.StudentId)
+                      .OnDelete(DeleteBehavior.Restrict);
 
-            // CourseList-Lesson ilişkisi
-            modelBuilder.Entity<CourseList>()
-                .HasOne(cl => cl.Lesson)
-                .WithMany()
-                .HasForeignKey(cl => cl.LessonId)
-                .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(g => g.Lesson)
+                      .WithMany(l => l.Grades)
+                      .HasForeignKey(g => g.LessonId)
+                      .OnDelete(DeleteBehavior.Restrict);
 
-           
-            // CourseList-Department ilişkisi
-            modelBuilder.Entity<CourseList>()
-                .HasOne(cl => cl.Department)
-                .WithMany()
-                .HasForeignKey(cl => cl.DepartmentId)
-                .OnDelete(DeleteBehavior.Restrict);
+                // Grade tablosu için alternatif anahtar
+                entity.HasIndex(g => new { g.StudentId, g.LessonId })
+                      .IsUnique();
+            });
+
+            // CourseList yapılandırması
+            modelBuilder.Entity<CourseList>(entity =>
+            {
+                entity.HasOne(cl => cl.Lesson)
+                      .WithMany()
+                      .HasForeignKey(cl => cl.LessonId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(cl => cl.Department)
+                      .WithMany()
+                      .HasForeignKey(cl => cl.DepartmentId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Veritabanı performans optimizasyonları
+            modelBuilder.Entity<Student>().HasIndex(s => s.StudentEmail).IsUnique();
+            modelBuilder.Entity<Teacher>().HasIndex(t => t.TeacherMail).IsUnique();
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=OgrenciBilgiSistemi;Trusted_Connection=True;");
+            }
+
+            // Geliştirme ortamında detaylı loglama
+#if DEBUG
+            optionsBuilder.EnableSensitiveDataLogging();
+            optionsBuilder.LogTo(Console.WriteLine);
+#endif
         }
     }
-
 }
