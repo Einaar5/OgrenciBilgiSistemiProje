@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using NuGet.DependencyResolver;
 using OgrenciBilgiSistemiProje.Models;
@@ -28,6 +29,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             return View(teacher); // Öğrenciyi view'a gönderiyoruz.
         }
 
+        #region Öğretmen Bilgi Edit
         public IActionResult Edit()
         {
             var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
@@ -98,9 +100,10 @@ namespace OgrenciBilgiSistemiProje.Controllers
             return RedirectToAction("Index"); // Index sayfasına yönlendir
 
         }
+        #endregion
 
 
-
+        #region Notlandırma
         public IActionResult Grades()
         {
             var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
@@ -208,8 +211,10 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             return RedirectToAction("Grades");
         }
+        #endregion
 
 
+        #region Courses
         public IActionResult Courses()
         {
             var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adına göre id alıyoruz
@@ -233,6 +238,162 @@ namespace OgrenciBilgiSistemiProje.Controllers
             return View(courses);
 
         }
+        #endregion
+
+
+        #region Duyuru Sistemi
+
+        // Öğretmende Duyuru Listeleme
+        public IActionResult ListNotifications()
+        {
+            var teacherUsername = HttpContext.User.Identity?.Name;
+            if (string.IsNullOrEmpty(teacherUsername))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var teacher = context.Teachers
+                .FirstOrDefault(x => x.TeacherMail == teacherUsername);
+
+            if (teacher == null)
+            {
+                return NotFound("Öğretmen bulunamadı.");
+            }
+
+            var notifications = context.Notifications
+                .Include(n => n.Department)
+                .Where(n => n.TeacherId == teacher.Id)
+                .OrderByDescending(n => n.NotificationDate)
+                .ToList();
+
+            ViewBag.TeacherImageFileName = teacher.ImageFileName;
+            ViewData["ImageFileName"] = teacher.ImageFileName;
+            return View(notifications);
+        }
+
+
+        // Öğretmen Duyuru Oluşturma
+
+
+        public IActionResult CreateNotification()
+        {
+            var teacherUsername = HttpContext.User.Identity?.Name;
+            if (string.IsNullOrEmpty(teacherUsername))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var teacher = context.Teachers
+                .Include(t => t.Lessons)
+                .ThenInclude(l => l.Department)
+                .FirstOrDefault(x => x.TeacherMail == teacherUsername);
+
+            if (teacher == null)
+            {
+                return NotFound("Öğretmen bulunamadı.");
+            }
+
+            var departments = teacher.Lessons
+                .Select(l => l.Department)
+                .Distinct()
+                .ToList();
+
+            if (!departments.Any())
+            {
+                departments = context.Departments.ToList();
+            }
+
+            var notification = new Notification
+            {
+                TeacherId = teacher.Id,
+                NotificationDate = DateTime.Now,
+                IsRead = false
+            };
+
+            ViewBag.Departments = new SelectList(departments, "Id", "Name");
+            ViewBag.TeacherImageFileName = teacher.ImageFileName;
+
+            return View(notification);
+        }
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CreateNotification(Notification notification)
+        {
+            var teacherUsername = HttpContext.User.Identity?.Name;
+            if (string.IsNullOrEmpty(teacherUsername))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var teacher = context.Teachers
+                .Include(t => t.Lessons)
+                .ThenInclude(l => l.Department)
+                .FirstOrDefault(x => x.TeacherMail == teacherUsername);
+
+            if (teacher == null)
+            {
+                return NotFound("Öğretmen bulunamadı.");
+            }
+
+            // Navigation property'leri ModelState'den çıkaralım
+            ModelState.Remove("Teacher");
+            ModelState.Remove("Department");
+
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                ViewBag.Errors = errors;
+
+                var departments = teacher.Lessons
+                    .Select(l => l.Department)
+                    .Distinct()
+                    .ToList();
+                if (!departments.Any())
+                {
+                    departments = context.Departments.ToList();
+                }
+
+                ViewBag.Departments = new SelectList(departments, "Id", "Name", notification.DepartmentId);
+                ViewBag.TeacherImageFileName = teacher.ImageFileName;
+                return View(notification);
+            }
+
+            // Notification nesnesini tamamla
+            notification.TeacherId = teacher.Id;
+            notification.NotificationDate = DateTime.Now;
+            notification.IsRead = false;
+
+            // Veritabanına kaydet
+            try
+            {
+                context.Notifications.Add(notification);
+                context.SaveChanges();
+                return RedirectToAction("ListNotifications");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = "Duyuru kaydedilirken bir hata oluştu: " + ex.Message;
+                var departments = teacher.Lessons
+                    .Select(l => l.Department)
+                    .Distinct()
+                    .ToList();
+                if (!departments.Any())
+                {
+                    departments = context.Departments.ToList();
+                }
+                ViewBag.Departments = new SelectList(departments, "Id", "Name", notification.DepartmentId);
+                ViewBag.TeacherImageFileName = teacher.ImageFileName;
+                return View(notification);
+            }
+        }
+
+        #endregion
 
     }
 }

@@ -1,0 +1,54 @@
+﻿@model OgrenciBilgiSistemiProje.Models.Notification
+
+@{
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+}
+
+<h2>Duyuru Oluştur</h2>
+
+@if (ViewBag.Errors != null && ViewBag.Errors.Count > 0)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var error in ViewBag.Errors)
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+{
+    <div class="alert alert-danger">
+        @ViewBag.ErrorMessage
+    </div>
+}
+
+<form asp-action="CreateNotification" method="post">
+    <div class="form-group">
+        <label asp-for="NotificationTitle">Başlık</label>
+        <input asp-for="NotificationTitle" class="form-control" />
+        <span asp-validation-for="NotificationTitle" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="NotificationContent">İçerik</label>
+        <textarea asp-for="NotificationContent" class="form-control"></textarea>
+        <span asp-validation-for="NotificationContent" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="DepartmentId">Departman</label>
+        <select asp-for="DepartmentId" asp-items="ViewBag.Departments" class="form-control">
+            <option value="">Departman Seçin</option>
+        </select>
+        <span asp-validation-for="DepartmentId" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Oluştur</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

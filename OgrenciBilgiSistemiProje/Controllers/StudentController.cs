@@ -39,6 +39,8 @@ namespace OgrenciBilgiSistemiProje.Controllers
             return View(student);
         }
 
+
+        #region Öğrenci Edit
         public IActionResult Edit()
         {
             var studentUsername = HttpContext.User.Identity.Name; // Kullanıcı adını alıyoruz.
@@ -113,9 +115,10 @@ namespace OgrenciBilgiSistemiProje.Controllers
             context.SaveChanges();
             return RedirectToAction("Index", "Student");
         }
+        #endregion
 
 
-
+        #region Öğrenci Not
         public IActionResult Grades()
         {
            
@@ -147,8 +150,10 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
                 return View(grades);
         }
+        #endregion
 
 
+        #region Öğrenci Courses
         public IActionResult Courses()
         {
             // Öğrenci bilgilerini al
@@ -184,5 +189,115 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             return View(courses);
         }
+        #endregion
+
+
+        #region Öğrenci Duyuru
+
+
+        public IActionResult ListNotifications()
+        {
+            var studentUsername = HttpContext.User.Identity?.Name;
+            if (string.IsNullOrEmpty(studentUsername))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var student = context.Students
+                .FirstOrDefault(x => x.StudentEmail == studentUsername);
+
+            if (student == null)
+            {
+                return NotFound("Öğrenci bulunamadı.");
+            }
+
+            // Öğrencinin departmanına ait duyuruları al
+            var notifications = context.Notifications
+                .Include(n => n.Department)
+                .Where(n => n.DepartmentId == student.DepartmentId)
+                .OrderByDescending(n => n.NotificationDate)
+                .ToList();
+
+            ViewData["ImageFileName"] = student.ImageFileName;
+            return View(notifications);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult MarkAsRead(int notificationId)
+        {
+            var studentUsername = HttpContext.User.Identity?.Name;
+            if (string.IsNullOrEmpty(studentUsername))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var student = context.Students
+                .FirstOrDefault(x => x.StudentEmail == studentUsername);
+
+            if (student == null)
+            {
+                return NotFound("Öğrenci bulunamadı.");
+            }
+
+            var notification = context.Notifications
+                .FirstOrDefault(n => n.NotificationId == notificationId && n.DepartmentId == student.DepartmentId);
+
+            if (notification == null)
+            {
+                return NotFound("Duyuru bulunamadı.");
+            }
+
+            if (!notification.IsRead)
+            {
+                notification.IsRead = true;
+                context.Notifications.Update(notification);
+                context.SaveChanges();
+            }
+
+            return RedirectToAction("ListNotifications");
+        }
+
+
+        public IActionResult NotificationDetail(int id)
+        {
+            var studentUsername = HttpContext.User.Identity?.Name;
+            if (string.IsNullOrEmpty(studentUsername))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var student = context.Students
+                .FirstOrDefault(x => x.StudentEmail == studentUsername);
+
+            if (student == null)
+            {
+                return NotFound("Öğrenci bulunamadı.");
+            }
+
+            var notification = context.Notifications
+                .Include(n => n.Department)
+                .Include(n => n.Teacher)
+                .FirstOrDefault(n => n.NotificationId == id && n.DepartmentId == student.DepartmentId);
+
+            if (notification == null)
+            {
+                return NotFound("Duyuru bulunamadı.");
+            }
+
+            // Otomatik okundu işaretle
+            if (!notification.IsRead)
+            {
+                notification.IsRead = true;
+                context.Notifications.Update(notification);
+                context.SaveChanges();
+            }
+
+            return View(notification);
+        }
+
+
+        #endregion
     }
 }

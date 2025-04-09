@@ -1,0 +1,21 @@
+﻿@model OgrenciBilgiSistemiProje.Models.Notification
+@{
+    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
+}
+
+<h2>Duyuru Detayı</h2>
+
+<div class="card">
+    <div class="card-header">
+        <h3>@Model.NotificationTitle</h3>
+    </div>
+    <div class="card-body">
+        <p><strong>İçerik:</strong> @Model.NotificationContent</p>
+        <p><strong>Departman:</strong> @Model.Department.Name</p>
+        <p><strong>Oluşturan:</strong> @Model.Teacher.TeacherName @Model.Teacher.TeacherSurname</p>
+        <p><strong>Tarih:</strong> @Model.NotificationDate.ToString("dd/MM/yyyy HH:mm")</p>
+        <p><strong>Durum:</strong> @(Model.IsRead ? "Okundu" : "Okunmadı")</p>
+    </div>
+</div>
+
+<a asp-action="ListNotifications" class="btn btn-primary mt-3">Geri Dön</a>

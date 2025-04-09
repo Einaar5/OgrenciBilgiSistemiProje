@@ -8,24 +8,26 @@ namespace OgrenciBilgiSistemiProje.Models
         [Key]
         public int NotificationId { get; set; }
 
+        [Required]
         [MaxLength(100)]
         public string NotificationTitle { get; set; } = "";
 
+        [Required]
         [MaxLength(500)]
         public string NotificationContent { get; set; } = "";
 
-        public DateTime NotificationDate { get; set; } = DateTime.Now; // Varsayılan tarih
+        public DateTime NotificationDate { get; set; } = DateTime.Now;
 
-        public Teacher Teacher { get; set; } = new Teacher();
+        public bool IsRead { get; set; } = false;
 
-        [ForeignKey("Teacher")]
         public int TeacherId { get; set; }
+        [ForeignKey("TeacherId")]
+        public Teacher Teacher { get; set; }
 
-        public Department Department { get; set; } = new Department();
-
-        [ForeignKey("Department")]
+        [Required]
         public int DepartmentId { get; set; }
-
-
+        [ForeignKey("DepartmentId")]
+        public Department Department { get; set; }
     }
+
 }
