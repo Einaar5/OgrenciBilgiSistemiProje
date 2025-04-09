@@ -302,6 +302,8 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return RedirectToAction("StudentList");
             }
 
+            var grades = context.Grades.Where(g => g.StudentId == id).ToList(); // Öğrencinin notlarını bul
+
             string imagePath = environment.WebRootPath + "/img/" + student.ImageFileName; // Resmin dosya yolunu belirt
             System.IO.File.Delete(imagePath); // Resmi sil
 
@@ -313,6 +315,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 try
                 {
                     // Öğrenciyi sil
+                    context.Grades.RemoveRange(grades); // Öğrencinin notlarını sil
                     context.Students.Remove(student);
                     context.SaveChanges();
 
