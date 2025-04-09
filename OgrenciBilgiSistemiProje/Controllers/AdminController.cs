@@ -26,6 +26,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
         // Öğrenci listesi
         public IActionResult StudentList(string searchParam)
         {
+            
             var students = context.Students.Include(s => s.Department).AsQueryable(); // Burada öğrencileri çekiyoruz ve sorgu yapabilmek için IQueryable türünde bir değişkene atıyoruz ve Department ilişkisini yüklüyoruz.
             if (!string.IsNullOrWhiteSpace(searchParam)) // Arama terimi boş değilse
             {
@@ -758,6 +759,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult DeleteLesson(int id)
         {
+            var teacher = context.Teachers.FirstOrDefault(t => t.Id != t.Id);
             var lesson = context.Lessons.Find(id);
             if (lesson == null)
             {
@@ -766,6 +768,18 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             try
             {
+
+                if (teacher != null)
+                {
+                    lesson.TeacherId = teacher.Id;
+                    context.Update(lesson);
+                }
+                else
+                {
+                    lesson.TeacherId = null; // Veya varsayılan bir öğretmen ID'si atayabilirsiniz
+                    context.Update(lesson);
+                }
+
                 context.Remove(lesson);
                 context.SaveChanges();
             }
@@ -782,7 +796,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
         #endregion
 
 
-
+        #region Ders programı başlangıç
         public IActionResult CourseList()
         {
             var courses = context.CourseList
@@ -953,6 +967,8 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return RedirectToAction("CourseList");
             }
         }
+
+        #endregion
 
     }
 }

@@ -18,6 +18,8 @@ namespace OgrenciBilgiSistemiProje.Services
         public DbSet<Grade> Grades { get; set; }
         public DbSet<CourseList> CourseList { get; set; }
 
+        public DbSet<Notification> Notifications { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -66,10 +68,10 @@ namespace OgrenciBilgiSistemiProje.Services
             // CourseList yapılandırması
             modelBuilder.Entity<CourseList>(entity =>
             {
-                entity.HasOne(cl => cl.Lesson)
-                      .WithMany()
-                      .HasForeignKey(cl => cl.LessonId)
-                      .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(cl => cl.Lesson) // burada LessonId ile CourseList arasındaki ilişkiyi tanımlıyoruz
+                      .WithMany() // CourseList ile Lesson arasında bire çok ilişki var
+                      .HasForeignKey(cl => cl.LessonId) // CourseList tablosundaki LessonId alanını Lesson tablosundaki LessonId ile ilişkilendiriyoruz
+                      .OnDelete(DeleteBehavior.Restrict); // Silme işlemi sırasında kısıtlama getiriyoruz
 
                 entity.HasOne(cl => cl.Department)
                       .WithMany()
@@ -80,6 +82,9 @@ namespace OgrenciBilgiSistemiProje.Services
             // Veritabanı performans optimizasyonları
             modelBuilder.Entity<Student>().HasIndex(s => s.StudentEmail).IsUnique();
             modelBuilder.Entity<Teacher>().HasIndex(t => t.TeacherMail).IsUnique();
+
+            
+
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
