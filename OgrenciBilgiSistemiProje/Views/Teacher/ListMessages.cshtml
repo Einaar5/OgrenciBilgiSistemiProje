@@ -1,0 +1,44 @@
+﻿@model List<OgrenciBilgiSistemiProje.Models.StudentMessage>
+
+@{
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+}
+
+
+<h2>Gelen Mesajlar</h2>
+
+@if(Model==null || !Model.Any())
+{
+    <p>Mesaj Bulunamadı</p>
+}
+
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Başlık</th>
+                <th>İçerik</th>
+                <th>Gönderen</th>
+                <th>Tarih</th>
+                <th>Durum</th>
+                <th>İşlem</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var message in Model)
+            {
+                <tr>
+                    <td>@message.Title</td>
+                    <td>@message.Content</td>
+                    <td>@message.Sender.StudentName @message.Sender.StudentSurname</td>
+                    <td>@message.SentDate.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@(message.IsRead ? "Okundu" : "Okunmadı")</td>
+                    <td>
+                        <a asp-controller="Teacher" asp-action="DeleteNotification" asp-route-id="@message.Id" class="btn btn-danger">Sil</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

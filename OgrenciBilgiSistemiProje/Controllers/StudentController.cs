@@ -293,10 +293,120 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 context.Notifications.Update(notification);
                 context.SaveChanges();
             }
+            ViewData["ImageFileName"] = student.ImageFileName;
 
             return View(notification);
         }
 
+
+        public IActionResult ListTeacher()
+        {
+            var studentUsername = HttpContext.User.Identity?.Name;
+            if(string.IsNullOrEmpty(studentUsername))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var student = context.Students
+                .FirstOrDefault(x => x.StudentEmail == studentUsername);
+
+            if(student==null)
+            {
+                return NotFound("Öğrenci bulunamadı.");
+            }
+
+            var teachers = context.Teachers
+                .OrderBy(t => t.TeacherName)
+                .ToList();
+            ViewData["ImageFileName"] = student.ImageFileName;
+
+            return View(teachers);
+        }
+
+
+        public IActionResult SendMessage(int teacherId)
+        {
+            var studentUsername = HttpContext.User.Identity?.Name;
+            if (string.IsNullOrEmpty(studentUsername))
+            {
+                return RedirectToAction("Login", "Home");
+            }
+
+            var student = context.Students
+                .FirstOrDefault(x => x.StudentEmail == studentUsername);
+
+            if(student == null)
+            {
+                return NotFound("Öğrenci bulunamadı.");
+            }
+
+
+            var message = new StudentMessage
+            {
+                SenderStudentId = student.StudentId,
+                ReceiverTeacherId = teacherId,
+            };
+
+            ViewBag.ReceiverTeacherId = teacherId; // Öğretmenin ID'sini ViewBag'e ekliyoruz
+            ViewData["ImageFileName"] = student.ImageFileName;
+            return View(message);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult SendMessage(StudentMessage message)
+        {
+            var studentUsername = HttpContext.User.Identity?.Name;
+            if (string.IsNullOrEmpty(studentUsername))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var student = context.Students
+                .FirstOrDefault(x => x.StudentEmail == studentUsername);
+
+            if (student == null)
+            {
+                return NotFound("Öğrenci bulunamadı.");
+            }
+
+            var teacher = context.Teachers
+                .FirstOrDefault(t => t.Id == message.ReceiverTeacherId);
+
+            if (teacher == null)
+            {
+                return NotFound("Öğretmen bulunamadı.");
+            }
+
+            // Navigation property'leri ModelState'den çıkar
+            ModelState.Remove("Sender");
+            ModelState.Remove("Receiver");
+
+            if (!ModelState.IsValid)
+            {
+                // Hataları ViewBag'e ekle
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+                ViewBag.Errors = errors;
+
+                ViewBag.ReceiverName = $"{teacher.TeacherName} {teacher.TeacherSurname}";
+                return View(message);
+            }
+
+            // Mesajı tamamla
+            message.SenderStudentId = student.StudentId;
+            message.ReceiverTeacherId = teacher.Id;
+            message.SentDate = DateTime.Now;
+            message.IsRead = false;
+
+            context.StudentMessages.Add(message);
+            context.SaveChanges();
+
+            return RedirectToAction("ListTeacher");
+        }
 
         #endregion
     }

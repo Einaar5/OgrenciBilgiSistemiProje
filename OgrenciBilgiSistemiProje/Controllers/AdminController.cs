@@ -378,6 +378,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
 
 
+        // GET: DepartmentEdit/5
         public IActionResult DepartmentEdit(int id)
         {
             var department = context.Departments.Find(id);
@@ -385,39 +386,54 @@ namespace OgrenciBilgiSistemiProje.Controllers
             {
                 return RedirectToAction("DepartmentList");
             }
+
             var departmentDto = new DepartmentDto
             {
+                Id = department.Id, // DTO'ya ID'yi ekliyoruz
                 Name = department.Name,
                 Quota = department.Quota
             };
-            var departments = context.Departments.OrderByDescending(d => d.Id).ToList(); // Bölümleri bölüm numarasına göre sıralıyoruz ve listeye çeviriyoruz.
-            ViewData["Departments"] = departments; // Bölümleri view'a gönderiyoruz.
-            ViewData["Id"] = id; // Bölüm numarasını view'a gönderiyoruz.
-            return View(departmentDto);
+
+            ViewData["Departments"] = context.Departments.OrderByDescending(d => d.Id).ToList();
+            return View(departmentDto); // ViewData["Id"] yerine DTO içindeki Id'yi kullanıyoruz
         }
 
-
+        // POST: EditDepartment
         [HttpPost]
-        public IActionResult EditDepartment(int Id, DepartmentDto departmentDto)
+        [ValidateAntiForgeryToken] // Güvenlik için ekledim
+        public IActionResult EditDepartment(DepartmentDto departmentDto)
         {
-            var department = context.Departments.Find(Id);
+            if (!ModelState.IsValid)
+            {
+                ViewData["Departments"] = context.Departments.OrderByDescending(d => d.Id).ToList();
+                return View("DepartmentEdit", departmentDto); // Hatalı verilerle formu tekrar göster
+            }
+
+            var department = context.Departments.Find(departmentDto.Id);
             if (department == null)
             {
                 return RedirectToAction("DepartmentList");
             }
 
-            var departments = context.Departments.OrderByDescending(d => d.Id).ToList(); // Bölümleri bölüm numarasına göre sıralıyoruz ve listeye çeviriyoruz.
-            ViewData["Departments"] = departments; // Bölümleri view'a gönderiyoruz.
-
-            // Student objesine student dtoya atadığımız değerleri atıyoruz.
-
+            // DTO'dan entity'ye veri aktarımı
             department.Name = departmentDto.Name;
             department.Quota = departmentDto.Quota;
 
-            context.SaveChanges();
+            try
+            {
+                context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Departman güncellenirken bir hata oluştu: " + ex.Message);
+                ViewData["Departments"] = context.Departments.OrderByDescending(d => d.Id).ToList();
+                return View("DepartmentEdit", departmentDto);
+            }
 
             return RedirectToAction("DepartmentList");
         }
+
+        // Diğer action'lar (Student, Teacher, Lesson vb.) değişmedi, sadece DepartmentEdit kısmı düzeltildi
 
 
         public IActionResult DeleteDepartment(int Id)

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OgrenciBilgiSistemiProje.Services;
 
@@ -11,9 +12,11 @@ using OgrenciBilgiSistemiProje.Services;
 namespace OgrenciBilgiSistemiProje.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250410164702_StudentMessage")]
+    partial class StudentMessage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -261,45 +264,6 @@ namespace OgrenciBilgiSistemiProje.Migrations
                     b.ToTable("Students");
                 });
 
-            modelBuilder.Entity("OgrenciBilgiSistemiProje.Models.StudentMessage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("ReceiverTeacherId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SenderStudentId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("SentDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReceiverTeacherId");
-
-                    b.HasIndex("SenderStudentId");
-
-                    b.ToTable("StudentMessages");
-                });
-
             modelBuilder.Entity("OgrenciBilgiSistemiProje.Models.Teacher", b =>
                 {
                     b.Property<int>("Id")
@@ -443,25 +407,6 @@ namespace OgrenciBilgiSistemiProje.Migrations
                         .IsRequired();
 
                     b.Navigation("Department");
-                });
-
-            modelBuilder.Entity("OgrenciBilgiSistemiProje.Models.StudentMessage", b =>
-                {
-                    b.HasOne("OgrenciBilgiSistemiProje.Models.Teacher", "Receiver")
-                        .WithMany()
-                        .HasForeignKey("ReceiverTeacherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("OgrenciBilgiSistemiProje.Models.Student", "Sender")
-                        .WithMany()
-                        .HasForeignKey("SenderStudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Receiver");
-
-                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("OgrenciBilgiSistemiProje.Models.Department", b =>

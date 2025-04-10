@@ -19,6 +19,7 @@ else
                 <th>Departman</th>
                 <th>Tarih</th>
                 <th>Durum</th>
+                <th>İşlem</th>
             </tr>
         </thead>
         <tbody>
@@ -30,6 +31,9 @@ else
                     <td>@notification.Department.Name</td>
                     <td>@notification.NotificationDate.ToString("dd/MM/yyyy HH:mm")</td>
                     <td>@(notification.IsRead ? "Okundu" : "Okunmadı")</td>
+                    <td>
+                        <a asp-controller="Teacher" asp-action="DeleteNotification" asp-route-id="@notification.NotificationId" class="btn btn-danger">Sil</a>
+                    </td>
                 </tr>
             }
         </tbody>

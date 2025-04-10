@@ -20,6 +20,8 @@ namespace OgrenciBilgiSistemiProje.Services
 
         public DbSet<Notification> Notifications { get; set; }
 
+        public DbSet<StudentMessage> StudentMessages { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

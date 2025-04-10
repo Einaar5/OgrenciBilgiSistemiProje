@@ -312,6 +312,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             ViewBag.Departments = new SelectList(departments, "Id", "Name");
             ViewBag.TeacherImageFileName = teacher.ImageFileName;
+            ViewData["ImageFileName"] = teacher.ImageFileName;
 
             return View(notification);
         }
@@ -392,6 +393,38 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return View(notification);
             }
         }
+
+
+
+        // Öğretmen Gelen Duyuruları Görme İşlemi
+
+        public IActionResult ListMessages()
+        {
+            var teacherUsername = HttpContext.User.Identity?.Name;
+            if(string.IsNullOrEmpty(teacherUsername))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername);
+
+            if(teacher == null)
+            {
+                return NotFound("Öğretmen bulunamadı.");
+            }
+
+            var messages = context.StudentMessages
+                .Include(m => m.Sender)
+                .Where(m => m.ReceiverTeacherId == teacher.Id)
+                .OrderByDescending(m => m.SentDate)
+                .ToList();
+
+            ViewBag.TeacherImageFileName = teacher.ImageFileName;
+            ViewData["ImageFileName"] = teacher.ImageFileName;
+            return View(messages);
+        }
+
+        
 
         #endregion
 

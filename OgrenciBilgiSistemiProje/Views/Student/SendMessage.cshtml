@@ -1,0 +1,45 @@
+﻿@model OgrenciBilgiSistemiProje.Models.StudentMessage
+@{
+    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
+}
+<h2>Mesaj Gönder</h2>
+
+@if (ViewBag.Errors != null && ViewBag.Errors.Count > 0)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var error in ViewBag.Errors)
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </div>
+}
+
+<form asp-action="SendMessage" method="post">
+    <input type="hidden" asp-for="SenderStudentId" />
+    <input type="hidden" asp-for="ReceiverTeacherId" />
+
+    <div class="form-group">
+        <label>Alıcı</label>
+        <input type="text" class="form-control" value="@ViewBag.ReceiverName" readonly />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Title">Başlık</label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Content">Mesaj</label>
+        <textarea asp-for="Content" class="form-control" rows="5"></textarea>
+        <span asp-validation-for="Content" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Gönder</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,38 @@
+﻿@model List<OgrenciBilgiSistemiProje.Models.Teacher>
+
+@{
+    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
+}
+
+<h2>Öğretmenler</h2>
+
+@if(Model == null || !Model.Any())
+{
+    <p>Sistemde Öğretmen bulunamadı</p>
+}
+
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <th>Ad</th>
+            <th>Soyad</th>
+            <th>E-posta</th>
+            <th>İşlem</th>
+        </thead>
+
+        <tbody>
+            @foreach(var teacher in Model)
+            {
+                <tr>
+                    <td>@teacher.TeacherName</td>
+                    <td>@teacher.TeacherSurname</td>
+                    <td>@teacher.TeacherMail</td>
+                    <td>
+                        <a asp-action="SendMessage" asp-route-teacherId="@teacher.Id" class="btn btn-danger">Mesaj Gönder</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
