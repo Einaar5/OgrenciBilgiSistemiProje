@@ -212,11 +212,11 @@ namespace OgrenciBilgiSistemiProje.Controllers
             }
 
             // Öğrencinin departmanına ait duyuruları al
-            var notifications = context.Notifications
-                .Include(n => n.Department)
-                .Where(n => n.DepartmentId == student.DepartmentId)
-                .OrderByDescending(n => n.NotificationDate)
-                .ToList();
+            var notifications = context.Notifications       // Notification tablosunu alıyoruz
+                .Include(n => n.Department)     // İçerisndeki bildirimle ilişkili bölüm bilgisini
+                .Where(n => n.DepartmentId == student.DepartmentId) // Eğer DeperatmentId si öğrencinin departmentId ile aynıysa
+                .OrderByDescending(n => n.NotificationDate) // Gönderilen tarihe göre sıralıyoruz
+                .ToList();  // Listele
 
             ViewData["ImageFileName"] = student.ImageFileName;
             return View(notifications);
@@ -241,8 +241,8 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return NotFound("Öğrenci bulunamadı.");
             }
 
-            var notification = context.Notifications
-                .FirstOrDefault(n => n.NotificationId == notificationId && n.DepartmentId == student.DepartmentId);
+            var notification = context.Notifications    // Notification tablosunu alıyoruz
+                .FirstOrDefault(n => n.NotificationId == notificationId && n.DepartmentId == student.DepartmentId); // DuyuruId ile oluşan duyuruId aynı ve öğrencinin bölümüne ait aynısa
 
             if (notification == null)
             {

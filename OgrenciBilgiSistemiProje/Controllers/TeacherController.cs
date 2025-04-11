@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -261,10 +262,10 @@ namespace OgrenciBilgiSistemiProje.Controllers
             }
 
             var notifications = context.Notifications
-                .Include(n => n.Department)
-                .Where(n => n.TeacherId == teacher.Id)
-                .OrderByDescending(n => n.NotificationDate)
-                .ToList();
+                .Include(n => n.Department)     // Duyurunun ait olduğu bölümü dahil et. Department ile bir foreign key ilişkisi ve Department tablosundaki veritabanını çeker.
+                .Where(n => n.TeacherId == teacher.Id)      // Notifications tablosundaki her satırın (n) TeacherId sütununun, teacher nesnesinin Id özelliğiyle eşleşip eşleşmediğini kontrol eder.
+                .OrderByDescending(n => n.NotificationDate) // belirli bir kritere göre sıralar.
+                .ToList();  // Listeler
 
             ViewBag.TeacherImageFileName = teacher.ImageFileName;
             ViewData["ImageFileName"] = teacher.ImageFileName;
@@ -284,18 +285,19 @@ namespace OgrenciBilgiSistemiProje.Controllers
             }
 
             var teacher = context.Teachers
-                .Include(t => t.Lessons)
-                .ThenInclude(l => l.Department)
-                .FirstOrDefault(x => x.TeacherMail == teacherUsername);
+                .Include(t => t.Lessons)    // Öğretmeni çekerken, onun derslerini de getir.
+                .ThenInclude(l => l.Department)     // Dersleri çekerken, her dersin bölümünü de getir.
+                .FirstOrDefault(x => x.TeacherMail == teacherUsername); // E-postası teacherUsername ile eşleşen ilk öğretmeni bul. Eğer yoksa, null (hiçbir şey) döndür."
 
             if (teacher == null)
             {
                 return NotFound("Öğretmen bulunamadı.");
             }
 
+            // Bir öğretmenin (teacher) verdiği derslerle bağlantılı olan bölümleri (Department) buluyor.
             var departments = teacher.Lessons
-                .Select(l => l.Department)
-                .Distinct()
+                .Select(l => l.Department)  // listedeki her bir eleman için bir şey seçmemizi sağlar. Burada, her ders (l) için o dersin bağlı olduğu bölümü (Department) seçiyoruz. Her dersin bölümünü al diyoruz.
+                .Distinct() // listedeki tekrar eden elemanları temizler.
                 .ToList();
 
             if (!departments.Any())
@@ -303,9 +305,10 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 departments = context.Departments.ToList();
             }
 
+            // Notification adında bir nesne oluşuyor. Bu nesne, bir bildirim kaydı içeriyor ve şu bilgilerle doluruluyor
             var notification = new Notification
             {
-                TeacherId = teacher.Id,
+                TeacherId = teacher.Id, // Bu bildirim, teacher adlı öğretmen için. Onun ID’sini bildirime yaz.
                 NotificationDate = DateTime.Now,
                 IsRead = false
             };
@@ -330,9 +333,9 @@ namespace OgrenciBilgiSistemiProje.Controllers
             }
 
             var teacher = context.Teachers
-                .Include(t => t.Lessons)
-                .ThenInclude(l => l.Department)
-                .FirstOrDefault(x => x.TeacherMail == teacherUsername);
+                .Include(t => t.Lessons)    // Öğretmeni alırken, onun derslerini de yanına ekle.
+                .ThenInclude(l => l.Department) // Dersleri çekerken, her dersin hangi bölüme (Department) ait olduğunu da getir.
+                .FirstOrDefault(x => x.TeacherMail == teacherUsername); // E-postası teacherUsername ile eşleşen ilk öğretmeni bul. Eğer yoksa, null (hiçbir şey) döndür.
 
             if (teacher == null)
             {
@@ -340,8 +343,9 @@ namespace OgrenciBilgiSistemiProje.Controllers
             }
 
             // Navigation property'leri ModelState'den çıkaralım
-            ModelState.Remove("Teacher");
-            ModelState.Remove("Department");
+            // Formdaki her alanı kontrol ettim, şimdi durumlarını tutuyorum.
+            ModelState.Remove("Teacher");   // Teacher alanını doğrulama kontrolünden çıkar
+            ModelState.Remove("Department");    // Department alanını da doğrulama kontrolünden çıkar
 
             if (!ModelState.IsValid)
             {
@@ -351,15 +355,24 @@ namespace OgrenciBilgiSistemiProje.Controllers
                     .ToList();
                 ViewBag.Errors = errors;
 
-                var departments = teacher.Lessons
-                    .Select(l => l.Department)
-                    .Distinct()
-                    .ToList();
+                var departments = teacher.Lessons   // teacher nesnesinden Dersleri tablosunu alırız.
+                    .Select(l => l.Department)  // her dersin bağlı olduğu bölümü alırız
+                    .Distinct()     // Aynı olan değerleri temizler.
+                    .ToList();  // Ve Listeleriz.
+
                 if (!departments.Any())
                 {
-                    departments = context.Departments.ToList();
+                    departments = context.Departments.ToList();     // eğer öğretmenin hiç dersi yoksa (veya derslere bağlı bölüm yoksa), tüm bölümleri getiriyor.
                 }
 
+                /*
+                    bir dropdown menüsü (HTML <select>) oluşturmak için kullanılan bir yapı.
+                    departments: Dropdown’da gösterilecek bölümler.
+                    "Id": Her bölümün benzersiz kimliği (ID’si).
+                    "Name": Kullanıcının gördüğü bölüm adı (mesela, “Matematik Bölümü”).
+                    notification.DepartmentId: Varsayılan olarak seçili olacak bölümün ID’si (mesela, kullanıcı daha önce bir bölüm seçtiyse, o seçili kalsın).
+                    Yani, “Bölüm listesini al, dropdown için hazırla ve varsa önceki seçimi işaretle” diyoruz.
+                 */
                 ViewBag.Departments = new SelectList(departments, "Id", "Name", notification.DepartmentId);
                 ViewBag.TeacherImageFileName = teacher.ImageFileName;
                 return View(notification);
@@ -413,11 +426,11 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return NotFound("Öğretmen bulunamadı.");
             }
 
-            var messages = context.StudentMessages
-                .Include(m => m.Sender)
-                .Where(m => m.ReceiverTeacherId == teacher.Id)
-                .OrderByDescending(m => m.SentDate)
-                .ToList();
+            var messages = context.StudentMessages  // StudentMessages tablosunu alıyoruz
+                .Include(m => m.Sender) // İçerisinden kimin gönderdiği değeri alırız.
+                .Where(m => m.ReceiverTeacherId == teacher.Id)  // Koşulluyoruz. Eğer Gönderilen öğretmenin Id'si, teacher.Id'ye eşitse
+                .OrderByDescending(m => m.SentDate) // Ve Gönderilen tarihine göre sıralıyoruz.
+                .ToList();  // Listele
 
             ViewBag.TeacherImageFileName = teacher.ImageFileName;
             ViewData["ImageFileName"] = teacher.ImageFileName;
