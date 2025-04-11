@@ -46,8 +46,13 @@
         <span asp-validation-for="DepartmentId" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary">Oluştur</button>
+    <div class="d-flex gap-3 mt-3">
+        <button type="submit" class="btn btn-danger">Oluştur</button>
+        <a asp-action="ListNotifications" class="btn btn-warning text-white">İptal</a>
+    </div>
+
 </form>
+
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

@@ -54,7 +54,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             // Öğretmenin derslerini buluyoruz.
             var lesson = context.Lessons.Include(x => x.Teacher).FirstOrDefault(x => x.Teacher.TeacherMail == teacherUsername); // Öğretmenin derslerini buluyoruz.
 
-            ViewBag.LessonName = lesson.LessonName; // Ders adını view'a gönderiyoruz.
+            ViewBag.LessonName = lesson?.LessonName  ; // Ders adını view'a gönderiyoruz.
             ViewBag.ImageLayout = teacher.ImageFileName;
             ViewData["ImageFileName"] = teacher.ImageFileName; // Resim dosya adını view'a gönderiyoruz.
             return View(teacherDto); // ÖğrenciDto'yu view'a gönderiyoruz.
@@ -437,8 +437,20 @@ namespace OgrenciBilgiSistemiProje.Controllers
             return View(messages);
         }
 
-        
 
+
+       
+        public IActionResult DeleteNotification(int id) // notification silme 
+        {
+            var notification = context.Notifications.Find(id);
+            if (notification == null)
+            {
+                return NotFound("Duyuru bulunamadı.");
+            }
+            context.Notifications.Remove(notification);
+            context.SaveChanges();
+            return RedirectToAction("ListNotifications");
+        }
         #endregion
 
     }

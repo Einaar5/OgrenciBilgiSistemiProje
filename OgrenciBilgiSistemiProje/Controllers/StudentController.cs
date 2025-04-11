@@ -339,7 +339,11 @@ namespace OgrenciBilgiSistemiProje.Controllers
             {
                 return NotFound("Öğrenci bulunamadı.");
             }
+            var teachers = context.Teachers
+               .OrderBy(t => t.TeacherName)
+               .ToList();
 
+            
 
             var message = new StudentMessage
             {
