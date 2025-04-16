@@ -1,0 +1,92 @@
+﻿@model List<OgrenciBilgiSistemiProje.Models.Attendance>
+
+@{
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+}
+
+<h2>Devamsızlık Girişi</h2>
+
+<!-- Debug bilgisi -->
+@if (TempData["DebugMessage"] != null)
+{
+    <div class="alert alert-info">@TempData["DebugMessage"]</div>
+}
+
+<!-- Hata veya uyarı mesajları -->
+@if (TempData["WarningMessage"] != null)
+{
+    <div class="alert alert-warning">@TempData["WarningMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<!-- Ders seçimi -->
+<form asp-action="Attendance" method="get">
+    <label for="lessonId">Ders Seçin:</label>
+    <select name="lessonId" onchange="this.form.submit()">
+        <option value="0">Bir ders seçin</option>
+        @foreach (var lesson in ViewBag.Lessons)
+        {
+            <option value="@lesson.Value" selected="@(lesson.Value == ViewBag.SelectedLessonId.ToString())">@lesson.Text</option>
+        }
+    </select>
+</form>
+
+<!-- Öğrencileri derse kaydet butonu -->
+@if (ViewBag.SelectedLessonId != null && ViewBag.SelectedLessonId != 0)
+{
+    <form asp-action="RegisterStudentsToLesson" method="post">
+        <input type="hidden" name="lessonId" value="@ViewBag.SelectedLessonId" />
+        <button type="submit" class="btn btn-primary">Bölüm Öğrencilerini Derse Kaydet</button>
+    </form>
+}
+
+<!-- Tarih seçimi ve devamsızlık girişi -->
+@if (Model.Any())
+{
+    <form asp-action="Attendance" method="get">
+        <input type="hidden" name="lessonId" value="@Model[0].LessonId" />
+        <label for="attendanceDate">Tarih Seçin:</label>
+        <input type="date" name="attendanceDate" value="@(((DateTime)ViewBag.SelectedDate).ToString("yyyy-MM-dd"))" onchange="this.form.submit()" />
+    </form>
+
+    <form asp-action="Attendance" method="post">
+        <input type="hidden" name="attendances[0].LessonId" value="@Model[0].LessonId" />
+        <input type="hidden" name="attendances[0].AttendanceDate" value="@Model[0].AttendanceDate.ToString("yyyy-MM-dd")" />
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Öğrenci Adı</th>
+                    <th>Derse Geldi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            @(Model[i].Student != null
+                                ? $"{Model[i].Student.StudentName} {Model[i].Student.StudentSurname}"
+                                : "Öğrenci Bilgisi Yok")
+                        </td>
+                        <td>
+                            <!-- Checkbox ve hidden input -->
+                            <input type="checkbox" name="attendances[@i].IsCome" value="true"
+                            @(Model[i].IsCome ? "checked" : "") />
+                            <input type="hidden" name="attendances[@i].StudentId" value="@Model[i].StudentId" />
+                            <input type="hidden" name="attendances[@i].LessonId" value="@Model[i].LessonId" />
+                            <input type="hidden" name="attendances[@i].AttendanceDate" value="@Model[i].AttendanceDate.ToString("yyyy-MM-dd")" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-primary">Kaydet</button>
+    </form>
+}

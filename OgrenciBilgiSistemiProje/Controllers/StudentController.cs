@@ -22,7 +22,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult Index()
         {
-            var studentUsername = HttpContext.User.Identity.Name; // Kullanıcı adını alıyoruz.
+            var studentUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
             // Öğrenciyi bul ve Department bilgisini de dahil et
             var student = context.Students
                 .Include(s => s.Department) // Department bilgisini dahil et
@@ -43,7 +43,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
         #region Öğrenci Edit
         public IActionResult Edit()
         {
-            var studentUsername = HttpContext.User.Identity.Name; // Kullanıcı adını alıyoruz.
+            var studentUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
             var student = context.Students.Include(s=>s.Department).FirstOrDefault(x => x.StudentEmail == studentUsername);
 
             if (student == null)
@@ -410,6 +410,70 @@ namespace OgrenciBilgiSistemiProje.Controllers
             context.SaveChanges();
 
             return RedirectToAction("ListTeacher");
+        }
+
+        #endregion
+
+
+        #region Devamsızlık Durumu
+
+        // İşlev: Öğrencinin devamsızlık durumunu gösterir.
+        [Authorize(Roles = "Student")]
+        public IActionResult Attendance()
+        {
+            var studentUsername = HttpContext.User.Identity?.Name;
+            if (string.IsNullOrEmpty(studentUsername))
+            {
+                return RedirectToAction("StuTeaLog", "Account");
+            }
+
+            var student = context.Students
+                .FirstOrDefault(x => x.StudentEmail == studentUsername);
+            if (student == null)
+            {
+                return RedirectToAction("Index");
+            }
+
+            // Öğrencinin dersleri ve devamsızlıklarını al
+            var studentLessons = context.StudentLessons
+                .Where(sl => sl.StudentId == student.StudentId)
+                .Include(sl => sl.Lesson)
+                .GroupJoin(
+                    context.Attendance.Where(a => a.StudentId == student.StudentId),
+                    sl => sl.LessonId,
+                    a => a.LessonId,
+                    (sl, attendances) => new
+                    {
+                        sl.Lesson,
+                        AbsenceCount = attendances.Count(a => a.IsCome == false),
+                        TotalLessons = attendances.Count(),
+                        Details = attendances
+                            .Where(a => a.IsCome == false)
+                            .Select(a => a.AttendanceDate)
+                            .ToList()
+                    }
+                )
+                .ToList();
+
+            var model = new StudentAttendanceReportView
+            {
+                StudentId = student.StudentId,
+                StudentName = $"{student.StudentName} {student.StudentSurname}",
+                LessonReports = studentLessons.Select(sl => new LessonAttendanceReport
+                {
+                    LessonId = sl.Lesson.LessonId,
+                    LessonName = sl.Lesson.LessonName,
+                    AbsenceCount = sl.AbsenceCount,
+                    AbsenceRate = sl.TotalLessons > 0 ? (sl.AbsenceCount * 100.0 / sl.TotalLessons) : 0,
+                    AbsenceDates = sl.Details
+                }).ToList()
+            };
+
+            // Debug için: Devamsızlık kayıtlarını kontrol et
+            TempData["DebugMessage"] = $"Öğrenci (ID: {student.StudentId}) için {model.LessonReports.Sum(r => r.AbsenceCount)} devamsızlık bulundu.";
+
+            ViewData["ImageFileName"] = student.ImageFileName;
+            return View(model);
         }
 
         #endregion

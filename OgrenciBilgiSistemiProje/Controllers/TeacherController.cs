@@ -13,7 +13,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
     [Authorize(Roles = "Teacher")] // Sadece öğretmen rolündeki kullanıcılar bu controller'a erişebilir
     public class TeacherController : Controller
     {
-        
+
         private readonly ApplicationDbContext context; // Veritabanı bağlantısı
         private readonly IWebHostEnvironment environment;
 
@@ -54,7 +54,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             // Öğretmenin derslerini buluyoruz.
             var lesson = context.Lessons.Include(x => x.Teacher).FirstOrDefault(x => x.Teacher.TeacherMail == teacherUsername); // Öğretmenin derslerini buluyoruz.
 
-            ViewBag.LessonName = lesson?.LessonName  ; // Ders adını view'a gönderiyoruz.
+            ViewBag.LessonName = lesson?.LessonName; // Ders adını view'a gönderiyoruz.
             ViewBag.ImageLayout = teacher.ImageFileName;
             ViewData["ImageFileName"] = teacher.ImageFileName; // Resim dosya adını view'a gönderiyoruz.
             return View(teacherDto); // ÖğrenciDto'yu view'a gönderiyoruz.
@@ -69,7 +69,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             {
                 return RedirectToAction("StuTeaLog", "Account");
             }
-            if(!ModelState.IsValid) //eğer model doğrulama başarısız olursa
+            if (!ModelState.IsValid) //eğer model doğrulama başarısız olursa
             {
                 return View(teacherDto); // öğrenciDto'yu view'a geri gönder
             }
@@ -272,7 +272,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             var courses = context.CourseList
                 .Where(c => c.Lesson.TeacherId == teacherId)
                 .Include(c => c.Lesson)
-                .Include(c=>c.Department)
+                .Include(c => c.Department)
                 .OrderBy(c => c.CourseDay)
                 .ThenBy(c => c.CourseTime)
                 .ToList();
@@ -455,14 +455,14 @@ namespace OgrenciBilgiSistemiProje.Controllers
         public IActionResult ListMessages()
         {
             var teacherUsername = HttpContext.User.Identity?.Name;
-            if(string.IsNullOrEmpty(teacherUsername))
+            if (string.IsNullOrEmpty(teacherUsername))
             {
                 return RedirectToAction("Login", "Account");
             }
 
             var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername);
 
-            if(teacher == null)
+            if (teacher == null)
             {
                 return NotFound("Öğretmen bulunamadı.");
             }
@@ -480,7 +480,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
 
 
-       
+
         public IActionResult DeleteNotification(int id) // notification silme 
         {
             var notification = context.Notifications.Find(id);
@@ -494,5 +494,366 @@ namespace OgrenciBilgiSistemiProje.Controllers
         }
         #endregion
 
+
+        #region Devamsızlık Durumu
+
+        // İşlev: Öğretmenin bir ders seçip, o derse kayıtlı öğrencilerin devamsızlık durumlarını girmesini sağlar.
+        [Authorize(Roles = "Teacher")]
+        public IActionResult Attendance(int lessonId = 0, DateTime? attendanceDate = null)
+        {
+            // Öğretmenin kimliğini al
+            var teacherUsername = HttpContext.User.Identity?.Name;
+            if (string.IsNullOrEmpty(teacherUsername))
+            {
+                // Kullanıcı giriş yapmamışsa login sayfasına yönlendir
+                return RedirectToAction("StuTeaLog", "Account");
+            }
+
+            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername);
+            ViewData["ImageFileName"] = teacher.ImageFileName;
+            if (teacher == null)
+            {
+                // Öğretmen bulunamazsa hata mesajı göster
+                TempData["ErrorMessage"] = "Öğretmen bulunamadı.";
+                return RedirectToAction("StuTeaLog", "Account");
+            }
+
+            // Öğretmenin derslerini ComboBox için al
+            var lessons = context.Lessons
+                .Where(l => l.TeacherId == teacher.Id)
+                .Select(l => new SelectListItem { Value = l.LessonId.ToString(), Text = l.LessonName })
+                .ToList();
+            ViewBag.Lessons = lessons;
+
+            if (!lessons.Any())
+            {
+                // Ders yoksa uyarı mesajı göster
+                TempData["WarningMessage"] = "Bu öğretmene ait ders bulunamadı.";
+                return View(new List<Attendance>());
+            }
+
+            // Ders seçilmemişse boş liste döndür
+            if (lessonId == 0)
+            {
+                ViewBag.SelectedLessonId = 0;
+                return View(new List<Attendance>());
+            }
+
+            // Tarih belirle: Varsayılan olarak bugün, yoksa seçilen tarih
+            var selectedDate = attendanceDate?.Date ?? DateTime.Today;
+
+            // Seçilen derse kayıtlı öğrencileri StudentLesson’dan al
+            var studentLessons = context.StudentLessons
+                .Where(sl => sl.LessonId == lessonId)
+                .Include(sl => sl.Student)
+                .ToList();
+
+            // Debug için: StudentLesson kayıt sayısını kontrol et
+            TempData["DebugMessage"] = $"Seçilen ders (LessonId: {lessonId}) için {studentLessons.Count} öğrenci bulundu.";
+
+            // Eğer öğrenci yoksa, uyarı mesajı ekle
+            if (!studentLessons.Any())
+            {
+                TempData["WarningMessage"] = "Bu derse kayıtlı öğrenci bulunamadı.";
+                ViewBag.SelectedLessonId = lessonId;
+                return View(new List<Attendance>());
+            }
+
+            // Attendance nesneleri oluştur
+            var attendances = studentLessons
+                .Select(sl => new Attendance
+                {
+                    StudentId = sl.StudentId,
+                    Student = sl.Student,
+                    LessonId = lessonId,
+                    AttendanceDate = selectedDate,
+                    IsCome = true // Varsayılan olarak geldi
+                })
+                .ToList();
+
+            // Aynı tarihte mevcut devamsızlık kayıtlarını kontrol et
+            var existingAttendances = context.Attendance
+                .Where(a => a.LessonId == lessonId && a.AttendanceDate.Date == selectedDate)
+                .Include(a => a.Student)
+                .ToList();
+
+            if (existingAttendances.Any())
+            {
+                // Mevcut kayıtları kullan
+                attendances = existingAttendances;
+            }
+
+            ViewBag.SelectedLessonId = lessonId;
+            ViewBag.SelectedDate = selectedDate;
+            ViewData["ImageFileName"] = teacher.ImageFileName;
+            return View(attendances);
+        }
+
+        // İşlev: Öğretmenin girdiği devamsızlık bilgilerini kaydeder veya günceller.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Attendance(List<Attendance> attendances)
+        {
+            // Öğretmenin kimliğini al
+            var teacherUsername = HttpContext.User.Identity?.Name;
+            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername);
+            if (teacher == null)
+            {
+                // Öğretmen bulunamazsa login sayfasına yönlendir
+                TempData["ErrorMessage"] = "Öğretmen bulunamadı.";
+                return RedirectToAction("StuTeaLog", "Account");
+            }
+
+            if (!attendances.Any())
+            {
+                // Veri yoksa hata mesajı göster
+                TempData["ErrorMessage"] = "Kaydedilecek veri bulunamadı.";
+                return RedirectToAction("Attendance");
+            }
+
+            var lessonId = attendances.First().LessonId;
+            var attendanceDate = attendances.First().AttendanceDate;
+
+            // Tarih geçerliliğini kontrol et
+            if (attendanceDate > DateTime.Today)
+            {
+                TempData["ErrorMessage"] = "Gelecek tarih için devamsızlık girilemez.";
+                return RedirectToAction("Attendance", new { lessonId });
+            }
+
+            int addedCount = 0;
+            int updatedCount = 0;
+            int attendedCount = 0;
+
+            foreach (var attendance in attendances)
+            {
+                // Aynı öğrenci, ders ve tarih için mevcut kaydı kontrol et
+                var existing = context.Attendance.FirstOrDefault(a =>
+                    a.StudentId == attendance.StudentId &&
+                    a.LessonId == lessonId &&
+                    a.AttendanceDate.Date == attendanceDate.Date);
+
+                if (existing == null)
+                {
+                    // Yeni kayıt oluştur
+                    context.Attendance.Add(new Attendance
+                    {
+                        StudentId = attendance.StudentId,
+                        LessonId = attendance.LessonId,
+                        AttendanceDate = attendanceDate,
+                        IsCome = attendance.IsCome, // Checkbox’tan gelen değer
+                        CreatedDate = DateTime.Now
+                    });
+                    addedCount++;
+
+                    if(attendance.IsCome)
+                    {
+                        attendedCount++;
+                    }
+                }
+                else
+                {
+                    // Mevcut kaydı güncelle
+                    existing.IsCome = attendance.IsCome;
+                    existing.CreatedDate = DateTime.Now; // Güncelleme zamanını yenile
+                    context.Attendance.Update(existing);
+                    updatedCount++;
+                    if (attendance.IsCome)
+                    {
+                        attendedCount++;
+                    }
+                }
+            }
+
+            try
+            {
+                // Değişiklikleri kaydet
+                context.SaveChanges();
+                TempData["SuccessMessage"] = $"{addedCount} yeni kayıt eklendi, {updatedCount} kayıt güncellendi.";
+            }
+            catch (Exception ex)
+            {
+                // Hata olursa detaylı mesaj göster
+                TempData["ErrorMessage"] = $"Kayıt sırasında bir hata oluştu: {ex.Message}";
+            }
+
+            // Aynı ders ve tarih için sayfayı yenile
+            return RedirectToAction("Attendance", new { lessonId, attendanceDate });
+        }
+
+
+        // Derse bağlı olan öğrencileri Öğretmen Buton ile kaydetme işlemi yapar.
+        [Authorize(Roles = "Teacher")]
+        public IActionResult RegisterStudentsToLesson(int lessonId)
+        {
+            var teacherUsername = HttpContext.User.Identity?.Name;
+            if (string.IsNullOrEmpty(teacherUsername))
+            {
+                TempData["ErrorMessage"] = "Öğretmen oturumu bulunamadı.";
+                return RedirectToAction("StuTeaLog", "Account");
+            }
+
+            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername);
+            if (teacher == null)
+            {
+                return RedirectToAction("StuTeaLog", "Account");
+            }
+
+            // Geçersiz lessonId kontrolü
+            if (lessonId <= 0)
+            {
+                // lessonId sıfır veya negatifse hata göster
+                TempData["ErrorMessage"] = "Geçersiz ders ID'si.";
+                return RedirectToAction("Attendance");
+            }
+
+            // Dersi kontrol etmek için
+            var lessons = context.Lessons
+                .Include(l => l.Department)
+                .FirstOrDefault(l => l.LessonId == lessonId && l.TeacherId == teacher.Id);
+
+            if (lessons == null)
+            {
+                // Ders bulunamazsa veya öğretmene ait değilse hata mesajı göster
+                TempData["ErrorMessage"] = $"Ders bulunamadı veya size ait değil. LessonId: {lessonId}, TeacherId: {teacher.Id}";
+                return RedirectToAction("Attendance");
+            }
+
+            // Bölüm kontrolü
+            if (lessons.Department == null)
+            {
+                // Dersin bağlı olduğu bölüm yoksa hata göster
+                TempData["ErrorMessage"] = "Dersin bağlı olduğu bölüm bulunamadı.";
+                return RedirectToAction("Attendance");
+            }
+
+            // Bölümdeki öğrencileri alırız.
+            var students = context.Students
+                .Where(s => s.DepartmentId == lessons.DepartmentId)
+                .ToList();
+
+            if (!students.Any())
+            {
+                // Bölümde öğrenci yoksa uyarı göster
+                TempData["WarningMessage"] = "Bu bölümde kayıtlı öğrenci bulunamadı.";
+                return RedirectToAction("Attendance", new { lessonId });
+            }
+
+            int addedCount = 0;
+            foreach (var student in students)
+            {
+                // Öğrencinin derse kayıtlı olup olmadığını kontrol eder.
+                if (!context.StudentLessons.Any(sl => sl.StudentId == student.StudentId && sl.LessonId == lessonId))
+                {
+                    // StudentLesson içersine öğrenci kayıtlı değilse ekler
+                    context.StudentLessons.Add(new StudentLesson
+                    {
+                        StudentId = student.StudentId,
+                        LessonId = lessonId
+                    });
+                    addedCount++;
+                }
+            }
+
+
+            try
+            {
+                context.SaveChanges();
+                TempData["SuccessMessages"] = "Öğrenciler derse başarıyla kaydedildi.";
+            }
+
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Kayıt sırasında bir hata oluştu: " + ex.Message;
+            }
+
+            // Devamsızlık sayfasına geri dön
+            return RedirectToAction("Attendance", new { lessonId = lessonId });
+        }
+
+        // İşlev: Öğretmenin seçtiği ders için öğrencilerin devamsızlık raporlarını gösterir.
+        [Authorize(Roles = "Teacher")]
+        public IActionResult AttendanceReport(int lessonId = 0)
+        {
+            // Öğretmenin kimliğini al
+            var teacherUsername = HttpContext.User.Identity?.Name;
+            if (string.IsNullOrEmpty(teacherUsername))
+            {
+                return RedirectToAction("StuTeaLog", "Account");
+            }
+
+            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername);
+            if (teacher == null)
+            {
+                TempData["ErrorMessage"] = "Öğretmen bulunamadı.";
+                return RedirectToAction("StuTeaLog", "Account");
+            }
+
+            // Öğretmenin derslerini ComboBox için al
+            var lessons = context.Lessons
+                .Where(l => l.TeacherId == teacher.Id)
+                .Select(l => new SelectListItem { Value = l.LessonId.ToString(), Text = l.LessonName })
+                .ToList();
+            ViewBag.Lessons = lessons;
+
+            if (!lessons.Any())
+            {
+                TempData["WarningMessage"] = "Bu öğretmene ait ders bulunamadı.";
+                return View(new AttendanceReportView());
+            }
+
+            var model = new AttendanceReportView();
+
+            if (lessonId != 0)
+            {
+                // Seçilen dersin öğrencilerini ve devamsızlıklarını al
+                var studentAttendances = context.StudentLessons
+                    .Where(sl => sl.LessonId == lessonId)
+                    .Include(sl => sl.Student)
+                    .GroupJoin(
+                        context.Attendance.Where(a => a.LessonId == lessonId),
+                        sl => sl.StudentId,
+                        a => a.StudentId,
+                        (sl, attendances) => new
+                        {
+                            sl.Student,
+                            AbsenceCount = attendances.Count(a => a.IsCome == false),
+                            TotalLessons = attendances.Count()
+                        }
+                    )
+                    .ToList();
+
+                // Debug için: StudentLesson ve Attendance kayıtlarını kontrol et
+                TempData["DebugMessage"] = $"Seçilen ders (LessonId: {lessonId}) için {studentAttendances.Count} öğrenci bulundu.";
+
+                if (!studentAttendances.Any())
+                {
+                    TempData["WarningMessage"] = "Bu derse kayıtlı öğrenci bulunamadı.";
+                }
+                else
+                {
+                    model.StudentReports = studentAttendances.Select(sa => new StudentAttendanceReport
+                    {
+                        StudentId = sa.Student.StudentId,
+                        StudentName = $"{sa.Student.StudentName} {sa.Student.StudentSurname}",
+                        AbsenceCount = sa.AbsenceCount,
+                        TotalLessons = sa.TotalLessons,
+                        AttendanceCount = sa.TotalLessons - sa.AbsenceCount,
+                        AbsenceRate = sa.TotalLessons > 0 ? (sa.AbsenceCount * 100.0 / sa.TotalLessons) : 0
+                    }).ToList();
+
+                    model.LessonId = lessonId;
+                    model.LessonName = context.Lessons
+                        .FirstOrDefault(x => x.LessonId == lessonId)?.LessonName ?? "Ders Adı Bulunamadı";
+                }
+            }
+
+            ViewData["ImageFileName"] = teacher.ImageFileName;
+            return View(model);
+        }
+
+
+
+        #endregion
     }
 }

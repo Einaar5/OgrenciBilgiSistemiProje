@@ -21,6 +21,8 @@ namespace OgrenciBilgiSistemiProje.Services
         public DbSet<Notification> Notifications { get; set; }
 
         public DbSet<StudentMessage> StudentMessages { get; set; }
+        public DbSet<StudentLesson> StudentLessons { get; set; }
+        public DbSet<Attendance> Attendance { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -80,6 +82,17 @@ namespace OgrenciBilgiSistemiProje.Services
                       .HasForeignKey(cl => cl.DepartmentId)
                       .OnDelete(DeleteBehavior.Restrict);
             });
+
+
+            // Attendance için benzersiz index
+            modelBuilder.Entity<Attendance>()
+                .HasIndex(a => new { a.StudentId, a.LessonId, a.AttendanceDate })
+                .IsUnique();
+
+            // StudentLesson için benzersiz index
+            modelBuilder.Entity<StudentLesson>()
+                .HasIndex(sl => new { sl.StudentId, sl.LessonId })
+                .IsUnique();
 
             // Veritabanı performans optimizasyonları
             modelBuilder.Entity<Student>().HasIndex(s => s.StudentEmail).IsUnique();

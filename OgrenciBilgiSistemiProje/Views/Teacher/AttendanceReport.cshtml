@@ -1,0 +1,57 @@
+﻿@model OgrenciBilgiSistemiProje.Models.AttendanceReportView
+
+@{
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+}
+
+<h2>Devamsızlık Raporu</h2>
+
+@if (TempData["WarningMessage"] != null)
+{
+    <div class="alert alert-warning">@TempData["WarningMessage"]</div>
+}
+
+<!-- Ders seçimi -->
+<form asp-action="AttendanceReport" method="get">
+    <label for="lessonId">Ders Seçin:</label>
+    <select name="lessonId" onchange="this.form.submit()">
+        <option value="0">Bir ders seçin</option>
+        @foreach (var lesson in ViewBag.Lessons)
+        {
+            <option value="@lesson.Value" selected="@(lesson.Value == Model.LessonId.ToString())">@lesson.Text</option>
+        }
+    </select>
+</form>
+
+@if (Model.StudentReports.Any())
+{
+    <h3>@Model.LessonName - Devamsızlık Raporu</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Öğrenci Adı</th>
+                <th>Devamsızlık Sayısı</th>
+                <th>Devamsızlık Oranı (%)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var report in Model.StudentReports)
+            {
+                <tr>
+                    <td>@report.StudentName</td>
+                    <td>@report.AbsenceCount</td>
+                    <td>@report.AbsenceRate.ToString("F2")%</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else if (ViewBag.Lessons.Any())
+{
+    <p>Lütfen bir ders seçin.</p>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}

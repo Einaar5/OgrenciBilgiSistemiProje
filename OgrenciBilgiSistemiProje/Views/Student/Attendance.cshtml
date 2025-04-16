@@ -1,0 +1,50 @@
+﻿@model OgrenciBilgiSistemiProje.Models.StudentAttendanceReportView
+
+@{
+    Layout = "~/Views/Shared/_LayoutStudent.cshtml";
+}
+
+<h2>Devamsızlık Raporu</h2>
+
+<h3>@Model.StudentName</h3>
+
+@if (Model.LessonReports.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Ders Adı</th>
+                <th>Devamsızlık Sayısı</th>
+                <th>Devamsızlık Tarihleri</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var report in Model.LessonReports)
+            {
+                <tr>
+                    <td>@report.LessonName</td>
+                    <td>@report.AbsenceCount</td>
+                    <td>
+                        @if (report.AbsenceDates.Any())
+                        {
+                            <ul>
+                                @foreach (var date in report.AbsenceDates)
+                                {
+                                    <li>@date.ToString("dd.MM.yyyy")</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <span>Devamsızlık yok</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Henüz devamsızlık kaydınız bulunmamaktadır.</p>
+}
