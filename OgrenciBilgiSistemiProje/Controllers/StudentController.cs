@@ -427,14 +427,12 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return RedirectToAction("StuTeaLog", "Account");
             }
 
-            var student = context.Students
-                .FirstOrDefault(x => x.StudentEmail == studentUsername);
+            var student = context.Students.FirstOrDefault(x => x.StudentEmail == studentUsername);
             if (student == null)
             {
                 return RedirectToAction("Index");
             }
 
-            // Öğrencinin dersleri ve devamsızlıklarını al
             var studentLessons = context.StudentLessons
                 .Where(sl => sl.StudentId == student.StudentId)
                 .Include(sl => sl.Lesson)
@@ -445,10 +443,20 @@ namespace OgrenciBilgiSistemiProje.Controllers
                     (sl, attendances) => new
                     {
                         sl.Lesson,
-                        AbsenceCount = attendances.Count(a => a.IsCome == false),
-                        TotalLessons = attendances.Count(),
-                        Details = attendances
-                            .Where(a => a.IsCome == false)
+                        AbsenceCount = attendances.Count(a => !a.IsComeHour1) +
+                                       attendances.Count(a => !a.IsComeHour2) +
+                                       attendances.Count(a => !a.IsComeHour3),
+                        TotalLessons = attendances.Count() * 3, // Her ders kaydı 3 saat
+                        AbsenceDatesHour1 = attendances
+                            .Where(a => !a.IsComeHour1)
+                            .Select(a => a.AttendanceDate)
+                            .ToList(),
+                        AbsenceDatesHour2 = attendances
+                            .Where(a => !a.IsComeHour2)
+                            .Select(a => a.AttendanceDate)
+                            .ToList(),
+                        AbsenceDatesHour3 = attendances
+                            .Where(a => !a.IsComeHour3)
                             .Select(a => a.AttendanceDate)
                             .ToList()
                     }
@@ -465,17 +473,17 @@ namespace OgrenciBilgiSistemiProje.Controllers
                     LessonName = sl.Lesson.LessonName,
                     AbsenceCount = sl.AbsenceCount,
                     AbsenceRate = sl.TotalLessons > 0 ? (sl.AbsenceCount * 100.0 / sl.TotalLessons) : 0,
-                    AbsenceDates = sl.Details
+                    AbsenceDatesHour1 = sl.AbsenceDatesHour1,
+                    AbsenceDatesHour2 = sl.AbsenceDatesHour2,
+                    AbsenceDatesHour3 = sl.AbsenceDatesHour3
                 }).ToList()
             };
 
-            // Debug için: Devamsızlık kayıtlarını kontrol et
-            TempData["DebugMessage"] = $"Öğrenci (ID: {student.StudentId}) için {model.LessonReports.Sum(r => r.AbsenceCount)} devamsızlık bulundu.";
+            TempData["DebugMessage"] = $"Öğrenci (ID: {student.StudentId}) için {model.LessonReports.Sum(r => r.AbsenceCount)} devamsız saat bulundu.";
 
             ViewData["ImageFileName"] = student.ImageFileName;
             return View(model);
         }
-
         #endregion
     }
 }

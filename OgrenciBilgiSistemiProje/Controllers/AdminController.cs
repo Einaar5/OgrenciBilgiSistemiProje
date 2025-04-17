@@ -134,12 +134,17 @@ namespace OgrenciBilgiSistemiProje.Controllers
             {
                 try
                 {
+
                     // 1. Öğrenciyi ekle
                     context.Students.Add(student);
                     await context.SaveChangesAsync();
 
                     Console.WriteLine($"Öğrenci eklendi. ID: {student.StudentId}");
                     Console.WriteLine($"Bölümdeki ders sayısı: {department.Lessons.Count}");
+
+                    //Attendance tablsou için öğrenci kaydı
+
+
 
                     // 2. Tüm dersler için grade kaydı oluştur
                     foreach (var lesson in department.Lessons)
@@ -156,6 +161,8 @@ namespace OgrenciBilgiSistemiProje.Controllers
                         };
                         await context.Grades.AddAsync(grade);
                     }
+
+
 
                     // 3. Kontenjanı güncelle
                     department.Quota -= 1;

@@ -22,7 +22,13 @@ namespace OgrenciBilgiSistemiProje.Models
         public DateTime AttendanceDate { get; set; }
 
         [Required]
-        public bool IsCome { get; set; } = false;
+        public bool IsComeHour1 { get; set; } = false; // 1. saat katılım durumu
+
+        [Required]
+        public bool IsComeHour2 { get; set; } = false; // 2. saat katılım durumu
+
+        [Required]
+        public bool IsComeHour3 { get; set; } = false; // 3. saat katılım durumu
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;
     }

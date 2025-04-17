@@ -14,8 +14,9 @@
         <thead>
             <tr>
                 <th>Ders Adı</th>
-                <th>Devamsızlık Sayısı</th>
-                <th>Devamsızlık Tarihleri</th>
+                <th>Devamsız Saat Sayısı</th>
+                <th>Devamsızlık Oranı (%)</th>
+               @*  <th>Detaylar</th> *@
             </tr>
         </thead>
         <tbody>
@@ -24,13 +25,47 @@
                 <tr>
                     <td>@report.LessonName</td>
                     <td>@report.AbsenceCount</td>
+                    <td>@report.AbsenceRate.ToString("F2")</td>
+@* 
                     <td>
-                        @if (report.AbsenceDates.Any())
+                        @if (report.AbsenceDatesHour1.Any() || report.AbsenceDatesHour2.Any() || report.AbsenceDatesHour3.Any())
                         {
                             <ul>
-                                @foreach (var date in report.AbsenceDates)
+                                @if (report.AbsenceDatesHour1.Any())
                                 {
-                                    <li>@date.ToString("dd.MM.yyyy")</li>
+                                    <li>
+                                        1. Saat Devamsızlık Tarihleri:
+                                        <ul>
+                                            @foreach (var date in report.AbsenceDatesHour1)
+                                            {
+                                                <li>@date.ToString("dd.MM.yyyy")</li>
+                                            }
+                                        </ul>
+                                    </li>
+                                }
+                                @if (report.AbsenceDatesHour2.Any())
+                                {
+                                    <li>
+                                        2. Saat Devamsızlık Tarihleri:
+                                        <ul>
+                                            @foreach (var date in report.AbsenceDatesHour2)
+                                            {
+                                                <li>@date.ToString("dd.MM.yyyy")</li>
+                                            }
+                                        </ul>
+                                    </li>
+                                }
+                                @if (report.AbsenceDatesHour3.Any())
+                                {
+                                    <li>
+                                        3. Saat Devamsızlık Tarihleri:
+                                        <ul>
+                                            @foreach (var date in report.AbsenceDatesHour3)
+                                            {
+                                                <li>@date.ToString("dd.MM.yyyy")</li>
+                                            }
+                                        </ul>
+                                    </li>
                                 }
                             </ul>
                         }
@@ -39,6 +74,7 @@
                             <span>Devamsızlık yok</span>
                         }
                     </td>
+ *@
                 </tr>
             }
         </tbody>

@@ -498,14 +498,12 @@ namespace OgrenciBilgiSistemiProje.Controllers
         #region Devamsızlık Durumu
 
         // İşlev: Öğretmenin bir ders seçip, o derse kayıtlı öğrencilerin devamsızlık durumlarını girmesini sağlar.
-        [Authorize(Roles = "Teacher")]
+
         public IActionResult Attendance(int lessonId = 0, DateTime? attendanceDate = null)
         {
-            // Öğretmenin kimliğini al
             var teacherUsername = HttpContext.User.Identity?.Name;
             if (string.IsNullOrEmpty(teacherUsername))
             {
-                // Kullanıcı giriş yapmamışsa login sayfasına yönlendir
                 return RedirectToAction("StuTeaLog", "Account");
             }
 
@@ -513,12 +511,10 @@ namespace OgrenciBilgiSistemiProje.Controllers
             ViewData["ImageFileName"] = teacher.ImageFileName;
             if (teacher == null)
             {
-                // Öğretmen bulunamazsa hata mesajı göster
                 TempData["ErrorMessage"] = "Öğretmen bulunamadı.";
                 return RedirectToAction("StuTeaLog", "Account");
             }
 
-            // Öğretmenin derslerini ComboBox için al
             var lessons = context.Lessons
                 .Where(l => l.TeacherId == teacher.Id)
                 .Select(l => new SelectListItem { Value = l.LessonId.ToString(), Text = l.LessonName })
@@ -527,31 +523,25 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             if (!lessons.Any())
             {
-                // Ders yoksa uyarı mesajı göster
                 TempData["WarningMessage"] = "Bu öğretmene ait ders bulunamadı.";
                 return View(new List<Attendance>());
             }
 
-            // Ders seçilmemişse boş liste döndür
             if (lessonId == 0)
             {
                 ViewBag.SelectedLessonId = 0;
                 return View(new List<Attendance>());
             }
 
-            // Tarih belirle: Varsayılan olarak bugün, yoksa seçilen tarih
             var selectedDate = attendanceDate?.Date ?? DateTime.Today;
 
-            // Seçilen derse kayıtlı öğrencileri StudentLesson’dan al
             var studentLessons = context.StudentLessons
                 .Where(sl => sl.LessonId == lessonId)
                 .Include(sl => sl.Student)
                 .ToList();
 
-            // Debug için: StudentLesson kayıt sayısını kontrol et
             TempData["DebugMessage"] = $"Seçilen ders (LessonId: {lessonId}) için {studentLessons.Count} öğrenci bulundu.";
 
-            // Eğer öğrenci yoksa, uyarı mesajı ekle
             if (!studentLessons.Any())
             {
                 TempData["WarningMessage"] = "Bu derse kayıtlı öğrenci bulunamadı.";
@@ -559,7 +549,6 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return View(new List<Attendance>());
             }
 
-            // Attendance nesneleri oluştur
             var attendances = studentLessons
                 .Select(sl => new Attendance
                 {
@@ -567,11 +556,12 @@ namespace OgrenciBilgiSistemiProje.Controllers
                     Student = sl.Student,
                     LessonId = lessonId,
                     AttendanceDate = selectedDate,
-                    IsCome = true // Varsayılan olarak geldi
+                    IsComeHour1 = true, // Varsayılan olarak geldi
+                    IsComeHour2 = true,
+                    IsComeHour3 = true
                 })
                 .ToList();
 
-            // Aynı tarihte mevcut devamsızlık kayıtlarını kontrol et
             var existingAttendances = context.Attendance
                 .Where(a => a.LessonId == lessonId && a.AttendanceDate.Date == selectedDate)
                 .Include(a => a.Student)
@@ -579,7 +569,6 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             if (existingAttendances.Any())
             {
-                // Mevcut kayıtları kullan
                 attendances = existingAttendances;
             }
 
@@ -589,24 +578,23 @@ namespace OgrenciBilgiSistemiProje.Controllers
             return View(attendances);
         }
 
+
+
         // İşlev: Öğretmenin girdiği devamsızlık bilgilerini kaydeder veya günceller.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Attendance(List<Attendance> attendances)
         {
-            // Öğretmenin kimliğini al
             var teacherUsername = HttpContext.User.Identity?.Name;
             var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername);
             if (teacher == null)
             {
-                // Öğretmen bulunamazsa login sayfasına yönlendir
                 TempData["ErrorMessage"] = "Öğretmen bulunamadı.";
                 return RedirectToAction("StuTeaLog", "Account");
             }
 
             if (!attendances.Any())
             {
-                // Veri yoksa hata mesajı göster
                 TempData["ErrorMessage"] = "Kaydedilecek veri bulunamadı.";
                 return RedirectToAction("Attendance");
             }
@@ -614,7 +602,6 @@ namespace OgrenciBilgiSistemiProje.Controllers
             var lessonId = attendances.First().LessonId;
             var attendanceDate = attendances.First().AttendanceDate;
 
-            // Tarih geçerliliğini kontrol et
             if (attendanceDate > DateTime.Today)
             {
                 TempData["ErrorMessage"] = "Gelecek tarih için devamsızlık girilemez.";
@@ -623,11 +610,9 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             int addedCount = 0;
             int updatedCount = 0;
-            int attendedCount = 0;
 
             foreach (var attendance in attendances)
             {
-                // Aynı öğrenci, ders ve tarih için mevcut kaydı kontrol et
                 var existing = context.Attendance.FirstOrDefault(a =>
                     a.StudentId == attendance.StudentId &&
                     a.LessonId == lessonId &&
@@ -635,55 +620,44 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
                 if (existing == null)
                 {
-                    // Yeni kayıt oluştur
                     context.Attendance.Add(new Attendance
                     {
                         StudentId = attendance.StudentId,
                         LessonId = attendance.LessonId,
                         AttendanceDate = attendanceDate,
-                        IsCome = attendance.IsCome, // Checkbox’tan gelen değer
+                        IsComeHour1 = attendance.IsComeHour1,
+                        IsComeHour2 = attendance.IsComeHour2,
+                        IsComeHour3 = attendance.IsComeHour3,
                         CreatedDate = DateTime.Now
                     });
                     addedCount++;
-
-                    if(attendance.IsCome)
-                    {
-                        attendedCount++;
-                    }
                 }
                 else
                 {
-                    // Mevcut kaydı güncelle
-                    existing.IsCome = attendance.IsCome;
-                    existing.CreatedDate = DateTime.Now; // Güncelleme zamanını yenile
+                    existing.IsComeHour1 = attendance.IsComeHour1;
+                    existing.IsComeHour2 = attendance.IsComeHour2;
+                    existing.IsComeHour3 = attendance.IsComeHour3;
+                    existing.CreatedDate = DateTime.Now;
                     context.Attendance.Update(existing);
                     updatedCount++;
-                    if (attendance.IsCome)
-                    {
-                        attendedCount++;
-                    }
                 }
             }
 
             try
             {
-                // Değişiklikleri kaydet
                 context.SaveChanges();
                 TempData["SuccessMessage"] = $"{addedCount} yeni kayıt eklendi, {updatedCount} kayıt güncellendi.";
             }
             catch (Exception ex)
             {
-                // Hata olursa detaylı mesaj göster
                 TempData["ErrorMessage"] = $"Kayıt sırasında bir hata oluştu: {ex.Message}";
             }
 
-            // Aynı ders ve tarih için sayfayı yenile
             return RedirectToAction("Attendance", new { lessonId, attendanceDate });
         }
 
-
         // Derse bağlı olan öğrencileri Öğretmen Buton ile kaydetme işlemi yapar.
-        [Authorize(Roles = "Teacher")]
+
         public IActionResult RegisterStudentsToLesson(int lessonId)
         {
             var teacherUsername = HttpContext.User.Identity?.Name;
@@ -772,10 +746,9 @@ namespace OgrenciBilgiSistemiProje.Controllers
         }
 
         // İşlev: Öğretmenin seçtiği ders için öğrencilerin devamsızlık raporlarını gösterir.
-        [Authorize(Roles = "Teacher")]
+
         public IActionResult AttendanceReport(int lessonId = 0)
         {
-            // Öğretmenin kimliğini al
             var teacherUsername = HttpContext.User.Identity?.Name;
             if (string.IsNullOrEmpty(teacherUsername))
             {
@@ -789,7 +762,6 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return RedirectToAction("StuTeaLog", "Account");
             }
 
-            // Öğretmenin derslerini ComboBox için al
             var lessons = context.Lessons
                 .Where(l => l.TeacherId == teacher.Id)
                 .Select(l => new SelectListItem { Value = l.LessonId.ToString(), Text = l.LessonName })
@@ -806,7 +778,6 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             if (lessonId != 0)
             {
-                // Seçilen dersin öğrencilerini ve devamsızlıklarını al
                 var studentAttendances = context.StudentLessons
                     .Where(sl => sl.LessonId == lessonId)
                     .Include(sl => sl.Student)
@@ -817,13 +788,14 @@ namespace OgrenciBilgiSistemiProje.Controllers
                         (sl, attendances) => new
                         {
                             sl.Student,
-                            AbsenceCount = attendances.Count(a => a.IsCome == false),
-                            TotalLessons = attendances.Count()
+                            AbsenceCount = attendances.Count(a => !a.IsComeHour1) +
+                                           attendances.Count(a => !a.IsComeHour2) +
+                                           attendances.Count(a => !a.IsComeHour3),
+                            TotalLessons = attendances.Count() * 3
                         }
                     )
                     .ToList();
 
-                // Debug için: StudentLesson ve Attendance kayıtlarını kontrol et
                 TempData["DebugMessage"] = $"Seçilen ders (LessonId: {lessonId}) için {studentAttendances.Count} öğrenci bulundu.";
 
                 if (!studentAttendances.Any())
@@ -851,7 +823,6 @@ namespace OgrenciBilgiSistemiProje.Controllers
             ViewData["ImageFileName"] = teacher.ImageFileName;
             return View(model);
         }
-
 
 
         #endregion
