@@ -80,8 +80,8 @@
                     <tr>
                         <td>
                             @(Model[i].Student != null
-                                    ? $"{Model[i].Student.StudentName} {Model[i].Student.StudentSurname}"
-                                    : "Öğrenci Bilgisi Yok")
+                                ? $"{Model[i].Student.StudentName} {Model[i].Student.StudentSurname}"
+                                : "Öğrenci Bilgisi Yok")
                         </td>
                         <td>
                             <input type="checkbox" name="attendances[@i].IsComeHour1" value="true"
@@ -109,9 +109,29 @@
         </table>
         <button type="submit" class="btn btn-danger">Kaydet</button>
     </form>
+}
 
-    @foreach(var item in Model)
-    {
-        @ViewBag.AttendanceStudentList;
-    }
+<!-- Devamsızlık Raporu Tablosu -->
+@if (ViewBag.SelectedLessonId != null && ViewBag.SelectedLessonId != 0 && ViewBag.AbsenceReport != null )
+{
+    <div class="mt-5">
+        <h3>Devamsızlık Raporu</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Öğrenci Adı</th>
+                    <th>Toplam Devamsızlık (Saat)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var report in ViewBag.AbsenceReport)
+                {
+                    <tr>
+                        <td>@report.StudentName</td>
+                        <td>@report.AbsenceCount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }

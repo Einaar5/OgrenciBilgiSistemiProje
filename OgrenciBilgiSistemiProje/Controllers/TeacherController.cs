@@ -498,7 +498,6 @@ namespace OgrenciBilgiSistemiProje.Controllers
         #region Devamsızlık Durumu
 
         // İşlev: Öğretmenin bir ders seçip, o derse kayıtlı öğrencilerin devamsızlık durumlarını girmesini sağlar.
-
         public IActionResult Attendance(int lessonId = 0, DateTime? attendanceDate = null)
         {
             var teacherUsername = HttpContext.User.Identity?.Name;
@@ -535,10 +534,6 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             var selectedDate = attendanceDate?.Date ?? DateTime.Today;
 
-
-            var studentsAttendance = context.Attendance.ToList();
-            ViewBag.AttendanceStudentList = studentsAttendance;
-
             var studentLessons = context.StudentLessons
                 .Where(sl => sl.LessonId == lessonId)
                 .Include(sl => sl.Student)
@@ -560,7 +555,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                     Student = sl.Student,
                     LessonId = lessonId,
                     AttendanceDate = selectedDate,
-                    IsComeHour1 = true, // Varsayılan olarak geldi
+                    IsComeHour1 = true,
                     IsComeHour2 = true,
                     IsComeHour3 = true
                 })
@@ -576,14 +571,28 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 attendances = existingAttendances;
             }
 
+            // Devamsızlık raporu için veri
+            var absenceReport = context.StudentLessons
+                .Where(sl => sl.LessonId == lessonId)
+                .Include(sl => sl.Student)
+                .GroupJoin(
+                    context.Attendance.Where(a => a.LessonId == lessonId),
+                    sl => sl.StudentId,
+                    a => a.StudentId,
+                    (sl, attendances) => new
+                    {
+                        StudentName = $"{sl.Student.StudentName} {sl.Student.StudentSurname}",
+                        AbsenceCount = attendances.Sum(a => (!a.IsComeHour1 ? 1 : 0) + (!a.IsComeHour2 ? 1 : 0) + (!a.IsComeHour3 ? 1 : 0))
+                    }
+                )
+                .ToList();
+
+            ViewBag.AbsenceReport = absenceReport;
             ViewBag.SelectedLessonId = lessonId;
             ViewBag.SelectedDate = selectedDate;
             ViewData["ImageFileName"] = teacher.ImageFileName;
             return View(attendances);
         }
-
-
-
         // İşlev: Öğretmenin girdiği devamsızlık bilgilerini kaydeder veya günceller.
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -815,7 +824,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                         AbsenceCount = sa.AbsenceCount,
                         TotalLessons = sa.TotalLessons,
                         AttendanceCount = sa.TotalLessons - sa.AbsenceCount,
-                        AbsenceRate = sa.TotalLessons > 0 ? (sa.AbsenceCount * 100.0 / sa.TotalLessons) : 0
+                        AbsenceRate = sa.TotalLessons > 0 ? (30 * 42 / 100) : 0
                     }).ToList();
 
                     model.LessonId = lessonId;
