@@ -80,8 +80,8 @@
                     <tr>
                         <td>
                             @(Model[i].Student != null
-                                ? $"{Model[i].Student.StudentName} {Model[i].Student.StudentSurname}"
-                                : "Öğrenci Bilgisi Yok")
+                                    ? $"{Model[i].Student.StudentName} {Model[i].Student.StudentSurname}"
+                                    : "Öğrenci Bilgisi Yok")
                         </td>
                         <td>
                             <input type="checkbox" name="attendances[@i].IsComeHour1" value="true"
@@ -109,4 +109,9 @@
         </table>
         <button type="submit" class="btn btn-danger">Kaydet</button>
     </form>
+
+    @foreach(var item in Model)
+    {
+        @ViewBag.AttendanceStudentList;
+    }
 }

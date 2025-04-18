@@ -25,7 +25,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
         public IActionResult Index()
         {
             var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
-            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername); // Kullanıcı adına göre öğrenciyi buluyoruz.
+            var teacher = context.Teachers.Include(l => l.Lessons).FirstOrDefault(x => x.TeacherMail == teacherUsername); // Kullanıcı adına göre öğrenciyi buluyoruz.
             ViewData["ImageFileName"] = teacher.ImageFileName;
             return View(teacher); // Öğrenciyi view'a gönderiyoruz.
         }
@@ -299,7 +299,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             if (teacher == null)
             {
-                return NotFound("Öğretmen bulunamadı.");
+                return NotFound("Öğretmen bulunamadı."); 
             }
 
             var notifications = context.Notifications
@@ -534,6 +534,10 @@ namespace OgrenciBilgiSistemiProje.Controllers
             }
 
             var selectedDate = attendanceDate?.Date ?? DateTime.Today;
+
+
+            var studentsAttendance = context.Attendance.ToList();
+            ViewBag.AttendanceStudentList = studentsAttendance;
 
             var studentLessons = context.StudentLessons
                 .Where(sl => sl.LessonId == lessonId)

@@ -38,5 +38,6 @@ namespace OgrenciBilgiSistemiProje.Models
        
         // Öğretmenin verdiği derslerle ilişki
         public virtual ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
+
     }
 }

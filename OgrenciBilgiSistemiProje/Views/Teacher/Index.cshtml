@@ -4,11 +4,30 @@
 }
 <h2>Öğretmen Ana Sayfa</h2>
 
-<table class="table">
-    <tr>
-        <th>Adı</th>
-        <td>@Model.TeacherName @Model.TeacherSurname</td>
-    </tr>
+<div class="row gx-5 p-3 gap-4">
+    <div class="col bg-success">
+        <div class="p-3 text-start text-light">Aktif Akademik Dönem Bilgileri <br />2024-2025 Bahar Dönemi</div>
+    </div>
 
-</table>
+    <div class="col bg-danger">
+        <div class="p-3 text-start text-light">
+            Dersler <br />@if (Model.Lessons != null && Model.Lessons.Any())
+            {
+                
+                    @foreach (var lesson in Model.Lessons)
+                    {
+                        <h6 class="list-group-item">@lesson.LessonName</h6>
+                    }
+               
+            }
+            else
+            {
+                <span>Bu öğretmene ait ders bulunamadı.</span>
+            }
+        </div>
+    </div>
+    <div class="col bg-secondary">
+        <div class="p-3 text-start text-light">Kayıt Tarihi <br />@Model.TeacherRegisterDate</div>
+    </div>
 
+</div>
