@@ -86,6 +86,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 }
             }
 
+
             // Eğer hiçbir giriş başarılı değilse, hata mesajı göster
             ViewBag.Error = "Kullanıcı adı veya şifre hatalı";
             return View();

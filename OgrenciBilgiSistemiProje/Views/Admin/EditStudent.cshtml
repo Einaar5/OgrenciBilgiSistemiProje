@@ -95,7 +95,7 @@
 						{
 							@foreach (var department in departmentList)
 							{
-								<option value="@department.Id" selected="@(department.Id == Model.DepartmentId ? "selected" : null)">@department.Name</option>
+								<option value="@department.Id" selected="@(department.Id == Model.DepartmentId ? "selected" : null)">@department.Name</option> //
 							}
 						}
 					</select>
