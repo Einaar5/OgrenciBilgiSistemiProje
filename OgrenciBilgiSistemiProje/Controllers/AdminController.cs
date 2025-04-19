@@ -18,6 +18,16 @@ namespace OgrenciBilgiSistemiProje.Controllers
         }
         public IActionResult Index()
         {
+            var studentCount = context.Students.Count();
+            var teacherCount = context.Teachers.Count();
+            var departmentCount = context.Departments.Count();
+            var lessonCount = context.Lessons.Count();
+            var courseCount = context.CourseList.Count();
+            ViewBag.OgrenciSayisi = studentCount;
+            ViewBag.OgretmenSayisi = teacherCount;
+            ViewBag.BolumSayisi = departmentCount;
+            ViewBag.DersSayisi = lessonCount;
+            ViewBag.DersProgramıKaydı = courseCount;
             return View();
         }
 

@@ -1,66 +1,303 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>@ViewData["Title"] - OgrenciBilgiSistemiProje</title>
-	<script type="importmap"></script>
-	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-	<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-	<link rel="stylesheet" href="~/OgrenciBilgiSistemiProje.styles.css" asp-append-version="true" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Yönetim Paneli</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/OgrenciBilgiSistemiProje.styles.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+
+    <style>
+        :root {
+            --bs-primary: #dc3545; /* Bootstrap danger rengi */
+            --bs-primary-rgb: 220, 53, 69;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: var(--bs-primary) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 600;
+            color: white !important;
+        }
+
+        /* Sidebar */
+        .offcanvas-start {
+            width: 280px;
+            transform: none !important;
+            visibility: visible !important;
+            position: fixed !important;
+            z-index: 0; /* Ana içerik altında kalacak */
+            height: 100vh;
+            background-color: white;
+        }
+
+        .offcanvas-header {
+            background-color: var(--bs-primary);
+            color: white;
+        }
+
+        .offcanvas-header .btn-close {
+            display: none;
+            filter: invert(1);
+        }
+
+        /* Accordion Stilleri */
+        .accordion-button {
+            background-color: #f8f9fa;
+            color: #000;
+            width: 100%;
+            text-align: left;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background-color: rgba(var(--bs-primary-rgb), 0.1);
+            color: var(--bs-primary);
+            box-shadow: none;
+        }
+
+        .accordion-button:focus {
+            box-shadow: none;
+            border-color: rgba(var(--bs-primary-rgb), 0.3);
+        }
+
+        .accordion-item {
+            width: 100%;
+            margin-bottom: 10px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .accordion-body {
+            width: 100%;
+            padding: 0.5rem 1.25rem;
+        }
+
+        .nav-link {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            margin: 0.25rem 0;
+        }
+
+        .nav-link:hover, .nav-link:focus {
+            background-color: rgba(var(--bs-primary-rgb), 0.1);
+            color: var(--bs-primary);
+        }
+
+        .nav-link.active {
+            background-color: var(--bs-primary);
+            color: white !important;
+        }
+
+        /* Profile Image */
+        .profile-img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border: 2px solid rgba(255,255,255,0.5);
+            transition: all 0.3s ease;
+        }
+
+        .profile-img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(220, 53, 69, 0.5);
+            border-color: #dc3545;
+        }
+
+        /* Dropdown */
+        .dropdown-menu {
+            border: 1px solid rgba(var(--bs-primary-rgb), 0.2);
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(var(--bs-primary-rgb), 0.1);
+            color: var(--bs-primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1; /* Sidebar'ın üstünde olacak */
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        /* MOBİL STİLLERİ */
+        @@media (max-width: 992px) {
+            .offcanvas-start {
+                transform: translateX(-100%) !important;
+                visibility: hidden !important;
+                z-index: 1045; /* Mobilde üste çıkacak */
+            }
+
+            .offcanvas-start.show {
+                transform: translateX(0) !important;
+                visibility: visible !important;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .offcanvas-header .btn-close {
+                display: block;
+            }
+
+            .navbar-toggler {
+                color: white;
+            }
+        }
+    </style>
 </head>
 <body>
-	<header>
-		<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-			<div class="container-fluid">
-				<a class="navbar-brand" asp-area="" asp-controller="Admin" asp-action="Index">OBS Yönetim Sistemi</a>
-				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-						aria-expanded="false" aria-label="Toggle navigation">
-					<span class="navbar-toggler-icon"></span>
-				</button>
-				<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-					<ul class="navbar-nav flex-grow-1">
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">Home</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="StudentList">Student List</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="DepartmentList">Department List</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="TeacherList">Teacher List</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="LessonList">Lessons List</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="CourseList">Course Program</a>
-						</li>
-						<li class="nav-item d-flex ms-auto">
-							<a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Çıkış Yap</a>
-						</li>
-						
-					</ul>
-				</div>
-			</div>
-		</nav>
-	</header>
-	<div class="container">
-		<main role="main" class="pb-3">
-			@RenderBody()
-		</main>
-	</div>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-dark">
+            <div class="container-fluid px-4">
+                <!-- SADECE MOBİLDE GÖSTER -->
+                <button class="btn btn-sm d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminSidebar">
+                    <i class="fas fa-bars fa-lg text-white"></i>
+                </button>
 
-	<footer class="border-top footer text-muted">
-		<div class="container">
-			&copy; 2025 - OgrenciBilgiSistemiProje - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-		</div>
-	</footer>
-	<script src="~/lib/jquery/dist/jquery.min.js"></script>
-	<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-	<script src="~/js/site.js" asp-append-version="true"></script>
-	@await RenderSectionAsync("Scripts", required: false)
+                <!-- Brand -->
+                <a class="navbar-brand ms-2" asp-controller="Admin" asp-action="Index">
+                    <i class="fas fa-chalkboard-teacher me-2"></i>Yönetim Paneli
+                </a>
+
+                <!-- User Dropdown -->
+                <div class="ms-auto">
+                    <div class="dropdown">
+                        <button class="btn p-0 border-0 dropdown-toggle" type="button" id="userDropdown"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="ms-2 text-white">Admin</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li><h6 class="dropdown-header">Hesap Yönetimi</h6></li>
+                            <li>
+                                <a class="dropdown-item text-danger" asp-controller="Account" asp-action="Logout">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Çıkış Yap
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="d-flex flex-nowrap">
+        <!-- Sidebar -->
+        <div class="offcanvas offcanvas-start d-block position-fixed" tabindex="0" id="adminSidebar" style="width: 280px; min-height: 100vh;">
+            <div class="offcanvas-header sidebar-header">
+                <h5 class="offcanvas-title">
+                    <i class="fas fa-user-shield me-2"></i>Yönetim Paneli
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body p-0">
+                <nav class="nav flex-column p-3">
+                    <h6 class="px-3 mt-2 text-uppercase text-muted small fw-bold">Yönetim</h6>
+                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Index" data-url="/Admin/Index">
+                        <i class="fas fa-tachometer-alt me-2"></i>Anasayfa
+                    </a>
+                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="StudentList" data-url="/Admin/StudentList">
+                        <i class="fas fa-user-graduate me-2"></i>Öğrenciler
+                    </a>
+                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="TeacherList" data-url="/Admin/TeacherList">
+                        <i class="fas fa-chalkboard-teacher me-2"></i>Öğretmenler
+                    </a>
+                    <hr class="my-2">
+                    <h6 class="px-3 mt-2 text-uppercase text-muted small fw-bold">Akademik</h6>
+                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="DepartmentList" data-url="/Admin/DepartmentList">
+                        <i class="fas fa-building me-2"></i>Bölümler
+                    </a>
+                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="LessonList" data-url="/Admin/LessonList">
+                        <i class="fas fa-book me-2"></i>Dersler
+                    </a>
+                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="CourseList" data-url="/Admin/CourseList">
+                        <i class="fas fa-calendar-alt me-2"></i>Ders Programı
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content flex-grow-1" style="overflow-x: auto;">
+            <div class="container px-4 py-3">
+                <main role="main">
+                    @RenderBody()
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer bg-light border-top py-3 mt-auto">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-between">
+                <span class="text-muted">
+                    © @DateTime.Now.Year - Öğrenci Bilgi Sistemi
+                </span>
+                <div>
+                    <a href="#" class="text-decoration-none me-3">Gizlilik Politikası</a>
+                    <a href="#" class="text-decoration-none">Yardım</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        $(document).ready(function () {
+            var currentUrl = window.location.pathname;
+            console.log('Current URL:', currentUrl);
+
+            // Tüm menü öğelerinden active sınıfını kaldır
+            $('.nav-link').removeClass('active');
+
+            // Menü öğelerini kontrol et
+            $('.nav-link').each(function () {
+                var href = $(this).data('url'); // data-url özelliğini kullan
+                console.log('Checking href:', href);
+
+                // Anasayfa için özel kontrol
+                var isHomePage = (href === '/Admin/Index' || href === '/Admin') && 
+                                 (currentUrl === '/Admin' || currentUrl === '/Admin/Index' || currentUrl === '/Admin/');
+                // Diğer sayfalar için tam eşleşme
+                var isExactMatch = href === currentUrl || href + '/' === currentUrl;
+
+                if (isHomePage || isExactMatch) {
+                    console.log('Activating:', href);
+                    $(this).addClass('active');
+                }
+            });
+
+            // Mobilde offcanvas otomatik kapatma
+            if (window.innerWidth < 992) {
+                $('.nav-link').on('click', function () {
+                    var offcanvas = bootstrap.Offcanvas.getInstance(document.getElementById('adminSidebar'));
+                    if (offcanvas) {
+                        offcanvas.hide();
+                    }
+                });
+            }
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

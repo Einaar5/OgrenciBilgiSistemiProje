@@ -1,3 +1,74 @@
 ﻿@{
-	Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
+
+<div class="container mt-4">
+    <!-- Hoş Geldin Başlığı -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card bg-danger text-white shadow rounded bg-gradient">
+                <div class="card-body text-center p-2">
+                    <h3 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>Yönetim Paneline Hoş Geldiniz</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Veri Kartları -->
+    <div class="row g-3">
+        <!-- Öğrenci Sayısı -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card bg-warning text-white shadow rounded bg-gradient">
+                <div class="card-body text-center p-2">
+                    <i class="fas fa-user-graduate fa-lg mb-2"></i>
+                    <h6 class="mb-0"><b>Öğrenci Sayısı</b></h6>
+                    <p class="fs-3 mb-0">@ViewBag.OgrenciSayisi</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Akademisyen Sayısı -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card bg-dark text-white shadow rounded bg-gradient">
+                <div class="card-body text-center p-2">
+                    <i class="fas fa-chalkboard-teacher fa-lg mb-2"></i>
+                    <h6 class="mb-0"><b>Akademisyen Sayısı</b></h6>
+                    <p class="fs-3 mb-0">@ViewBag.OgretmenSayisi</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bölüm Sayısı -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card bg-danger text-white shadow rounded bg-gradient">
+                <div class="card-body text-center p-2">
+                    <i class="fas fa-building fa-lg mb-2"></i>
+                    <h6 class="mb-0"><b>Bölüm Sayısı</b></h6>
+                    <p class="fs-3 mb-0">@ViewBag.BolumSayisi</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ders Sayısı -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card bg-light text-dark shadow rounded">
+                <div class="card-body text-center p-2">
+                    <i class="fas fa-book fa-lg mb-2"></i>
+                    <h6 class="mb-0"><b>Ders Sayısı</b></h6>
+                    <p class="fs-3 mb-0">@ViewBag.DersSayisi</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ders Programı -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card bg-success text-light shadow rounded">
+                <div class="card-body text-center p-2">
+                    <i class="fas fa-book fa-lg mb-2"></i>
+                    <h6 class="mb-0"><b>Programa Kayıtlı Dersler</b></h6>
+                    <p class="fs-3 mb-0">@ViewBag.DersProgramıKaydı</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
