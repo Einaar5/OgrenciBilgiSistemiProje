@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using NuGet.DependencyResolver;
+using OgrenciBilgiSistemiProje.Migrations;
 using OgrenciBilgiSistemiProje.Models;
 using OgrenciBilgiSistemiProje.Services;
 
@@ -476,6 +477,20 @@ namespace OgrenciBilgiSistemiProje.Controllers
             ViewBag.TeacherImageFileName = teacher.ImageFileName;
             ViewData["ImageFileName"] = teacher.ImageFileName;
             return View(messages);
+        }
+
+
+        public IActionResult DeleteMessages(int id)
+        {
+            var message = context.StudentMessages.Find(id);
+            if (message == null)
+            {
+                return NotFound("Duyuru bulunamadı.");
+            }
+            context.StudentMessages.Remove(message);
+            context.SaveChanges();
+            return RedirectToAction("ListMessages");
+
         }
 
 

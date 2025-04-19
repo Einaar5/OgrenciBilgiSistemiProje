@@ -35,7 +35,7 @@ else
                     <td>@message.SentDate.ToString("dd/MM/yyyy HH:mm")</td>
                     <td>@(message.IsRead ? "Okundu" : "Okunmadı")</td>
                     <td>
-                        <a asp-controller="Teacher" asp-action="DeleteNotification" asp-route-id="@message.Id" class="btn btn-danger">Sil</a>
+                        <a asp-controller="Teacher" asp-action="DeleteMessages" asp-route-id="@message.Id" class="btn btn-danger">Sil</a>
                     </td>
                 </tr>
             }
