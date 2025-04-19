@@ -23,6 +23,7 @@
                     <th>Saat</th>
                     <th>Ders</th>
                     <th>Bölüm</th>
+                    <th>Derslik</th>
                 </tr>
             </thead>
             <tbody>
@@ -32,6 +33,7 @@
                         <td>@course.CourseTime</td>
                         <td>@course.Lesson?.LessonName</td>
                         <th>@course.Department?.Name</th>
+                        <th>@course.CourseClass</th>
                     </tr>
                 }
             </tbody>

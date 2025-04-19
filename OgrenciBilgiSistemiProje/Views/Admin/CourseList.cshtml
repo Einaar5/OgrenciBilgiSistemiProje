@@ -18,7 +18,9 @@
             <th>Ders</th>
             <th>Öğretmen</th>
             <th>Bölüm</th>
+            <th>Derslik</th>
             <th>İşlemler</th>
+            
         </tr>
     </thead>
     <tbody>
@@ -30,10 +32,12 @@
                 <td>@item.Lesson?.LessonName</td>
                 <td>@item.Lesson?.Teacher?.TeacherName</td>
                 <td>@item.Department?.Name</td>
+                <td>@item.CourseClass</td>
                 <td>
                     <a asp-action="EditCourseList" asp-route-id="@item.Id" class="btn btn-warning">Düzenle</a>
                     <a asp-action="DeleteCourseList" asp-route-id="@item.Id" class="btn btn-danger" onclick="return confirm('Silmek istediğinize emin misiniz?')">Sil</a>
                 </td>
+
             </tr>
         }
     </tbody>

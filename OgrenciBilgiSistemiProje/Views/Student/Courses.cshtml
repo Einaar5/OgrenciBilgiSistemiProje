@@ -21,6 +21,7 @@
                 <th>Ders</th>
                 <th>Öğretmen</th>
                 <th>Bölüm</th>
+                <th>Derslik</th>
             </tr>
         </thead>
         <tbody>
@@ -31,6 +32,7 @@
                     <td>@course.Lesson?.LessonName</td>
                     <td>@course.Lesson?.Teacher?.TeacherName  @course.Lesson.Teacher.TeacherSurname</td>
                     <td>@course.Department?.Name</td>
+                    <td>@course.CourseClass</td>
                 </tr>
             }
         </tbody>

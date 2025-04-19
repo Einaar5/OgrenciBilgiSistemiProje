@@ -13,6 +13,8 @@ namespace OgrenciBilgiSistemiProje.Models
 
         public string CourseTime { get; set; } = "";
 
+        public string CourseClass { get; set; } = "";
+
        
         public int DepartmentId { get; set; }
         public Department? Department { get; set; }

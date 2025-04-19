@@ -874,6 +874,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             {
                 CourseDay = dto.CourseDay,
                 CourseTime = dto.CourseTime,
+                CourseClass = dto.CourseClass,
                 LessonId = dto.LessonId,
                 DepartmentId = dto.DepartmentId
             };
@@ -915,6 +916,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 Id = courseList.Id,
                 CourseDay = courseList.CourseDay,
                 CourseTime = courseList.CourseTime,
+                CourseClass = courseList.CourseClass,
                 DepartmentId = courseList.DepartmentId,
                 LessonId = courseList.LessonId
             };
@@ -951,6 +953,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             courseList.CourseDay = dto.CourseDay;
             courseList.CourseTime = dto.CourseTime;
+            courseList.CourseClass = dto.CourseClass;
             courseList.DepartmentId = dto.DepartmentId;
             courseList.LessonId = dto.LessonId;
 
