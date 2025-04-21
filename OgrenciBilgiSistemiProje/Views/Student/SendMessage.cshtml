@@ -37,7 +37,13 @@
         <span asp-validation-for="Content" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary">Gönder</button>
+    <div class="d-flex mt-4 gap-3 ">
+        <button type="submit" class="btn btn-danger ">Gönder</button>
+        <a class="btn btn-outline-danger" asp-controller="Student" asp-action="ListTeacher" role="button">
+            <!--asp-action = "Index" Index Sayfasına Yönlendirme Yapılacaktır. Çünkü Ürünler Listesine Geri Dönülecektir.-->
+            İptal
+        </a>
+    </div>
 </form>
 
 @section Scripts {

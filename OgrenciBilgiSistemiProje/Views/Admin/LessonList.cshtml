@@ -49,8 +49,8 @@
                 <td>@lesson.Department?.Name</td>
                 <td>@(lesson.Teacher != null ? $"{lesson.Teacher.TeacherName} {lesson.Teacher.TeacherSurname}" : "Atanmamış")</td>
                 <td>
-                    <a class="btn btn-primary" asp-controller="Admin" asp-action="EditLesson" asp-route-id="@lesson.LessonId">Düzenle</a>
-                    <a class="btn btn-danger" asp-controller="Admin" asp-action="DeleteLesson" onclick="return confirm('(@lesson.LessonName) Adlı Dersi Silmek İstediğinize Emin Misiniz ?');" asp-route-id="@lesson.LessonId">Sil</a>
+                    <a class="btn btn-danger" asp-controller="Admin" asp-action="EditLesson" asp-route-id="@lesson.LessonId">Düzenle</a>
+                    <a class="btn btn-outline-danger" asp-controller="Admin" asp-action="DeleteLesson" onclick="return confirm('(@lesson.LessonName) Adlı Dersi Silmek İstediğinize Emin Misiniz ?');" asp-route-id="@lesson.LessonId">Sil</a>
                 </td>
             </tr>
         }

@@ -59,8 +59,8 @@
 				<td><img src="/img/@teacher.ImageFileName" width="100" alt="Alternate Text" /></td>
 
 				<td>
-					<a class="btn btn-primary" asp-controller="Admin" asp-action="EditTeacher" asp-route-id="@teacher.Id">Düzenle</a>
-					<a class="btn btn-danger" asp-controller="Admin" asp-action="DeleteTeacher" onclick="return confirm('(@teacher.TeacherName) Adlı Öğretmeni Silmek İstediğinize Emin Misiniz ?');" asp-route-id="@teacher.Id">Sil</a>
+					<a class="btn btn-danger" asp-controller="Admin" asp-action="EditTeacher" asp-route-id="@teacher.Id">Düzenle</a>
+					<a class="btn btn-outline-danger" asp-controller="Admin" asp-action="DeleteTeacher" onclick="return confirm('(@teacher.TeacherName) Adlı Öğretmeni Silmek İstediğinize Emin Misiniz ?');" asp-route-id="@teacher.Id">Sil</a>
 				</td>
 
 			</tr>
