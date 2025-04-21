@@ -12,22 +12,7 @@
 	</div>
 </div>
 
-<div>
-	<div class="d-flex flex-row align-items-center justify-content-end mb-3">
-		<!-- Arama Formu -->
-		<form asp-controller="Admin" asp-action="LessonList" method="get" class="mr-2">
-			<div class="input-group">
-				<input type="text" class="form-control" placeholder="Ders Adı"searchParam" value="@ViewBag.Search">
-				<button class="btn btn-outline-secondary" type="submit">Ara</button>
-			</div>
-		</form>
 
-		<!-- Temizle Butonu -->
-		<form asp-controller="Admin" asp-action="LessonList" method="get">
-			<button class="btn btn-outline-secondary" type="submit" name="searchParam" value="">Temizle</button>
-		</form>
-	</div>
-</div>
 <table class="table">
     <thead>
         <tr>

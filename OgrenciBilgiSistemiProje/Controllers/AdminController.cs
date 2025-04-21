@@ -660,22 +660,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult LessonList(string searchParam)
         {
-            /*
-            var lessons = context.Lessons.AsQueryable(); // Tüm öğrencileri çekiyoruz ve sorgu yapabilmek için IQueryable türünde bir değişkene atıyoruz.
-            if (!string.IsNullOrWhiteSpace(searchParam)) // Arama terimi boş değilse
-            {
-                //Bu kısım idsine göre arama yapmak için kullanılır.
-                var lesson = from s in context.Lessons
-                              where s.LessonName.Contains(searchParam) || Convert.ToString(s.LessonId).Contains(searchParam) // Öğrenci adı, emaili, soyadı veya id ile arama terimini içeriyorsa
-                              select s; // Arama terimine göre ürünleri çekiyoruz.
-
-                lessons = lesson;
-            }
-            var LessonList = lessons.OrderByDescending(s => s.LessonId).ToList(); // Öğrencileri öğrenci numarasına göre sıralıyoruz ve listeye çeviriyoruz.
-            ViewBag.Search = searchParam; // Arama terimini view'a gönderiyoruz.
-            return View(LessonList);
-            */
-
+            
 
             var lessons = context.Lessons
                 .Include(l => l.Department) // Department ilişkisini yükle

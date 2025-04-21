@@ -60,7 +60,7 @@
 				<td>@student.Department?.Name</td>
 				 
 				<td>
-					<a class="btn btn-primary" asp-controller="Admin" asp-action="EditStudent" asp-route-id="@student.StudentId" >Düzenle</a>
+					<a class="btn btn-danger" asp-controller="Admin" asp-action="EditStudent" asp-route-id="@student.StudentId" >Düzenle</a>
 					<a class="btn btn-outline-danger" asp-controller="Admin" asp-action="DeleteStudent" onclick="return confirm('(@student.StudentName) Adlı Öğrenciyi Silmek İstediğinize Emin Misiniz ?');" asp-route-id="@student.StudentId">Sil</a>
 				</td>
 
