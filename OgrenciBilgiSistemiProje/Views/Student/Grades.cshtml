@@ -26,8 +26,8 @@
 
                     <tr class="@rowClass">
                         <td>@score.Lesson?.LessonName</td>
-                        <td>@(score.Midterm?.ToString("0.00") ?? "Girilmedi") </td>
-                        <td>@(score.Final?.ToString("0.00") ?? "Girilmedi")</td>
+                        <td>@(score.Midterm.HasValue && score.Midterm == 0 ? "G" : score.Midterm?.ToString("0.00"))</td>
+                        <td>@(score.Final.HasValue && score.Final == 0 ? "G" : score.Final?.ToString("0.00"))</td>
                         <td>@(score.Average)</td>
                         <td>
                             <span class="badge @(score.Average >= 50 ? "bg-success" : "bg-danger")">
