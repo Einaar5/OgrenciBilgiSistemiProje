@@ -529,6 +529,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return RedirectToAction("StuTeaLog", "Account");
             }
 
+            // Lessons tablosundan öğretmeni id'leri doğrularız ve Combobox'a Derslerin Adlarını yazarız.
             var lessons = context.Lessons
                 .Where(l => l.TeacherId == teacher.Id)
                 .Select(l => new SelectListItem { Value = l.LessonId.ToString(), Text = l.LessonName })
@@ -538,7 +539,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             if (!lessons.Any())
             {
                 TempData["WarningMessage"] = "Bu öğretmene ait ders bulunamadı.";
-                return View(new List<Attendance>());
+                return View(new List<Attendance>());    // Burada new List<Attendance>(), boş bir Attendance listesi oluşturuyor. Yani, view’a boş bir devamsızlık listesi gönderiliyor.
             }
 
             if (lessonId == 0)
@@ -547,11 +548,12 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return View(new List<Attendance>());
             }
 
-            var selectedDate = attendanceDate?.Date ?? DateTime.Today;
+            var selectedDate = attendanceDate?.Date ?? DateTime.Today;  // Öğretmenin seçiceği tarih alır. Yoksa bugünün tarihini alır.
 
+            // StudentLessons tablosundan lessonId leri doğrularız sonra Students tablosunu ekleriz ve listeleriz.
             var studentLessons = context.StudentLessons
                 .Where(sl => sl.LessonId == lessonId)
-                .Include(sl => sl.Student)
+                .Include(sl => sl.Student)  // Öğrencileri dahil et
                 .ToList();
 
             TempData["DebugMessage"] = $"Seçilen ders (LessonId: {lessonId}) için {studentLessons.Count} öğrenci bulundu.";
@@ -563,6 +565,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return View(new List<Attendance>());
             }
 
+            // Yeni devamsızlık girişi oluşturur. var studentLessons'da bulunan her öğrenci için yeni bir Attendance nesnesi oluşturur.
             var attendances = studentLessons
                 .Select(sl => new Attendance
                 {
@@ -576,6 +579,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 })
                 .ToList();
 
+            // Mevcut devamsızlık bilgilerini al
             var existingAttendances = context.Attendance
                 .Where(a => a.LessonId == lessonId && a.AttendanceDate.Date == selectedDate)
                 .Include(a => a.Student)
@@ -591,6 +595,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 .Where(sl => sl.LessonId == lessonId)
                 .Include(sl => sl.Student)
                 .GroupJoin(
+                    // Her öğrenciyi (StudentLessons.StudentId) ilgili devamsızlık kayıtlarıyla (Attendance.StudentId) eşleştirmek ve bir grup oluşturmak.
                     context.Attendance.Where(a => a.LessonId == lessonId),
                     sl => sl.StudentId,
                     a => a.StudentId,
@@ -602,12 +607,15 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 )
                 .ToList();
 
-            ViewBag.AbsenceReport = absenceReport;
-            ViewBag.SelectedLessonId = lessonId;
-            ViewBag.SelectedDate = selectedDate;
-            ViewData["ImageFileName"] = teacher.ImageFileName;
-            return View(attendances);
+            ViewBag.AbsenceReport = absenceReport;  // Devamsızlık raporunu view'a gönderiyoruz.
+            ViewBag.SelectedLessonId = lessonId;    // Seçilen dersi view'a gönderiyoruz.
+            ViewBag.SelectedDate = selectedDate;     // Seçilen tarihi view'a gönderiyoruz.
+            ViewData["ImageFileName"] = teacher.ImageFileName;  // Öğretmenin resim dosya adını view'a gönderiyoruz.
+            return View(attendances);   // Devamsızlık bilgilerini view'a gönderiyoruz.
         }
+
+
+
         // İşlev: Öğretmenin girdiği devamsızlık bilgilerini kaydeder veya günceller.
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -627,25 +635,29 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return RedirectToAction("Attendance");
             }
 
-            var lessonId = attendances.First().LessonId;
-            var attendanceDate = attendances.First().AttendanceDate;
+            var lessonId = attendances.First().LessonId;    // lessonId'yi attnedances tablonun ilk LessonId'yi alıyoruz.
+            var attendanceDate = attendances.First().AttendanceDate;    // attnedanceDate'e attnedances tablonun ilk AttendanceDate'yi alıyoruz.
 
+            // Eğer seçilen Tarih attendanceDate bugünden büyükse hata mesajı gösteriyoruz.
             if (attendanceDate > DateTime.Today)
             {
                 TempData["ErrorMessage"] = "Gelecek tarih için devamsızlık girilemez.";
                 return RedirectToAction("Attendance", new { lessonId });
             }
 
-            int addedCount = 0;
-            int updatedCount = 0;
+            int addedCount = 0; // Yeni kayıt sayısını tutar.
+            int updatedCount = 0;   // Güncellenen kayıt sayısını tutar.
 
+            // Devamsızlık bilgilerini güncelleme veya ekleme işlemi
             foreach (var attendance in attendances)
             {
+                // Eğer Attendance tablosunda belirtilen değerler varsa, güncelleme işlemi yapıyoruz.
                 var existing = context.Attendance.FirstOrDefault(a =>
                     a.StudentId == attendance.StudentId &&
                     a.LessonId == lessonId &&
                     a.AttendanceDate.Date == attendanceDate.Date);
 
+                // Eğer mevcut kayıt yoksa, yeni bir kayıt ekliyoruz.
                 if (existing == null)
                 {
                     context.Attendance.Add(new Attendance
@@ -684,8 +696,8 @@ namespace OgrenciBilgiSistemiProje.Controllers
             return RedirectToAction("Attendance", new { lessonId, attendanceDate });
         }
 
-        // Derse bağlı olan öğrencileri Öğretmen Buton ile kaydetme işlemi yapar.
 
+        // Derse bağlı olan öğrencileri Öğretmen Buton ile kaydetme işlemi yapar.
         public IActionResult RegisterStudentsToLesson(int lessonId)
         {
             var teacherUsername = HttpContext.User.Identity?.Name;
@@ -729,7 +741,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return RedirectToAction("Attendance");
             }
 
-            // Bölümdeki öğrencileri alırız.
+            // Öğrencilerin departmentId'si ile lessons.DepartmentId'si eşleşen öğrencileri alırız.
             var students = context.Students
                 .Where(s => s.DepartmentId == lessons.DepartmentId)
                 .ToList();
@@ -741,6 +753,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return RedirectToAction("Attendance", new { lessonId });
             }
 
+            // Öğrencileri StudentLesson içersine yeni ekleme yapar.
             int addedCount = 0;
             foreach (var student in students)
             {
@@ -757,7 +770,6 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 }
             }
 
-
             try
             {
                 context.SaveChanges();
@@ -773,8 +785,8 @@ namespace OgrenciBilgiSistemiProje.Controllers
             return RedirectToAction("Attendance", new { lessonId = lessonId });
         }
 
-        // İşlev: Öğretmenin seçtiği ders için öğrencilerin devamsızlık raporlarını gösterir.
 
+        // İşlev: Öğretmenin seçtiği ders için öğrencilerin devamsızlık raporlarını gösterir.
         public IActionResult AttendanceReport(int lessonId = 0)
         {
             var teacherUsername = HttpContext.User.Identity?.Name;
@@ -851,7 +863,6 @@ namespace OgrenciBilgiSistemiProje.Controllers
             ViewData["ImageFileName"] = teacher.ImageFileName;
             return View(model);
         }
-
 
         #endregion
     }
