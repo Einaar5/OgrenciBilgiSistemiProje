@@ -9,45 +9,47 @@
 
 @if (Model == null || !Model.Any())
 {
-        <p>Departmanınıza ait duyuru bulunmamaktadır.</p>
+    <p>Departmanınıza ait duyuru bulunmamaktadır.</p>
 }
 else
 {
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Başlık</th>
-                    <th>İçerik</th>
-                    <th>Departman</th>
-                    <th>Tarih</th>
-                    <th>Durum</th>
-                    <th>İşlem</th>
-                </tr>
-            </thead>
-            <tbody>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Başlık</th>
+                <th>İçerik</th>
+                <th>Departman</th>
+                <th>Tarih</th>
+                <th>Durum</th>
+                <th>İşlem</th>
+            </tr>
+        </thead>
+        <tbody>
             @foreach (var notification in Model)
             {
-                        <tr>
-                            <td>
-                                <a asp-action="NotificationDetail" asp-route-id="@notification.NotificationId">
-                            @notification.NotificationTitle
-                                </a>
-                            </td>
-                            <td>@notification.NotificationContent</td>
-                            <td>@notification.Department.Name</td>
-                            <td>@notification.NotificationDate.ToString("dd/MM/yyyy HH:mm")</td>
-                            <td>@(notification.IsRead ? "Okundu" : "Okunmadı")</td>
-                            <td>
+                <tr>
+                    <td>
+                        @notification.NotificationTitle
+                    </td>
+                    <td>@notification.NotificationContent</td>
+                    <td>@notification.Department.Name</td>
+                    <td>@notification.NotificationDate.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@(notification.IsRead ? "Okundu" : "Okunmadı")</td>
+                    <td>
                         @if (!notification.IsRead)
                         {
-                                        <form asp-action="MarkAsRead" method="post" style="display:inline;">
-                                            <input type="hidden" name="notificationId" value="@notification.NotificationId" />
-                                            <button type="submit" class="btn btn-success">Okundu</button>
-                                        </form>
+                            <form asp-action="MarkAsRead" method="post" style="display:inline;">
+                                <input type="hidden" name="notificationId" value="@notification.NotificationId" />
+                                <button type="submit" class="btn btn-success">Okundu</button>
+                            </form>
                         }
-                            </td>
-                        </tr>
+                        <form method="get" asp-action="NotificationDetail" asp-route-id="@notification.NotificationId">
+                            <button type="submit" class="btn btn-danger">Detaylar</button>
+                        </form>
+                        @* <button class="btn btn-danger" asp-action="NotificationDetail" asp-route-id="@notification.NotificationId">Detaylar</button> *@
+                    </td>
+                </tr>
             }
-            </tbody>
-        </table>
+        </tbody>
+    </table>
 }
