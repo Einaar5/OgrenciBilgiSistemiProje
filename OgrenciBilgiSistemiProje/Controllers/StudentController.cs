@@ -343,6 +343,9 @@ namespace OgrenciBilgiSistemiProje.Controllers
                .OrderBy(t => t.TeacherName)
                .ToList();
 
+            var teacherSendId = context.Teachers.Find(teacherId);
+
+            ViewBag.TeacherName = teacherSendId?.TeacherName +" "+ teacherSendId?.TeacherSurname;
             
 
             var message = new StudentMessage
