@@ -77,6 +77,14 @@
 				</div>
 			</div>
 
+			<div class="row mb-3">
+				<label class="col-sm-4 col-form-label">Resim</label>
+				<div class="col-sm-8">
+					<input class="form-control" asp-for="ImageFile" />
+					<span asp-validation-for="ImageFile" class="text-danger"></span> <!--Validation Hatası Olursa Burada Gösterilecektir.-->
+				</div>
+			</div>
+
 			<div class="row">
 				<div class="offset-sm-4 col-sm-4 d-grid">
 					<button type="submit" class="btn btn-danger">Gönder</button>
