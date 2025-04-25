@@ -13,7 +13,6 @@
         public string StudentName { get; set; }
         public int AttendanceCount { get; set; } // Geldiği ders sayısı
         public int AbsenceCount { get; set; } // Gelmediği ders sayısı
-        public double AbsenceRate { get; set; }
         public int TotalLessons { get; set; }
     }
 }

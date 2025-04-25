@@ -13,7 +13,6 @@
             <tr>
                 <th>Ders Adı</th>
                 <th>Devamsız Saat Sayısı</th>
-                <th>Devamsızlık Oranı (%)</th>
                @*  <th>Detaylar</th> *@
             </tr>
         </thead>
@@ -23,7 +22,6 @@
                 <tr>
                     <td>@report.LessonName</td>
                     <td>@report.AbsenceCount</td>
-                    <td>@report.AbsenceRate.ToString("F2")</td>
 @* 
                     <td>
                         @if (report.AbsenceDatesHour1.Any() || report.AbsenceDatesHour2.Any() || report.AbsenceDatesHour3.Any())

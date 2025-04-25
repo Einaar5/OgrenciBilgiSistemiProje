@@ -475,7 +475,6 @@ namespace OgrenciBilgiSistemiProje.Controllers
                     LessonId = sl.Lesson.LessonId,
                     LessonName = sl.Lesson.LessonName,
                     AbsenceCount = sl.AbsenceCount,
-                    AbsenceRate = sl.TotalLessons > 0 ? (sl.AbsenceCount * 100.0 / sl.TotalLessons) : 0,
                     AbsenceDatesHour1 = sl.AbsenceDatesHour1,
                     AbsenceDatesHour2 = sl.AbsenceDatesHour2,
                     AbsenceDatesHour3 = sl.AbsenceDatesHour3

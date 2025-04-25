@@ -850,8 +850,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                         StudentName = $"{sa.Student.StudentName} {sa.Student.StudentSurname}",
                         AbsenceCount = sa.AbsenceCount,
                         TotalLessons = sa.TotalLessons,
-                        AttendanceCount = sa.TotalLessons - sa.AbsenceCount,
-                        AbsenceRate = sa.TotalLessons > 0 ? (30 * 42 / 100) : 0
+                        AttendanceCount = sa.TotalLessons - sa.AbsenceCount // Devamsızlık sayısı
                     }).ToList();
 
                     model.LessonId = lessonId;

@@ -1,174 +1,166 @@
 ﻿@model List<OgrenciBilgiSistemiProje.Models.Attendance>
 
 @{
-	Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
 }
 
-<h2>Devamsızlık Girişi</h2>
+<h2 class="text-danger">Devamsızlık Girişi</h2>
 
 <!-- Debug bilgisi -->
 @if (TempData["DebugMessage"] != null)
 {
-	<div class="alert alert-info">@TempData["DebugMessage"]</div>
+    <div class="alert alert-info">@TempData["DebugMessage"]</div>
 }
 
 <!-- Hata veya uyarı mesajları -->
 @if (TempData["WarningMessage"] != null)
 {
-	<div class="alert alert-warning">@TempData["WarningMessage"]</div>
+    <div class="alert alert-warning">@TempData["WarningMessage"]</div>
 }
 @if (TempData["ErrorMessage"] != null)
 {
-	<div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
 }
 @if (TempData["SuccessMessage"] != null)
 {
-	<div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
 }
 
 <!-- Ders seçimi -->
 <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
-	<form asp-action="Attendance" method="get" class="flex-grow-1" style="min-width: 300px;">
-		<div class="input-group">
-			<label for="lessonId" class="input-group-text bg-light">Ders Seçin:</label>
-			<select class="form-select" name="lessonId" onchange="this.form.submit()">
-				<option value="0">Bir ders seçin</option>
-				@foreach (var lesson in ViewBag.Lessons)
-				{
-					<option value="@lesson.Value" selected="@(lesson.Value == ViewBag.SelectedLessonId.ToString())">@lesson.Text</option>
-				}
-			</select>
-		</div>
-	</form>
+    <form asp-action="Attendance" method="get" class="flex-grow-1" style="min-width: 300px;">
+        <div class="input-group">
+            <label for="lessonId" class="input-group-text bg-light">Ders Seçin:</label>
+            <select class="form-select" name="lessonId" onchange="this.form.submit()">
+                <option value="0">Bir ders seçin</option>
+                @foreach (var lesson in ViewBag.Lessons)
+                {
+                    <option value="@lesson.Value" selected="@(lesson.Value == ViewBag.SelectedLessonId.ToString())">@lesson.Text</option>
+                }
+            </select>
+        </div>
+    </form>
 
-	@if (ViewBag.SelectedLessonId != null && ViewBag.SelectedLessonId != 0)
-	{
-		<form asp-action="RegisterStudentsToLesson" method="post" class="flex-shrink-0">
-			<input type="hidden" name="lessonId" value="@ViewBag.SelectedLessonId" />
-			<button type="submit" class="btn btn-danger">
-				<i class="fas fa-user-plus me-2"></i>Öğrencileri Kaydet
-			</button>
-		</form>
-	}
+    @if (ViewBag.SelectedLessonId != null && ViewBag.SelectedLessonId != 0)
+    {
+        <form asp-action="RegisterStudentsToLesson" method="post" class="flex-shrink-0">
+            <input type="hidden" name="lessonId" value="@ViewBag.SelectedLessonId" />
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-user-plus me-2"></i>Öğrencileri Kaydet
+            </button>
+        </form>
+    }
 </div>
 
 <!-- Tarih seçimi ve devamsızlık girişi -->
 @if (Model.Any())
 {
-	<div class="mt-3">
-		<form asp-action="Attendance" method="get">
-			<input type="hidden" name="lessonId" value="@Model[0].LessonId" />
-			<div class="d-flex align-items-center gap-3">
-				<label for="attendanceDate">Tarih Seçin:</label>
-				<input type="date"
-					   name="attendanceDate"
-					   value="@(((DateTime)ViewBag.SelectedDate).ToString("yyyy-MM-dd"))"
-					   onchange="this.form.submit()"
-					   class="form-control border-danger bg-opacity-10 w-25"
-					   style="box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25)" />
-			</div>
-		</form>
-	</div>
+    <div class="mt-3">
+        <form asp-action="Attendance" method="get">
+            <input type="hidden" name="lessonId" value="@Model[0].LessonId" />
+            <div class="d-flex align-items-center gap-3">
+                <label for="attendanceDate">Tarih Seçin:</label>
+                <input type="date"
+                       name="attendanceDate"
+                       value="@(((DateTime)ViewBag.SelectedDate).ToString("yyyy-MM-dd"))"
+                       onchange="this.form.submit()"
+                       class="form-control border-danger bg-opacity-10 w-25"
+                       style="box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25)" />
+            </div>
+        </form>
+    </div>
 
-	<form asp-action="Attendance" method="post">
-		<input type="hidden" name="attendances[0].LessonId" value="@Model[0].LessonId" />
-		<input type="hidden" name="attendances[0].AttendanceDate" value="@Model[0].AttendanceDate.ToString("yyyy-MM-dd")"  />
-		<table class="table mt-3">
-			<thead>
-				<tr>
-					<th>No</th>
-					<th>Öğrenci Adı</th>
-					<th>Tüm Gün</th>
-					<th>1. Saat</th>
-					<th>2. Saat</th>
-					<th>3. Saat</th>
-				</tr>
-			</thead>
-			<tbody>
-				@for (int i = 0; i < Model.Count; i++)
-				{
-					<tr>
-						<td>
-							@(Model[i].Student.StudentId)
-						</td>
-						<td>
-							@(Model[i].Student != null
-														? $"{Model[i].Student.StudentName} {Model[i].Student.StudentSurname}"
-														: "Öğrenci Bilgisi Yok")
-						</td>
-						<td>
-							<input type="checkbox" name="all" id="allHours" value="true" checked />
-							<input type="hidden" name="all" value="true" />
-						</td>
-						<td>
-							<input type="checkbox" name="attendances[@i].IsComeHour1" id="allHours1" value="true"
-							@(Model[i].IsComeHour1 ? "checked" : "") />
-							<input type="hidden" name="attendances[@i].IsComeHour1" value="false" />
-						</td>
-						<td>
-							<input type="checkbox" name="attendances[@i].IsComeHour2" id="allHours2" value="true"
-							@(Model[i].IsComeHour2 ? "checked" : "") />
-							<input type="hidden" name="attendances[@i].IsComeHour2" value="false" />
-						</td>
-						<td>
-							<input type="checkbox" name="attendances[@i].IsComeHour3" id="allHours3" value="true"
-							@(Model[i].IsComeHour3 ? "checked" : "") />
-							<input type="hidden" name="attendances[@i].IsComeHour3" value="false" />
-						</td>
-						<td>
-							<input type="hidden" name="attendances[@i].StudentId" value="@Model[i].StudentId" />
-							<input type="hidden" name="attendances[@i].LessonId" value="@Model[i].LessonId" />
-							<input type="hidden" name="attendances[@i].AttendanceDate" value="@Model[i].AttendanceDate.ToString("yyyy-MM-dd")" />
-						</td>
-					</tr>
-				}
-			</tbody>
-		</table>
-		<button type="submit" class="btn btn-danger">Kaydet</button>
-	</form>
+    <form asp-action="Attendance" method="post">
+        <input type="hidden" name="attendances[0].LessonId" value="@Model[0].LessonId" />
+        <input type="hidden" name="attendances[0].AttendanceDate" value="@Model[0].AttendanceDate.ToString("yyyy-MM-dd")" />
+        <table class="table mt-3">
+            <thead>
+                <tr>
+                    <th class="text-danger">No</th>
+                    <th class="text-danger">Öğrenci Adı</th>
+                    <th class="text-danger">Tüm Gün</th>
+                    <th class="text-danger">1. Saat</th>
+                    <th class="text-danger">2. Saat</th>
+                    <th class="text-danger">3. Saat</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            @(Model[i].Student.StudentId)
+                        </td>
+                        <td>
+                            @(Model[i].Student != null
+                                ? $"{Model[i].Student.StudentName} {Model[i].Student.StudentSurname}"
+                                : "Öğrenci Bilgisi Yok")
+                        </td>
+                        <td>
+                            <input type="checkbox" class="all-hours" value="true" checked />
+                            <input type="hidden" name="all" value="true" />
+                        </td>
+                        <td>
+                            <input type="checkbox" name="attendances[@i].IsComeHour1" class="hour-checkbox" value="true"
+                            @(Model[i].IsComeHour1 ? "checked" : "") />
+                            <input type="hidden" name="attendances[@i].IsComeHour1" value="false" />
+                        </td>
+                        <td>
+                            <input type="checkbox" name="attendances[@i].IsComeHour2" class="hour-checkbox" value="true"
+                            @(Model[i].IsComeHour2 ? "checked" : "") />
+                            <input type="hidden" name="attendances[@i].IsComeHour2" value="false" />
+                        </td>
+                        <td>
+                            <input type="checkbox" name="attendances[@i].IsComeHour3" class="hour-checkbox" value="true"
+                            @(Model[i].IsComeHour3 ? "checked" : "") />
+                            <input type="hidden" name="attendances[@i].IsComeHour3" value="false" />
+                        </td>
+                        <td>
+                            <input type="hidden" name="attendances[@i].StudentId" value="@Model[i].StudentId" />
+                            <input type="hidden" name="attendances[@i].LessonId" value="@Model[i].LessonId" />
+                            <input type="hidden" name="attendances[@i].AttendanceDate" value="@Model[i].AttendanceDate.ToString("yyyy-MM-dd")" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-danger">Kaydet</button>
+    </form>
 }
 
 <!-- Devamsızlık Raporu Tablosu -->
 @if (ViewBag.SelectedLessonId != null && ViewBag.SelectedLessonId != 0 && ViewBag.AbsenceReport != null)
 {
-	<div class="mt-5">
-		<h3>Devamsızlık Raporu</h3>
-		<table class="table table-bordered">
-			<thead>
-				<tr>
-					<th>Öğrenci Adı</th>
-					<th>Toplam Devamsızlık (Saat)</th>
-				</tr>
-			</thead>
-			<tbody>
-				@foreach (var report in ViewBag.AbsenceReport)
-				{
-					<tr>
-						<td>@report.StudentName</td>
-						<td>@report.AbsenceCount</td>
-					</tr>
-				}
-			</tbody>
-		</table>
-	</div>
+    <div class="mt-5">
+        <h3 class="text-danger">Devamsızlık Raporu</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th class="text-danger">Öğrenci Adı</th>
+                    <th class="text-danger">Toplam Devamsızlık (Saat)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var report in ViewBag.AbsenceReport)
+                {
+                    <tr>
+                        <td>@report.StudentName</td>
+                        <td>@report.AbsenceCount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
 
 <script>
-	const allHoursCheckbox = document.getElementById('allHours');
-	const hourCheckboxes = [
-		document.getElementById("allHours1"),
-		document.getElementById("allHours2"),
-		document.getElementById("allHours3")
-	];
-
-	allHoursCheckbox.addEventListener('change', () => {
-		setAllHourCheckboxes(allHoursCheckbox.checked);
-	});
-
-	function setAllHourCheckboxes(shouldCheck) {
-		hourCheckboxes.forEach(checkbox => {
-			checkbox.checked = shouldCheck;
-		});
-	}
-
+    document.querySelectorAll('.all-hours').forEach(allCheckbox => {
+        allCheckbox.addEventListener('change', () => {
+            const row = allCheckbox.closest('tr');
+            const hourCheckboxes = row.querySelectorAll('.hour-checkbox');
+            hourCheckboxes.forEach(checkbox => {
+                checkbox.checked = allCheckbox.checked;
+            });
+        });
+    });
 </script>
