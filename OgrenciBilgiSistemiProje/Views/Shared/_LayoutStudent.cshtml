@@ -173,7 +173,7 @@
 
 				<!-- Brand -->
 				<a class="navbar-brand ms-2" asp-controller="Student" asp-action="Index">
-					<i class="fas fa-chalkboard-teacher me-2"></i>Öğrenci Paneli
+					<i class="fas fa-user-graduate me-2"></i>Öğrenci Paneli
 				</a>
 
 				<!-- User Dropdown -->
@@ -190,7 +190,7 @@
 							<li><h6 class="dropdown-header">Hesap Yönetimi</h6></li>
 							<li>
 								<a class="dropdown-item" asp-controller="Student" asp-action="Edit">
-									<i class="fas fa-user-cog me-2 text-danger"></i>Profil Düzenle
+									<i class="fas fa-user-edit me-2 text-danger"></i>Profil Düzenle
 								</a>
 							</li>
 
@@ -198,13 +198,13 @@
 
 							<li>
 								<a class="dropdown-item" asp-controller="Student" asp-action="ListNotifications">
-									<i class="fas fa-bell me-2 text-danger"></i>Duyurular
+									<i class="fas fa-envelope me-2 text-danger"></i>Duyurular
 								</a>
 							</li>
 
 							<li>
 								<a class="dropdown-item" asp-controller="Student" asp-action="ListTeacher">
-									<i class="fas fa-bullhorn me-2 text-danger"></i>Mesaj Gönder
+									<i class="fas fa-comments me-2 text-danger"></i>Mesaj Gönder
 								</a>
 							</li>
 
@@ -235,30 +235,33 @@
 			<div class="offcanvas-body p-0">
 				<nav class="nav flex-column p-3">
 					<a class="nav-link text-dark active" asp-controller="Student" asp-action="Index">
-						<i class="fas fa-tachometer-alt"></i>Anasayfa
+						<i class="fas fa-home"></i>Anasayfa
 					</a>
 					<a class="nav-link text-dark" asp-controller="Student" asp-action="Edit">
-						<i class="fas fa-user-edit"></i>Profil Bilgileri
+						<i class="fas fa-id-card"></i>Profil Bilgileri
 					</a>
 
 					<hr class="my-2">
 
 					<h6 class="px-3 mt-2 text-uppercase text-muted small fw-bold">Akademik İşlemler</h6>
 					<a class="nav-link text-dark" asp-controller="Student" asp-action="Grades">
-						<i class="fas fa-clipboard-list"></i>Not Bilgileri
+						<i class="fas fa-graduation-cap"></i>Not Bilgileri
 					</a>
 					<a class="nav-link text-dark" asp-controller="Student" asp-action="Attendance">
-						<i class="fas fa-clipboard-list"></i>Devamsızlık Durumu
+						<i class="fas fa-calendar-times"></i>Devamsızlık Durumu
 					</a>
 					<a class="nav-link text-dark" asp-controller="Student" asp-action="Courses">
 						<i class="fas fa-calendar-alt"></i>Ders Programı
+					</a>
+					<a class="nav-link text-dark" asp-controller="Student" asp-action="CourseSelect">
+						<i class="fas fa-tasks"></i>Ders Seçimi
 					</a>
 
 					<hr class="my-2">
 
 					<h6 class="px-3 mt-2 text-uppercase text-muted small fw-bold">Form İşlemleri</h6>
 					<a class="nav-link text-dark" href="#">
-						<i class="fas fa-file-signature"></i>Ders Kayıt Formu
+						<i class="fas fa-file-alt"></i>Ders Kayıt Formu
 					</a>
 					<a class="nav-link text-dark" href="#">
 						<i class="fas fa-file-upload"></i>Belge Yükleme

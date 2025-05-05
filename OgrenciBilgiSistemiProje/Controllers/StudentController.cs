@@ -539,6 +539,8 @@ namespace OgrenciBilgiSistemiProje.Controllers
             var totalCredits = selectedLessons.Sum(l => l.Credit ?? 0);
             ViewBag.TotalCredits = totalCredits;
 
+            ViewData["ImageFileName"] = student.ImageFileName;
+
             return View(lessons);
         }
 

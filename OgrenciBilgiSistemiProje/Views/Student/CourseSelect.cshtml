@@ -9,32 +9,41 @@
 }
 
 <div class="container mt-5">
-    <h1 class="text-center mb-4 text-danger fw-bold">Ders Seçimi</h1>
+    <h1 class="text-center mb-4  fw-bold">Ders Seçimi</h1>
 
     @if (Model.Any())
     {
-        <div class="row g-4">
-            @foreach (var lesson in Model)
-            {
-                <div class="col-md-4">
-                    <div class="card border-danger h-100 shadow">
-                        <div class="card-header bg-danger text-white">
-                            <h5 class="card-title mb-0">@lesson.LessonName</h5>
-                        </div>
-                        <div class="card-body">
-                            <p class="card-text">
-                                <strong>Kredi:</strong> @(lesson.Credit ?? 0)<br />
-                                <strong>Bölüm:</strong> @(lesson.Department?.Name ?? "Bilinmiyor")<br />
-                                <strong>Öğretmen:</strong> @(lesson.Teacher != null ? $"{lesson.Teacher.TeacherName} {lesson.Teacher.TeacherSurname}" : "Atanmamış")
-                            </p>
-                            <form asp-action="AddToSelection" asp-controller="Student" method="post">
-                                <input type="hidden" name="lessonId" value="@lesson.LessonId" />
-                                <button type="submit" class="btn btn-danger w-100" @(disabledLessonIds.Contains(lesson.LessonId) ? "disabled" : "")>Seç</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            }
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered">
+                <thead class="table-danger">
+                    <tr>
+                        <th>Ders Adı</th>
+                        <th>Kredi</th>
+                        <th>Bölüm</th>
+                        <th>Öğretmen</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var lesson in Model)
+                    {
+                        <tr>
+                            <td>@lesson.LessonName</td>
+                            <td>@(lesson.Credit ?? 0)</td>
+                            <td>@(lesson.Department?.Name ?? "Bilinmiyor")</td>
+                            <td>@(lesson.Teacher != null ? $"{lesson.Teacher.TeacherName} {lesson.Teacher.TeacherSurname}" : "Atanmamış")</td>
+                            <td>
+                                <form asp-action="AddToSelection" asp-controller="Student" method="post">
+                                    <input type="hidden" name="lessonId" value="@lesson.LessonId" />
+                                    <button type="submit" class="btn btn-danger btn-sm" @(disabledLessonIds.Contains(lesson.LessonId) ? "disabled" : "")>
+                                        @(disabledLessonIds.Contains(lesson.LessonId) ? "Seçildi" : "Seç")
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     }
     else

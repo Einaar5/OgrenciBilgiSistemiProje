@@ -41,15 +41,7 @@
         </div>
     </form>
 
-    @if (ViewBag.SelectedLessonId != null && ViewBag.SelectedLessonId != 0)
-    {
-        <form asp-action="RegisterStudentsToLesson" method="post" class="flex-shrink-0">
-            <input type="hidden" name="lessonId" value="@ViewBag.SelectedLessonId" />
-            <button type="submit" class="btn btn-danger">
-                <i class="fas fa-user-plus me-2"></i>Öğrencileri Kaydet
-            </button>
-        </form>
-    }
+   
 </div>
 
 <!-- Tarih seçimi ve devamsızlık girişi -->
