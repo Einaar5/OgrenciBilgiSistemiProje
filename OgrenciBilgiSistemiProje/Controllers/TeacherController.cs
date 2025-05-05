@@ -697,93 +697,93 @@ namespace OgrenciBilgiSistemiProje.Controllers
         }
 
 
-        // Derse bağlı olan öğrencileri Öğretmen Buton ile kaydetme işlemi yapar.
-        public IActionResult RegisterStudentsToLesson(int lessonId)
-        {
-            var teacherUsername = HttpContext.User.Identity?.Name;
-            if (string.IsNullOrEmpty(teacherUsername))
-            {
-                TempData["ErrorMessage"] = "Öğretmen oturumu bulunamadı.";
-                return RedirectToAction("StuTeaLog", "Account");
-            }
+        //// Derse bağlı olan öğrencileri Öğretmen Buton ile kaydetme işlemi yapar.
+        //public IActionResult RegisterStudentsToLesson(int lessonId)
+        //{
+        //    var teacherUsername = HttpContext.User.Identity?.Name;
+        //    if (string.IsNullOrEmpty(teacherUsername))
+        //    {
+        //        TempData["ErrorMessage"] = "Öğretmen oturumu bulunamadı.";
+        //        return RedirectToAction("StuTeaLog", "Account");
+        //    }
 
-            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername);
-            if (teacher == null)
-            {
-                return RedirectToAction("StuTeaLog", "Account");
-            }
+        //    var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername);
+        //    if (teacher == null)
+        //    {
+        //        return RedirectToAction("StuTeaLog", "Account");
+        //    }
 
-            // Geçersiz lessonId kontrolü
-            if (lessonId <= 0)
-            {
-                // lessonId sıfır veya negatifse hata göster
-                TempData["ErrorMessage"] = "Geçersiz ders ID'si.";
-                return RedirectToAction("Attendance");
-            }
+        //    // Geçersiz lessonId kontrolü
+        //    if (lessonId <= 0)
+        //    {
+        //        // lessonId sıfır veya negatifse hata göster
+        //        TempData["ErrorMessage"] = "Geçersiz ders ID'si.";
+        //        return RedirectToAction("Attendance");
+        //    }
 
-            // Dersi kontrol etmek için
-            var lessons = context.Lessons
-                .Include(l => l.Department)
-                .FirstOrDefault(l => l.LessonId == lessonId && l.TeacherId == teacher.Id);
+        //    // Dersi kontrol etmek için
+        //    var lessons = context.Lessons
+        //        .Include(l => l.Department)
+        //        .FirstOrDefault(l => l.LessonId == lessonId && l.TeacherId == teacher.Id);
 
-            if (lessons == null)
-            {
-                // Ders bulunamazsa veya öğretmene ait değilse hata mesajı göster
-                TempData["ErrorMessage"] = $"Ders bulunamadı veya size ait değil. LessonId: {lessonId}, TeacherId: {teacher.Id}";
-                return RedirectToAction("Attendance");
-            }
+        //    if (lessons == null)
+        //    {
+        //        // Ders bulunamazsa veya öğretmene ait değilse hata mesajı göster
+        //        TempData["ErrorMessage"] = $"Ders bulunamadı veya size ait değil. LessonId: {lessonId}, TeacherId: {teacher.Id}";
+        //        return RedirectToAction("Attendance");
+        //    }
 
-            // Bölüm kontrolü
-            if (lessons.Department == null)
-            {
-                // Dersin bağlı olduğu bölüm yoksa hata göster
-                TempData["ErrorMessage"] = "Dersin bağlı olduğu bölüm bulunamadı.";
-                return RedirectToAction("Attendance");
-            }
+        //    // Bölüm kontrolü
+        //    if (lessons.Department == null)
+        //    {
+        //        // Dersin bağlı olduğu bölüm yoksa hata göster
+        //        TempData["ErrorMessage"] = "Dersin bağlı olduğu bölüm bulunamadı.";
+        //        return RedirectToAction("Attendance");
+        //    }
 
-            // Öğrencilerin departmentId'si ile lessons.DepartmentId'si eşleşen öğrencileri alırız.
-            var students = context.Students
-                .Where(s => s.DepartmentId == lessons.DepartmentId)
-                .ToList();
+        //    // Öğrencilerin departmentId'si ile lessons.DepartmentId'si eşleşen öğrencileri alırız.
+        //    var students = context.Students
+        //        .Where(s => s.DepartmentId == lessons.DepartmentId)
+        //        .ToList();
 
-            if (!students.Any())
-            {
-                // Bölümde öğrenci yoksa uyarı göster
-                TempData["WarningMessage"] = "Bu bölümde kayıtlı öğrenci bulunamadı.";
-                return RedirectToAction("Attendance", new { lessonId });
-            }
+        //    if (!students.Any())
+        //    {
+        //        // Bölümde öğrenci yoksa uyarı göster
+        //        TempData["WarningMessage"] = "Bu bölümde kayıtlı öğrenci bulunamadı.";
+        //        return RedirectToAction("Attendance", new { lessonId });
+        //    }
 
-            // Öğrencileri StudentLesson içersine yeni ekleme yapar.
-            int addedCount = 0;
-            foreach (var student in students)
-            {
-                // Öğrencinin derse kayıtlı olup olmadığını kontrol eder.
-                if (!context.StudentLessons.Any(sl => sl.StudentId == student.StudentId && sl.LessonId == lessonId))
-                {
-                    // StudentLesson içersine öğrenci kayıtlı değilse ekler
-                    context.StudentLessons.Add(new StudentLesson
-                    {
-                        StudentId = student.StudentId,
-                        LessonId = lessonId
-                    });
-                    addedCount++;
-                }
-            }
+        //    // Öğrencileri StudentLesson içersine yeni ekleme yapar.
+        //    int addedCount = 0;
+        //    foreach (var student in students)
+        //    {
+        //        // Öğrencinin derse kayıtlı olup olmadığını kontrol eder.
+        //        if (!context.StudentLessons.Any(sl => sl.StudentId == student.StudentId && sl.LessonId == lessonId))
+        //        {
+        //            // StudentLesson içersine öğrenci kayıtlı değilse ekler
+        //            context.StudentLessons.Add(new StudentLesson
+        //            {
+        //                StudentId = student.StudentId,
+        //                LessonId = lessonId
+        //            });
+        //            addedCount++;
+        //        }
+        //    }
 
-            try
-            {
-                context.SaveChanges();
-                TempData["SuccessMessages"] = "Öğrenciler derse başarıyla kaydedildi.";
-            }
+        //    try
+        //    {
+        //        context.SaveChanges();
+        //        TempData["SuccessMessages"] = "Öğrenciler derse başarıyla kaydedildi.";
+        //    }
 
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = "Kayıt sırasında bir hata oluştu: " + ex.Message;
-            }
+        //    catch (Exception ex)
+        //    {
+        //        TempData["ErrorMessage"] = "Kayıt sırasında bir hata oluştu: " + ex.Message;
+        //    }
 
-            // Devamsızlık sayfasına geri dön
-            return RedirectToAction("Attendance", new { lessonId = lessonId });
-        }
+        //    // Devamsızlık sayfasına geri dön
+        //    return RedirectToAction("Attendance", new { lessonId = lessonId });
+        //}
 
 
         // İşlev: Öğretmenin seçtiği ders için öğrencilerin devamsızlık raporlarını gösterir.

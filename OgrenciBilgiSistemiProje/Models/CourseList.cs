@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OgrenciBilgiSistemiProje.Models
 {
@@ -15,7 +16,10 @@ namespace OgrenciBilgiSistemiProje.Models
 
         public string CourseClass { get; set; } = "";
 
-       
+        public int? StudentLessonId { get; set; }
+        [ForeignKey("StudentLessonId")]
+        public virtual StudentLesson? StudentLesson { get; set; }
+
         public int DepartmentId { get; set; }
         public Department? Department { get; set; }
 

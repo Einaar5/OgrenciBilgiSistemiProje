@@ -13,6 +13,7 @@ namespace OgrenciBilgiSistemiProje.Models
         [ForeignKey("StudentId")]
         public virtual Student Student { get; set; }
 
+
         [Required]
         public int LessonId { get; set; }
         [ForeignKey("LessonId")]

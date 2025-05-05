@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OgrenciBilgiSistemiProje.Services;
 
@@ -11,9 +12,11 @@ using OgrenciBilgiSistemiProje.Services;
 namespace OgrenciBilgiSistemiProje.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250505114959_falanfilan")]
+    partial class falanfilan
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -107,16 +110,11 @@ namespace OgrenciBilgiSistemiProje.Migrations
                     b.Property<int>("LessonId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("StudentLessonId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("DepartmentId");
 
                     b.HasIndex("LessonId");
-
-                    b.HasIndex("StudentLessonId");
 
                     b.ToTable("CourseList");
                 });
@@ -464,15 +462,9 @@ namespace OgrenciBilgiSistemiProje.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("OgrenciBilgiSistemiProje.Models.StudentLesson", "StudentLesson")
-                        .WithMany()
-                        .HasForeignKey("StudentLessonId");
-
                     b.Navigation("Department");
 
                     b.Navigation("Lesson");
-
-                    b.Navigation("StudentLesson");
                 });
 
             modelBuilder.Entity("OgrenciBilgiSistemiProje.Models.Grade", b =>

@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using OgrenciBilgiSistemiProje.Models;
 using OgrenciBilgiSistemiProje.Services;
 
+using System.Text.Json;
+
 namespace OgrenciBilgiSistemiProje.Controllers
 {
 
@@ -162,7 +164,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             {
                 return RedirectToAction("Login", "Account");
             }
-
+           
             // Öğrenciyi ve bölümünü bul
             var student = context.Students
                 .Include(s => s.Department) // Bölüm bilgisini de yüklüyoruz
@@ -178,14 +180,21 @@ namespace OgrenciBilgiSistemiProje.Controllers
             ViewData["ImageFileName"] = student.ImageFileName;
 
             // Öğrencinin bölümüne ait dersleri getir
-            var courses = context.CourseList
-                .Include(c => c.Lesson)
-                .Include (c => c.Lesson.Teacher)
-                .Include(c => c.Department)
-                .Where(c => c.DepartmentId == student.DepartmentId) // Sadece öğrencinin bölümündeki dersler
-                .OrderBy(c => c.CourseDay)
-                .ThenBy(c => c.CourseTime)
+            // Öğrencinin kayıtlı olduğu dersleri al
+            var studentLessons = context.StudentLessons
+                .Where(sl => sl.StudentId == student.StudentId)
+                .Select(sl => sl.LessonId)
                 .ToList();
+
+            // Bu derslere ait programı getir
+            var courses = context.CourseList
+             .Include(c => c.Lesson)
+             .ThenInclude(l => l.Teacher) // Öğretmen bilgisini de yüklüyoruz
+             .Include(c => c.Department) // Bölüm bilgisini yüklüyoruz
+             .Where(c => studentLessons.Contains(c.LessonId))
+             .OrderBy(c => c.CourseDay)
+             .ThenBy(c => c.CourseTime)
+             .ToList();
 
             return View(courses);
         }
@@ -486,6 +495,206 @@ namespace OgrenciBilgiSistemiProje.Controllers
             ViewData["ImageFileName"] = student.ImageFileName;
             return View(model);
         }
+        #endregion
+
+        #region derskayit
+
+        // GET: Dersleri listele ve seçilen dersleri göster
+        public IActionResult CourseSelect()
+        {
+            var studentEmail = User.Identity?.Name;
+            if (string.IsNullOrEmpty(studentEmail))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var lessons = context.Lessons
+                .Include(l => l.Department)
+                .Include(l => l.Teacher)
+                .ToList();
+
+            // Session'dan seçilen dersleri al
+            var selectedLessonIdsJson = HttpContext.Session.GetString("SelectedLessonIds");
+            var selectedLessonIds = string.IsNullOrEmpty(selectedLessonIdsJson)
+                ? new List<int>()
+                : JsonSerializer.Deserialize<List<int>>(selectedLessonIdsJson);
+
+            // Grades tablosundan öğrencinin seçtiği dersleri al
+            var student = context.Students.FirstOrDefault(s => s.StudentEmail == studentEmail);
+            var gradedLessonIds = student != null
+                ? context.Grades.Where(g => g.StudentId == student.StudentId).Select(g => g.LessonId).ToList()
+                : new List<int>();
+
+            // Butonları disabled yapmak için tüm disabled lessonIds
+            var disabledLessonIds = selectedLessonIds.Concat(gradedLessonIds).Distinct().ToList();
+            ViewBag.DisabledLessonIds = disabledLessonIds;
+
+            // Seçilen derslerin detaylarını al
+            var selectedLessons = lessons
+                .Where(l => selectedLessonIds.Contains(l.LessonId))
+                .ToList();
+            ViewBag.SelectedLessons = selectedLessons;
+
+            // Seçilen derslerin kredi toplamını hesapla
+            var totalCredits = selectedLessons.Sum(l => l.Credit ?? 0);
+            ViewBag.TotalCredits = totalCredits;
+
+            return View(lessons);
+        }
+
+        // POST: Dersi geçici listeye ekle
+        [HttpPost]
+        [Route("Student/CourseSelect/Add")]
+        public IActionResult AddToSelection(int lessonId)
+        {
+            var studentEmail = User.Identity?.Name;
+            if (string.IsNullOrEmpty(studentEmail))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var student = context.Students.FirstOrDefault(s => s.StudentEmail == studentEmail);
+            if (student == null)
+            {
+                TempData["Error"] = true;
+                TempData["Message"] = "Öğrenci bulunamadı.";
+                return RedirectToAction("CourseSelect");
+            }
+
+            var lesson = context.Lessons.FirstOrDefault(l => l.LessonId == lessonId);
+            if (lesson == null)
+            {
+                TempData["Error"] = true;
+                TempData["Message"] = "Ders bulunamadı.";
+                return RedirectToAction("CourseSelect");
+            }
+
+            var isSelectedCourse = context.Grades
+                .FirstOrDefault(g => g.StudentId == student.StudentId && g.LessonId == lessonId);
+            if (isSelectedCourse != null)
+            {
+                TempData["Error"] = true;
+                TempData["Message"] = $"{lesson.LessonName} dersi zaten seçilmiş.";
+                return RedirectToAction("CourseSelect");
+            }
+
+            var selectedLessonIdsJson = HttpContext.Session.GetString("SelectedLessonIds");
+            var selectedLessonIds = string.IsNullOrEmpty(selectedLessonIdsJson)
+                ? new List<int>()
+                : JsonSerializer.Deserialize<List<int>>(selectedLessonIdsJson);
+
+            if (!selectedLessonIds.Contains(lessonId))
+            {
+                selectedLessonIds.Add(lessonId);
+                HttpContext.Session.SetString("SelectedLessonIds", JsonSerializer.Serialize(selectedLessonIds));
+                TempData["Message"] = $"{lesson.LessonName} dersi geçici listeye eklendi.";
+            }
+            else
+            {
+                TempData["Error"] = true;
+                TempData["Message"] = $"{lesson.LessonName} dersi zaten seçildi.";
+            }
+
+            return RedirectToAction("CourseSelect");
+        }
+
+        // POST: Dersleri Session'dan sil
+        [HttpPost]
+        [Route("Student/CourseSelect/Remove")]
+        public IActionResult RemoveFromSelection(int lessonId)
+        {
+            var selectedLessonIdsJson = HttpContext.Session.GetString("SelectedLessonIds");
+            var selectedLessonIds = string.IsNullOrEmpty(selectedLessonIdsJson)
+                ? new List<int>()
+                : JsonSerializer.Deserialize<List<int>>(selectedLessonIdsJson);
+
+            if (selectedLessonIds.Contains(lessonId))
+            {
+                selectedLessonIds.Remove(lessonId);
+                HttpContext.Session.SetString("SelectedLessonIds", JsonSerializer.Serialize(selectedLessonIds));
+                TempData["Message"] = "Ders listeden kaldırıldı.";
+            }
+            else
+            {
+                TempData["Error"] = true;
+                TempData["Message"] = "Ders listeden bulunamadı.";
+            }
+
+            return RedirectToAction("CourseSelect");
+        }
+
+        // POST: Geçici listedeki dersleri Grade tablosuna kaydet
+        [HttpPost]
+        [Route("Student/CourseSelect/SaveAll")]
+        public async Task<IActionResult> SaveAllSelected()
+        {
+            var studentEmail = User.Identity?.Name;
+            if (string.IsNullOrEmpty(studentEmail))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var student = await context.Students
+                .FirstOrDefaultAsync(s => s.StudentEmail == studentEmail);
+            if (student == null)
+            {
+                TempData["Error"] = true;
+                TempData["Message"] = "Öğrenci bulunamadı.";
+                return RedirectToAction("CourseSelect");
+            }
+
+            var selectedLessonIdsJson = HttpContext.Session.GetString("SelectedLessonIds");
+            var selectedLessonIds = string.IsNullOrEmpty(selectedLessonIdsJson)
+                ? new List<int>()
+                : JsonSerializer.Deserialize<List<int>>(selectedLessonIdsJson);
+
+            if (!selectedLessonIds.Any())
+            {
+                TempData["Error"] = true;
+                TempData["Message"] = "Kaydedilecek ders yok.";
+                return RedirectToAction("CourseSelect");
+            }
+
+            foreach (var lessonId in selectedLessonIds)
+            {
+                var lesson = context.Lessons.FirstOrDefault(l => l.LessonId == lessonId);
+                if (lesson == null) continue;
+
+                var isSelectedCourse = context.Grades
+                    .FirstOrDefault(g => g.StudentId == student.StudentId && g.LessonId == lessonId);
+                if (isSelectedCourse == null)
+                {
+                    context.StudentLessons.Add(new StudentLesson
+                    {
+                        StudentId = student.StudentId,
+                        LessonId = lessonId
+                    });
+                    context.Grades.Add(new Grade
+                    {
+                        StudentId = student.StudentId,
+                        LessonId = lessonId,
+                        Midterm = 0,
+                        Final = 0,
+                        Average = 0
+                    });
+                }
+            }
+
+            try
+            {
+                await context.SaveChangesAsync();
+                TempData["Message"] = $"{selectedLessonIds.Count} ders başarıyla kaydedildi.";
+                HttpContext.Session.Remove("SelectedLessonIds");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = true;
+                TempData["Message"] = $"Hata oluştu: {ex.Message}";
+            }
+
+            return RedirectToAction("CourseSelect");
+        }
+
         #endregion
     }
 }

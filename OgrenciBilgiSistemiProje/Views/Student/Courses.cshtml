@@ -4,9 +4,6 @@
 
 @{
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
-}
-
-@{
     // Gün isimleri
     var days = new string[] { "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma" };
 }
@@ -29,9 +26,18 @@
             {
                 <tr>
                     <td>@course.CourseTime</td>
-                    <td>@course.Lesson?.LessonName</td>
-                    <td>@course.Lesson?.Teacher?.TeacherName  @course.Lesson.Teacher.TeacherSurname</td>
-                    <td>@course.Department?.Name</td>
+                    <td>@(course.Lesson?.LessonName ?? "Ders bilgisi yok")</td>
+                    <td>
+                        @if (course.Lesson?.Teacher != null)
+                        {
+                            @($"{course.Lesson.Teacher.TeacherName} {course.Lesson.Teacher.TeacherSurname}")
+                        }
+                        else
+                        {
+                            <text>Öğretmen atanmamış</text>
+                        }
+                    </td>
+                    <td>@(course.Department?.Name ?? "Bölüm bilgisi yok")</td>
                     <td>@course.CourseClass</td>
                 </tr>
             }

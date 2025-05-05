@@ -157,20 +157,20 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
 
                     // 2. Tüm dersler için grade kaydı oluştur
-                    foreach (var lesson in department.Lessons)
-                    {
-                        Console.WriteLine($"Ders ID: {lesson.LessonId} için grade oluşturuluyor...");
+                    //foreach (var lesson in department.Lessons)
+                    //{
+                    //    Console.WriteLine($"Ders ID: {lesson.LessonId} için grade oluşturuluyor...");
 
-                        var grade = new Grade
-                        {
-                            StudentId = student.StudentId,
-                            LessonId = lesson.LessonId,
-                            Midterm = 0,
-                            Final = 0,
-                            Average = 0
-                        };
-                        await context.Grades.AddAsync(grade);
-                    }
+                    //    var grade = new Grade
+                    //    {
+                    //        StudentId = student.StudentId,
+                    //        LessonId = lesson.LessonId,
+                    //        Midterm = 0,
+                    //        Final = 0,
+                    //        Average = 0
+                    //    };
+                    //    await context.Grades.AddAsync(grade);
+                    //}
 
 
 
