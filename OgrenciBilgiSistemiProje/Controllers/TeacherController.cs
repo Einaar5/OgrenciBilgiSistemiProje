@@ -529,7 +529,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return RedirectToAction("StuTeaLog", "Account");
             }
 
-            // Lessons tablosundan öğretmeni id'leri doğrularız ve Combobox'a Derslerin Adlarını yazarız.
+            // Lessons tablosundan öğretmenin derslerini al
             var lessons = context.Lessons
                 .Where(l => l.TeacherId == teacher.Id)
                 .Select(l => new SelectListItem { Value = l.LessonId.ToString(), Text = l.LessonName })
@@ -539,7 +539,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             if (!lessons.Any())
             {
                 TempData["WarningMessage"] = "Bu öğretmene ait ders bulunamadı.";
-                return View(new List<Attendance>());    // Burada new List<Attendance>(), boş bir Attendance listesi oluşturuyor. Yani, view’a boş bir devamsızlık listesi gönderiliyor.
+                return View(new List<Attendance>());
             }
 
             if (lessonId == 0)
@@ -548,15 +548,49 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return View(new List<Attendance>());
             }
 
-            var selectedDate = attendanceDate?.Date ?? DateTime.Today;  // Öğretmenin seçiceği tarih alır. Yoksa bugünün tarihini alır.
+            // Haftaları hesapla (1’den 14’e kadar)
+            var startDate = new DateTime(2024, 10, 1); // Derslerin başlangıç tarihi (örneğin 1 Ekim 2024)
+            var weeks = new List<SelectListItem>();
+            for (int week = 1; week <= 14; week++)
+            {
+                var weekDate = startDate.AddDays((week - 1) * 7);
+                weeks.Add(new SelectListItem
+                {
+                    Value = weekDate.ToString("yyyy-MM-dd"),
+                    Text = $"{week}. Hafta "
+                });
+            }
+            ViewBag.Weeks = weeks;
 
-            // StudentLessons tablosundan lessonId leri doğrularız sonra Students tablosunu ekleriz ve listeleriz.
+            // Session’dan seçili tarihi al veya güncelle
+            string sessionDate = HttpContext.Session.GetString("SelectedAttendanceDate");
+            DateTime selectedDate;
+            if (attendanceDate.HasValue)
+            {
+                selectedDate = attendanceDate.Value.Date;
+                HttpContext.Session.SetString("SelectedAttendanceDate", selectedDate.ToString("yyyy-MM-dd"));
+                TempData["DebugMessage"] = $"Yeni attendanceDate alındı: {selectedDate:yyyy-MM-dd}";
+            }
+            else if (!string.IsNullOrEmpty(sessionDate))
+            {
+                selectedDate = DateTime.Parse(sessionDate);
+                TempData["DebugMessage"] = $"Session’dan alındı: {selectedDate:yyyy-MM-dd}";
+            }
+            else
+            {
+                selectedDate = weeks.Any() ? DateTime.Parse(weeks.First().Value) : DateTime.Today;
+                HttpContext.Session.SetString("SelectedAttendanceDate", selectedDate.ToString("yyyy-MM-dd"));
+                TempData["DebugMessage"] = $"Varsayılan ayarlandı: {selectedDate:yyyy-MM-dd}";
+            }
+            ViewBag.SelectedDate = selectedDate;
+
+            // StudentLessons tablosundan dersin öğrencilerini al
             var studentLessons = context.StudentLessons
                 .Where(sl => sl.LessonId == lessonId)
-                .Include(sl => sl.Student)  // Öğrencileri dahil et
+                .Include(sl => sl.Student)
                 .ToList();
 
-            TempData["DebugMessage"] = $"Seçilen ders (LessonId: {lessonId}) için {studentLessons.Count} öğrenci bulundu.";
+            TempData["DebugMessage"] += $", Seçilen ders (LessonId: {lessonId}) için {studentLessons.Count} öğrenci bulundu.";
 
             if (!studentLessons.Any())
             {
@@ -565,7 +599,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return View(new List<Attendance>());
             }
 
-            // Yeni devamsızlık girişi oluşturur. var studentLessons'da bulunan her öğrenci için yeni bir Attendance nesnesi oluşturur.
+            // Devamsızlık girişi oluştur
             var attendances = studentLessons
                 .Select(sl => new Attendance
                 {
@@ -590,12 +624,11 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 attendances = existingAttendances;
             }
 
-            // Devamsızlık raporu için veri
+            // Devamsızlık raporu
             var absenceReport = context.StudentLessons
                 .Where(sl => sl.LessonId == lessonId)
                 .Include(sl => sl.Student)
                 .GroupJoin(
-                    // Her öğrenciyi (StudentLessons.StudentId) ilgili devamsızlık kayıtlarıyla (Attendance.StudentId) eşleştirmek ve bir grup oluşturmak.
                     context.Attendance.Where(a => a.LessonId == lessonId),
                     sl => sl.StudentId,
                     a => a.StudentId,
@@ -607,14 +640,11 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 )
                 .ToList();
 
-            ViewBag.AbsenceReport = absenceReport;  // Devamsızlık raporunu view'a gönderiyoruz.
-            ViewBag.SelectedLessonId = lessonId;    // Seçilen dersi view'a gönderiyoruz.
-            ViewBag.SelectedDate = selectedDate;     // Seçilen tarihi view'a gönderiyoruz.
-            ViewData["ImageFileName"] = teacher.ImageFileName;  // Öğretmenin resim dosya adını view'a gönderiyoruz.
-            return View(attendances);   // Devamsızlık bilgilerini view'a gönderiyoruz.
+            ViewBag.AbsenceReport = absenceReport;
+            ViewBag.SelectedLessonId = lessonId;
+            ViewData["ImageFileName"] = teacher.ImageFileName;
+            return View(attendances);
         }
-
-
 
         // İşlev: Öğretmenin girdiği devamsızlık bilgilerini kaydeder veya günceller.
         [HttpPost]
@@ -638,12 +668,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             var lessonId = attendances.First().LessonId;    // lessonId'yi attnedances tablonun ilk LessonId'yi alıyoruz.
             var attendanceDate = attendances.First().AttendanceDate;    // attnedanceDate'e attnedances tablonun ilk AttendanceDate'yi alıyoruz.
 
-            // Eğer seçilen Tarih attendanceDate bugünden büyükse hata mesajı gösteriyoruz.
-            if (attendanceDate > DateTime.Today)
-            {
-                TempData["ErrorMessage"] = "Gelecek tarih için devamsızlık girilemez.";
-                return RedirectToAction("Attendance", new { lessonId });
-            }
+           
 
             int addedCount = 0; // Yeni kayıt sayısını tutar.
             int updatedCount = 0;   // Güncellenen kayıt sayısını tutar.
@@ -772,6 +797,12 @@ namespace OgrenciBilgiSistemiProje.Controllers
             ViewData["ImageFileName"] = teacher.ImageFileName;
             return View(model);
         }
+
+        #endregion
+
+        #region  
+
+
 
         #endregion
     }

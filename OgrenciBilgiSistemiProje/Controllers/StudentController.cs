@@ -526,7 +526,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 : new List<int>();
 
             // Butonları disabled yapmak için tüm disabled lessonIds
-            var disabledLessonIds = selectedLessonIds.Concat(gradedLessonIds).Distinct().ToList();
+            var disabledLessonIds = selectedLessonIds.Concat(gradedLessonIds).Distinct().ToList(); 
             ViewBag.DisabledLessonIds = disabledLessonIds;
 
             // Seçilen derslerin detaylarını al
@@ -535,6 +535,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 .ToList();
             ViewBag.SelectedLessons = selectedLessons;
 
+           
             // Seçilen derslerin kredi toplamını hesapla
             var totalCredits = selectedLessons.Sum(l => l.Credit ?? 0);
             ViewBag.TotalCredits = totalCredits;
