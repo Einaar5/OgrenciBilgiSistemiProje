@@ -800,9 +800,44 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         #endregion
 
-        #region  
+        #region Verdiğim Dersler
 
+        public IActionResult myCourses()
+        {
+            var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adına göre id alıyoruz
+            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername);
+            ViewBag.ImageLayout = teacher.ImageFileName;
+            ViewData["ImageFileName"] = teacher.ImageFileName;
+            var teacherId = context.Teachers
+                .Where(x => x.TeacherMail == teacherUsername)
+                .Select(x => x.Id)
+                .FirstOrDefault();
+            var lessons = context.Lessons
+                .Include(x=>x.Teacher)
+                .Include(x=>x.Department)
+                .Where(x=>x.TeacherId == teacherId).ToList();
+            return View(lessons);
+        }
 
+        public IActionResult detailMyCourses(int id)
+        {
+            var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adına göre id alıyoruz
+            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername);
+            ViewBag.ImageLayout = teacher.ImageFileName;
+            ViewData["ImageFileName"] = teacher.ImageFileName;
+            var courseDetails = context.StudentLessons
+                .Where(x => x.LessonId == id) // Ders ID'sine göre filtreleme yapılmalı
+                .Include(x => x.Student)
+                .Include(x => x.Lesson)
+                .ToList();
+
+            if (courseDetails == null || !courseDetails.Any())
+            {
+                ViewBag.Message = "Bu derse kayıtlı öğrenci bulunamadı";
+            }
+
+            return View(courseDetails);
+        }
 
         #endregion
     }

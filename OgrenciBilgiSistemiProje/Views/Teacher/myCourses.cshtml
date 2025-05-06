@@ -1,0 +1,34 @@
+﻿@model List<Lesson>
+@{
+	Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+}
+
+
+<table class="table">
+	<thead>
+		<tr>
+			<th>Ders No</th>
+			<th>Ders Adı</th>
+			<th>Bölüm</th>
+			<th>Kredi</th>
+			<th>İşlem</th>
+			
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var lesson in Model)
+		{
+			<tr>
+				<td>@lesson.LessonId</td>
+				<td>@lesson.LessonName</td>
+				<td>@lesson.Department.Name</td>
+				<td>@lesson.Credit</td>
+				
+				<td>
+					<a class="btn btn-danger" asp-controller="Teacher" asp-action="detailMyCourses" asp-route-id="@lesson.LessonId">Detaylar</a>
+				</td>
+
+			</tr>
+		}
+	</tbody>
+</table>

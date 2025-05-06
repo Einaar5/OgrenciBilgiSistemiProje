@@ -1,0 +1,40 @@
+﻿@model List<StudentLesson>
+@{
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+    ViewData["Title"] = "Ders Detayları";
+}
+
+<div class="container mt-4">
+    <h2>Ders Kayıtlı Öğrenciler</h2>
+
+    @if (ViewBag.Message != null)
+    {
+        <div class="alert alert-info">@ViewBag.Message</div>
+    }
+
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Öğrenci No</th>
+                <th>Adı</th>
+                <th>Soyadı</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Student?.StudentId</td>
+                    <td>@item.Student?.StudentName</td>
+                    <td>@item.Student?.StudentSurname</td>
+                    <td>@item.Student?.StudentEmail</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <a asp-action="MyCourses" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Geri Dön
+    </a>
+</div>
