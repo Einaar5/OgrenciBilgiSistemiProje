@@ -1,0 +1,64 @@
+﻿
+@model OgrenciBilgiSistemiProje.Models.QuizDto
+
+@{
+	ViewData["Title"] = "Create Quiz";
+	Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+}
+<div class="row">
+	<div class="col-md-8 mx-auto rounded border p-3">
+		<h2>Quiz Ekle</h2>
+		<form asp-action="CreateQuiz" asp-controller="Teacher" method="post" enctype="multipart/form-data">
+			<div class="row mb-3">
+				<label class="col-sm-4 col-form-label">Quiz Adı</label>
+				<div class="col-sm-8">
+					<input class="form-control" asp-for="QuizName" />
+					<span asp-validation-for="QuizName" class="text-danger"></span> <!--Validation Hatası Olursa Burada Gösterilecektir.-->
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<label class="col-sm-4 col-form-label">Quiz Ağırlığı</label>
+				<div class="col-sm-8">
+					<input class="form-control" asp-for="QuizWeight" />
+					<span asp-validation-for="QuizWeight" class="text-danger"></span> <!--Validation Hatası Olursa Burada Gösterilecektir.-->
+				</div>
+			</div>
+
+			
+
+			<div class="row mb-3">
+				<label class="col-sm-4 col-form-label">Ders</label>
+				<div class="col-sm-8">
+					<select class="form-select" asp-for="LessonId">
+						<option value="">Lütfen bir Ders seçin</option>
+						@foreach (var lesson in ViewBag.Lessons)
+						{
+							<option value="@lesson.LessonId">@lesson.LessonName</option>
+						}
+					</select>
+
+
+					@if (ViewBag.QuotaWarning != null)
+					{
+						<div class="alert alert-warning mt-3">
+							@ViewBag.QuotaWarning
+						</div>
+					}
+
+				</div>
+				
+			</div>
+
+			<div class="row">
+				<div class="offset-sm-4 col-sm-4 d-grid">
+					<button type="submit" class="btn btn-danger">Gönder</button>
+				</div>
+				<div class="col-sm-4 d-grid">
+					<a class="btn btn-outline-danger" asp-controller="Teacher" asp-action="Grades" role="button">İptal</a>
+				</div>
+			</div>
+
+		</form>
+	</div>
+</div>

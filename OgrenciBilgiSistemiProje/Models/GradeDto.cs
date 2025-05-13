@@ -8,6 +8,8 @@
 
         public int LessonId { get; set; }
 
+        public int QuizId { get; set; }
+
         public int? Midterm { get; set; }
 
         public int? Final { get; set; }

@@ -16,6 +16,10 @@ namespace OgrenciBilgiSistemiProje.Models
         public int LessonId { get; set; }
         public virtual Lesson Lesson { get; set; }
 
+
+        public int QuizId { get; set; }
+        public Quiz? Quiz { get; set; } // İlişkilendirilmiş Quiz nesnesi
+
         public int? Midterm { get; set; } // Vize notu
         public int? Final { get; set; }   // Final notu
         public float? Average { get; set; } // Ortalama (isteğe bağlı, hesaplanabilir)

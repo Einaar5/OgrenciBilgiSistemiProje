@@ -1,0 +1,37 @@
+﻿@model List<Quiz>
+@{
+	Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+}
+
+<div>
+    <a class="btn btn-danger" asp-controller="Teacher" asp-action="CreateQuiz" >Sınav Oluştur</a>
+</div>
+
+<div class="container mt-4">
+   
+        <table class="table">
+           <tr>
+                <th>Quiz No</th>
+                <th>Quiz Adı</th>
+                <th>Quiz Ağırlığı</th>
+                <th>Quiz Dersi </th>
+                <th>İşlemler</th>
+           </tr>
+        @foreach (var quiz in Model)
+        {
+           <tr>
+                <td>@quiz.Id</td>
+                <td>@quiz.QuizName</td>
+                <td>@quiz.QuizWeight</td>
+                <td>@quiz.Lesson.LessonName</td>
+                <td>
+                    <a class="btn btn-danger" asp-controller="Teacher" asp-action="EditQuiz" asp-route-id="@quiz.Id">Sınav İşlemleri</a>
+                    <a class="btn btn-outline-danger" asp-controller="Teacher" asp-action="DeleteQuiz" onclick="return confirm('(@quiz.QuizName) Adlı Sınavı Silmek İstediğinize Emin Misiniz ?');" asp-route-id="@quiz.Id">Sınav Sil</a>
+                </td>
+           </tr>
+        }
+        </table>
+       
+    
+</div>
+

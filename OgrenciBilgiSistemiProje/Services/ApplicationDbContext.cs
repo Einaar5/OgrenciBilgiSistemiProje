@@ -16,6 +16,7 @@ namespace OgrenciBilgiSistemiProje.Services
         public DbSet<AdminAcc> Admins { get; set; }
         public DbSet<Lesson> Lessons { get; set; }
         public DbSet<Grade> Grades { get; set; }
+        public DbSet<Quiz> Quizzes { get; set; }
         public DbSet<CourseList> CourseList { get; set; }
 
         public DbSet<Notification> Notifications { get; set; }

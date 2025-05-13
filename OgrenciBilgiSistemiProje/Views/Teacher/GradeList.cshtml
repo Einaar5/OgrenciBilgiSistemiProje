@@ -1,0 +1,40 @@
+﻿@model GradeListViewModel
+@{
+    Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+}
+
+<div class="container mt-4">
+    <form asp-action="SaveScores" method="post">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Öğrenci No</th>
+                    <th>Adı</th>
+                    <th>Soyadı</th>
+                    @foreach (var quiz in Model.Quizzes)
+                    {
+                        <th>@quiz.QuizName</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var student in Model.Students)
+                {
+                    <tr>
+                        <td>@student.StudentId</td>
+                        <td>@student.StudentName</td>
+                        <td>@student.StudentSurname</td>
+                        @foreach (var quiz in Model.Quizzes)
+                        {
+                            var grade = Model.Grades.FirstOrDefault(g => g.StudentId == student.StudentId && g.QuizId == quiz.Id);
+                            <td>
+                                <input type="number" name="Scores[@student.StudentId][@quiz.Id]" value="@(grade !=  null ? grade.Quiz.Score : 0)" min="0" max="100" />
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-success">Kaydet</button>
+    </form>
+</div>

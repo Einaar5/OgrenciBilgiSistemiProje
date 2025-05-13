@@ -15,6 +15,8 @@ namespace OgrenciBilgiSistemiProje.Controllers
     public class TeacherController : Controller
     {
 
+        
+
         private readonly ApplicationDbContext context; // Veritabanı bağlantısı
         private readonly IWebHostEnvironment environment;
 
@@ -108,66 +110,139 @@ namespace OgrenciBilgiSistemiProje.Controllers
         #region Notlandırma
 
 
+       
+        public IActionResult Grades()
+        {
+            var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
+            var teacher = context.Teachers.Include(l => l.Lessons).FirstOrDefault(x => x.TeacherMail == teacherUsername); // Kullanıcı adına göre öğrenciyi buluyoruz.
+            ViewData["ImageFileName"] = teacher.ImageFileName;
+
+            var teacherLessonList = context.Lessons
+                .Include(l => l.Department)
+                .Include(l => l.Teacher)
+                .ToList();
 
 
+            
+            return View(teacherLessonList);
+        }
 
-        [Authorize(Roles = "Teacher")]
-        public IActionResult Grades(int? lessonId)
+        public IActionResult QuizList(int id)
+        {
+            var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
+            var teacher = context.Teachers.Include(l => l.Lessons).FirstOrDefault(x => x.TeacherMail == teacherUsername); // Kullanıcı adına göre öğrenciyi buluyoruz.
+            ViewData["ImageFileName"] = teacher.ImageFileName;
+            var quizs = context.Quizzes
+               .Include(q => q.Lesson)
+               .Where(q => q.lessonId == id)
+               .ToList();
+            if (quizs == null)
+            {
+                return RedirectToAction("Grades");
+            }
+
+            
+
+            return View(quizs);
+        }
+
+        public IActionResult CreateQuiz()
+        {
+            var departments = context.Departments.OrderByDescending(d => d.Id).ToList(); // Bölümleri bölüm numarasına göre sıralıyoruz ve listeye çeviriyoruz.           
+            ViewData["Departments"] = departments; // Bölümleri view'a gönderiyoruz.
+            ViewBag.Lessons = context.Lessons.ToList(); // Ders listesini alıyoruz.
+            return View(new QuizDto());
+        }
+
+        [HttpPost]
+        public IActionResult CreateQuiz(QuizDto quizDto)
+        {
+            var teacherUsername = HttpContext.User.Identity?.Name;
+            var teacher = context.Teachers.Include(l => l.Lessons)
+                                          .FirstOrDefault(x => x.TeacherMail == teacherUsername);
+            var lesson = context.Lessons.FirstOrDefault(l => l.LessonId == quizDto.LessonId);
+
+            if (lesson == null || teacher == null)
+            {
+                // Form hatalı dolduruldu, tekrar göstereceksen ViewBag'leri doldurmayı unutma!
+                ViewBag.Lessons = context.Lessons.ToList();
+                return View(quizDto);
+            }
+
+            Quiz quiz = new Quiz
+            {
+                QuizName = quizDto.QuizName,
+                QuizWeight = quizDto.QuizWeight,
+                lessonId = lesson.LessonId,
+                teacherId = teacher.Id,
+                Lesson = lesson,
+                Teacher = teacher
+            };
+
+            context.Quizzes.Add(quiz);
+            context.SaveChanges();
+
+            return RedirectToAction("Grades"); // yönlendirme yap
+        }
+
+
+        public IActionResult DeleteQuiz(int id)
+        {
+            var quiz = context.Quizzes.Find(id);
+            if (quiz == null)
+            {
+                return NotFound("Quiz bulunamadı.");
+            }
+            context.Quizzes.Remove(quiz);
+            context.SaveChanges();
+            return RedirectToAction("Grades");
+        }
+
+
+        //Öğrenci notlandırma
+
+        public IActionResult GradeList(int id) // id: selected lessonId
         {
             var teacherUsername = HttpContext.User.Identity?.Name;
             var teacher = context.Teachers
-                .Include(t => t.Lessons)
+                .Include(l => l.Lessons)
                 .FirstOrDefault(x => x.TeacherMail == teacherUsername);
-
-            if (teacher == null)
-            {
-                return RedirectToAction("StuTeaLog", "Account");
-            }
-
-            // Öğretmenin dersleri
-            var teacherLessons = teacher.Lessons.ToList();
-            var selectedLessonId = lessonId ?? teacherLessons.FirstOrDefault()?.LessonId;
-
-            // Seçilen derse kayıtlı öğrencileri getir
-            List<Student> students = new();
-            if (selectedLessonId.HasValue)
-            {
-                students = context.Grades
-                    .Include(cl => cl.Student)
-                    .Where(cl => cl.LessonId == selectedLessonId.Value)
-                    .Select(cl => cl.Student)
-                    .Distinct()
-                    .ToList();
-            }
-
-            // Seçili dersin notlarını al
-            List<Grade> grades = new();
-            try
-            {
-                if (selectedLessonId.HasValue)
-                {
-                    grades = context.Grades
-                        .Include(g => g.Student)
-                        .Include(g => g.Lesson)
-                        .Where(g => g.LessonId == selectedLessonId.Value && g.Lesson.TeacherId == teacher.Id)
-                        .ToList();
-                }
-            }
-            catch (Exception)
-            {
-                TempData["ErrorMessage"] = "Notlar yüklenirken bir hata oluştu.";
-            }
-
-            ViewBag.ImageLayout = teacher.ImageFileName;
             ViewData["ImageFileName"] = teacher.ImageFileName;
-            ViewBag.TeacherLessons = teacherLessons;
-            ViewBag.Students = students;
-            ViewBag.SelectedLessonId = selectedLessonId;
 
-            return View(grades);
+            // Only quizzes for the selected lesson
+            var quizzes = context.Quizzes
+                .Where(q => q.lessonId == id)
+                .ToList();
+
+            // Only students enrolled in the selected lesson
+            var studentIds = context.StudentLessons
+                .Where(sl => sl.LessonId == id)
+                .Select(sl => sl.StudentId)
+                .ToList();
+
+            var students = context.Students
+                .Where(s => studentIds.Contains(s.StudentId))
+                .ToList();
+
+            // Only grades for the selected lesson
+            var grades = context.Grades
+                .Where(g => g.LessonId == id)
+                .ToList();
+
+            var model = new GradeListViewModel
+            {
+                Quizzes = quizzes,
+                Students = students,
+                Grades = grades
+            };
+
+            return View(model);
         }
+
+
+
+
         [HttpPost]
-        [Authorize(Roles = "Teacher")]
         public IActionResult Grades(GradeDto gradeDto)
         {
             if (gradeDto == null)
