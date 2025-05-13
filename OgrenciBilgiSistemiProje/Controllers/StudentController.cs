@@ -672,14 +672,16 @@ namespace OgrenciBilgiSistemiProje.Controllers
                         StudentId = student.StudentId,
                         LessonId = lessonId
                     });
-                    context.Grades.Add(new Grade
-                    {
-                        StudentId = student.StudentId,
-                        LessonId = lessonId,
-                        Midterm = 0,
-                        Final = 0,
-                        Average = 0
-                    });
+                    //context.Grades.Add(new Grade
+                    //{
+                    //    StudentId = student.StudentId,
+                    //    LessonId = lessonId,
+                    //    QuizId = , // Varsayılan değer
+                    //    Midterm = 0,
+                    //    Final = 0,
+                    //    Average = 0
+
+                    //});
                 }
             }
 
