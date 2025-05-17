@@ -192,6 +192,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 QuizName = quizDto.QuizName,
                 QuizWeight = quizDto.QuizWeight,
                 teacherId = teacher.Id,
+                LessonId = lesson.LessonId,
                 Lesson = lesson,
                 Teacher = teacher
             };
@@ -275,22 +276,42 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         //Öğrenci notlandırma
 
-        public IActionResult GradeList(int id) // id: selected lessonId
+        public IActionResult GradeList(int id) // id = lessonId
         {
-            var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
-            var teacher = context.Teachers.Include(l => l.Lessons).FirstOrDefault(x => x.TeacherMail == teacherUsername); // Kullanıcı adına göre öğrenciyi buluyoruz.
-            ViewData["ImageFileName"] = teacher.ImageFileName; 
+            var teacherUsername = HttpContext.User.Identity?.Name;
+            var teacher = context.Teachers
+                                 .Include(t => t.Lessons)
+                                 .FirstOrDefault(t => t.TeacherMail == teacherUsername);
 
-            var students = context.Students.ToList();
-            var quizzes = context.Quizzes.ToList();
-            var grades = context.Grades.ToList();
+            if (teacher == null)
+                return RedirectToAction("Login", "Account");
 
+            ViewData["ImageFileName"] = teacher.ImageFileName;
+
+            // 🔴 SADECE bu derse ait quiz'ler
+            var quizzes = context.Quizzes
+                                 .Where(q => q.LessonId == id)
+                                 .ToList();
+
+            // 🔴 SADECE bu derse kayıtlı öğrenciler
+            var students = context.StudentLessons
+                                  .Where(sl => sl.LessonId == id)
+                                  .Select(sl => sl.Student)
+                                  .ToList();
+
+            // 🔴 SADECE bu derse ait notlar (grade)
+            var grades = context.Grades
+                                .Where(g => g.LessonId == id)
+                                .ToList();
+
+            // View'a gönderilecek veriler
             ViewBag.Students = students;
             ViewBag.Quizzes = quizzes;
             ViewBag.Grades = grades;
 
             return View();
         }
+
 
 
         [HttpPost]

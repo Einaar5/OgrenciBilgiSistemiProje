@@ -17,6 +17,8 @@ namespace OgrenciBilgiSistemiProje.Models
         [Required]
         public float QuizWeight { get; set; } = 0;
 
+        [ForeignKey("Lesson")]
+        public int LessonId { get; set; } // ✅ Foreign key açıkça belirtilmeli
         public Lesson Lesson { get; set; } = new Lesson();
 
         public int teacherId { get; set; }

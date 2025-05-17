@@ -1,34 +1,68 @@
-﻿
-@{
+﻿@{
     Layout = "~/Views/Shared/_LayoutStudent.cshtml";
     var lessons = ViewBag.Lessons as List<Lesson>;
     var quizzes = ViewBag.Quizzes as List<Quiz>;
     var grades = ViewBag.Grades as List<Grade>;
 }
 
-<h2>Notlarım</h2>
+<h2 class="mt-4 text-center text-danger">Notlarım</h2>
 
-<table class="table table-bordered table-hover">
-    <thead>
-        <tr>
-            <th>Ders</th>
-            @foreach (var quiz in quizzes.GroupBy(q => q.Lesson.LessonId).SelectMany(g => g))
-            {
-                <th>@quiz.QuizName</th>
+@if (lessons != null && lessons.Any())
+{
+    @foreach (var lesson in lessons)
+    {
+        <div class="mt-5">
+            <h4 class="text-danger">@lesson.LessonName</h4>
+
+            @{
+                var relatedQuizzes = quizzes
+                    .Where(q => q.Lesson.LessonId == lesson.LessonId)
+                    .ToList();
             }
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var lesson in lessons)
-        {
-            <tr>
-                <td>@lesson.LessonName</td>
-                @foreach (var quiz in quizzes.Where(q => q.Lesson.LessonId == lesson.LessonId))
-                {
-                    var grade = grades.FirstOrDefault(g => g.QuizId == quiz.Id);
-                    <td>@(grade?.Score ?? 0)</td>
-                }
-            </tr>
-        }
-    </tbody>
-</table>
+
+            @if (relatedQuizzes.Any())
+            {
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            @foreach (var quiz in relatedQuizzes)
+                            {
+                                <th>@quiz.QuizName</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            @foreach (var quiz in relatedQuizzes)
+                            {
+                                var grade = grades.FirstOrDefault(g => g.QuizId == quiz.Id);
+                                <td>@(grade?.Score ?? 0)</td>
+                            }
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p class="fw-bold text-success">
+                    Ortalama: @{
+                        var avg = relatedQuizzes
+                        .Select(q => grades.FirstOrDefault(g => g.QuizId == q.Id)?.Score ?? 0)
+                        .DefaultIfEmpty()
+                        .Average();
+                    } @avg.ToString("0.00")
+                </p>
+
+
+
+                
+            }
+            else
+            {
+                <div class="alert alert-warning mt-2">Bu ders için henüz sınav bulunmamaktadır.</div>
+            }
+        </div>
+    }
+}
+else
+{
+    <div class="alert alert-danger text-center mt-4">Görüntülenecek ders bulunamadı.</div>
+}
