@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OgrenciBilgiSistemiProje.Services;
 
@@ -11,9 +12,11 @@ using OgrenciBilgiSistemiProje.Services;
 namespace OgrenciBilgiSistemiProje.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250514073844_deneme78")]
+    partial class deneme78
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -171,7 +174,7 @@ namespace OgrenciBilgiSistemiProje.Migrations
 
                     b.HasIndex("QuizId");
 
-                    b.HasIndex("StudentId", "QuizId")
+                    b.HasIndex("StudentId", "LessonId")
                         .IsUnique();
 
                     b.ToTable("Grades");
@@ -518,7 +521,7 @@ namespace OgrenciBilgiSistemiProje.Migrations
                     b.HasOne("OgrenciBilgiSistemiProje.Models.Quiz", "Quiz")
                         .WithMany()
                         .HasForeignKey("QuizId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("OgrenciBilgiSistemiProje.Models.Student", "Student")

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OgrenciBilgiSistemiProje.Services;
 
@@ -11,9 +12,11 @@ using OgrenciBilgiSistemiProje.Services;
 namespace OgrenciBilgiSistemiProje.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250514065621_deneme6")]
+    partial class deneme6
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -159,9 +162,6 @@ namespace OgrenciBilgiSistemiProje.Migrations
                     b.Property<int>("QuizId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
-
                     b.Property<int>("StudentId")
                         .HasColumnType("int");
 
@@ -171,7 +171,7 @@ namespace OgrenciBilgiSistemiProje.Migrations
 
                     b.HasIndex("QuizId");
 
-                    b.HasIndex("StudentId", "QuizId")
+                    b.HasIndex("StudentId", "LessonId")
                         .IsUnique();
 
                     b.ToTable("Grades");
@@ -255,9 +255,6 @@ namespace OgrenciBilgiSistemiProje.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("LessonId")
-                        .HasColumnType("int");
-
                     b.Property<string>("QuizName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -265,12 +262,18 @@ namespace OgrenciBilgiSistemiProje.Migrations
                     b.Property<float>("QuizWeight")
                         .HasColumnType("real");
 
+                    b.Property<int>("Score")
+                        .HasColumnType("int");
+
+                    b.Property<int>("lessonId")
+                        .HasColumnType("int");
+
                     b.Property<int>("teacherId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LessonId");
+                    b.HasIndex("lessonId");
 
                     b.HasIndex("teacherId");
 
@@ -518,7 +521,7 @@ namespace OgrenciBilgiSistemiProje.Migrations
                     b.HasOne("OgrenciBilgiSistemiProje.Models.Quiz", "Quiz")
                         .WithMany()
                         .HasForeignKey("QuizId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("OgrenciBilgiSistemiProje.Models.Student", "Student")
@@ -575,7 +578,7 @@ namespace OgrenciBilgiSistemiProje.Migrations
                 {
                     b.HasOne("OgrenciBilgiSistemiProje.Models.Lesson", "Lesson")
                         .WithMany()
-                        .HasForeignKey("LessonId")
+                        .HasForeignKey("lessonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

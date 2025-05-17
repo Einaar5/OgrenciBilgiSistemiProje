@@ -123,34 +123,35 @@ namespace OgrenciBilgiSistemiProje.Controllers
         #region Öğrenci Not
         public IActionResult Grades()
         {
-           
-            var studentUsername = HttpContext.User.Identity.Name;
-            var student = context.Students.FirstOrDefault(x => x.StudentEmail == studentUsername);
-            if (student == null)
-            {
-                return RedirectToAction("Index", "Student");
-            }
-            if (!ModelState.IsValid)
-            {
-                return View();
-            }
-
-            
-
-            var studentID = student.StudentId; // öğrenci idsini alıyoruz
+            var studentUsername = HttpContext.User.Identity?.Name;
+            var student = context.Students.FirstOrDefault(s => s.StudentEmail == studentUsername);
             ViewData["ImageFileName"] = student.ImageFileName;
-            var grades = context.Grades.Where(s=>s.StudentId == studentID)
-            .Include(l=> l.Lesson).ToList(); // Burada StudentId sine göre grades tablosunu çekip Lessonu dahil ediyoruz böylece Viewde Lesson.LessonName ile adını çağırabiliyoruz
 
-            var gradesColor = context.Grades.Select(a => a.Average).ToList();
-            
-            if(gradesColor.Average() < 50)
-            {
-                ViewBag.GradesColor = "bg-danger";
-            }
-            
+            if (student == null)
+                return RedirectToAction("StuTeaLog", "Account");
 
-                return View(grades);
+            var grades = context.Grades
+                .Include(g => g.Quiz)
+                    .ThenInclude(q => q.Lesson)
+                .Where(g => g.StudentId == student.StudentId)
+                .ToList();
+
+            var lessons = grades
+                .Select(g => g.Lesson)
+                .Distinct()
+                .ToList();
+
+            var allQuizzes = context.Quizzes
+                .Include(q => q.Lesson)
+                .Where(q => lessons.Select(l => l.LessonId).Contains(q.Lesson.LessonId))
+                .ToList();
+
+            ViewBag.Lessons = lessons;
+            ViewBag.Quizzes = allQuizzes;
+            ViewBag.Grades = grades;
+
+           
+            return View();
         }
         #endregion
 
@@ -508,42 +509,47 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
+            var student = context.Students.FirstOrDefault(s => s.StudentEmail == studentEmail);
+            if (student == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Tüm dersleri al (öğretmen ve bölüm bilgisi dahil)
             var lessons = context.Lessons
                 .Include(l => l.Department)
                 .Include(l => l.Teacher)
                 .ToList();
 
-            // Session'dan seçilen dersleri al
+            // Session'dan geçici olarak seçilen dersleri al
             var selectedLessonIdsJson = HttpContext.Session.GetString("SelectedLessonIds");
             var selectedLessonIds = string.IsNullOrEmpty(selectedLessonIdsJson)
                 ? new List<int>()
                 : JsonSerializer.Deserialize<List<int>>(selectedLessonIdsJson);
 
-            // Grades tablosundan öğrencinin seçtiği dersleri al
-            var student = context.Students.FirstOrDefault(s => s.StudentEmail == studentEmail);
-            var gradedLessonIds = student != null
-                ? context.Grades.Where(g => g.StudentId == student.StudentId).Select(g => g.LessonId).ToList()
-                : new List<int>();
-
-            // Butonları disabled yapmak için tüm disabled lessonIds
-            var disabledLessonIds = selectedLessonIds.Concat(gradedLessonIds).Distinct().ToList(); 
-            ViewBag.DisabledLessonIds = disabledLessonIds;
-
-            // Seçilen derslerin detaylarını al
+            // Geçici olarak seçilmiş derslerin detayları
             var selectedLessons = lessons
                 .Where(l => selectedLessonIds.Contains(l.LessonId))
                 .ToList();
-            ViewBag.SelectedLessons = selectedLessons;
 
-           
-            // Seçilen derslerin kredi toplamını hesapla
+            // Toplam kredi
             var totalCredits = selectedLessons.Sum(l => l.Credit ?? 0);
-            ViewBag.TotalCredits = totalCredits;
 
+            // Öğrencinin daha önce kalıcı olarak seçtiği dersler (StudentLessons tablosundan)
+            var studentLessonIds = context.StudentLessons
+                .Where(sl => sl.StudentId == student.StudentId)
+                .Select(sl => sl.LessonId)
+                .ToList();
+
+            // ViewBag'e gerekli verileri gönder
+            ViewBag.SelectedLessons = selectedLessons;
+            ViewBag.TotalCredits = totalCredits;
+            ViewBag.DisabledLessonIds = studentLessonIds; // Kalıcı seçilen dersler disable olacak
             ViewData["ImageFileName"] = student.ImageFileName;
 
             return View(lessons);
         }
+
 
         // POST: Dersi geçici listeye ekle
         [HttpPost]

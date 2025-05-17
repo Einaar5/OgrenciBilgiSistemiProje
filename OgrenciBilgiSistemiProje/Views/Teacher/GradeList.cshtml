@@ -1,40 +1,42 @@
-﻿@model GradeListViewModel
-@{
+﻿@{
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+    var students = ViewBag.Students as List<Student>;
+    var quizzes = ViewBag.Quizzes as List<Quiz>;
+    var grades = ViewBag.Grades as List<Grade>;
 }
 
-<div class="container mt-4">
-    <form asp-action="SaveScores" method="post">
-        <table class="table">
-            <thead>
+<h2>Notlarim</h2>
+
+<form asp-action="UpdateAllScores" method="post">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Öğrenci</th>
+                @foreach (var quiz in quizzes)
+                {
+                    <th>@quiz.QuizName</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < students.Count; i++)
+            {
                 <tr>
-                    <th>Öğrenci No</th>
-                    <th>Adı</th>
-                    <th>Soyadı</th>
-                    @foreach (var quiz in Model.Quizzes)
+                    <td>@students[i].StudentName @students[i].StudentSurname</td>
+                    @for (int j = 0; j < quizzes.Count; j++)
                     {
-                        <th>@quiz.QuizName</th>
+                        var grade = grades.FirstOrDefault(g => g.StudentId == students[i].StudentId && g.QuizId == quizzes[j].Id);
+                        var index = i * quizzes.Count + j;
+
+                        <td>
+                            <input type="hidden" name="Grades[@index].StudentId" value="@students[i].StudentId" />
+                            <input type="hidden" name="Grades[@index].QuizId" value="@quizzes[j].Id" />
+                            <input type="number" name="Grades[@index].Score" value="@(grade?.Score ?? 0)" class="form-control" />
+                        </td>
                     }
                 </tr>
-            </thead>
-            <tbody>
-                @foreach (var student in Model.Students)
-                {
-                    <tr>
-                        <td>@student.StudentId</td>
-                        <td>@student.StudentName</td>
-                        <td>@student.StudentSurname</td>
-                        @foreach (var quiz in Model.Quizzes)
-                        {
-                            var grade = Model.Grades.FirstOrDefault(g => g.StudentId == student.StudentId && g.QuizId == quiz.Id);
-                            <td>
-                                <input type="number" name="Scores[@student.StudentId][@quiz.Id]" value="@(grade !=  null ? grade.Quiz.Score : 0)" min="0" max="100" />
-                            </td>
-                        }
-                    </tr>
-                }
-            </tbody>
-        </table>
-        <button type="submit" class="btn btn-success">Kaydet</button>
-    </form>
-</div>
+            }
+        </tbody>
+    </table>
+    <button type="submit" class="btn btn-success">Tüm Notları Kaydet</button>
+</form>

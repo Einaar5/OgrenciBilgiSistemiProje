@@ -205,6 +205,13 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             return RedirectToAction("StudentList");
         }
+
+
+
+
+
+
+
         public IActionResult EditStudent(int id)
         {
             var student = context.Students.Find(id);
@@ -234,6 +241,20 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
             return View(studentDto);
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         [HttpPost]
         public IActionResult EditStudent(int id, StudentDto studentDto)

@@ -6,12 +6,12 @@
 
         public int StudentId { get; set; }
 
+        public int Score { get; set; } = 0;
+
         public int LessonId { get; set; }
 
         public int QuizId { get; set; }
 
-        public int? Midterm { get; set; }
-
-        public int? Final { get; set; }
+        
     }
 }

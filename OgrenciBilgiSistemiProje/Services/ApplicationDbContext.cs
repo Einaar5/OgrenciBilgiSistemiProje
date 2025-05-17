@@ -65,10 +65,18 @@ namespace OgrenciBilgiSistemiProje.Services
                       .HasForeignKey(g => g.LessonId)
                       .OnDelete(DeleteBehavior.Restrict);
 
-                // Grade tablosu için alternatif anahtar
-                entity.HasIndex(g => new { g.StudentId, g.LessonId })
-                      .IsUnique();
+                entity.HasOne(g => g.Quiz)
+                      .WithMany() // Quiz sınıfında Grades listesi yoksa
+                      .HasForeignKey(g => g.QuizId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                // 🔥 ÖNEMLİ: Eski unique constraint kaldırılıyor
+                // entity.HasIndex(g => new { g.StudentId, g.LessonId }).IsUnique(); // ❌ ARTIK YOK
+
+                // ✅ Doğru benzersizlik kuralı:
+                entity.HasIndex(g => new { g.StudentId, g.QuizId }).IsUnique();
             });
+
 
             // CourseList yapılandırması
             modelBuilder.Entity<CourseList>(entity =>

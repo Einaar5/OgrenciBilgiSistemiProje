@@ -51,7 +51,6 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 TeacherAddress = teacher.TeacherAddress,
                 TeacherGender = teacher.TeacherGender,
                 TeacherPassword = teacher.TeacherPassword
-
             };
 
             // Öğretmenin derslerini buluyoruz.
@@ -134,25 +133,44 @@ namespace OgrenciBilgiSistemiProje.Controllers
             ViewData["ImageFileName"] = teacher.ImageFileName;
             var quizs = context.Quizzes
                .Include(q => q.Lesson)
-               .Where(q => q.lessonId == id)
+               .Where(q => q.Lesson.LessonId == id)
                .ToList();
             if (quizs == null)
             {
                 return RedirectToAction("Grades");
             }
+           int lessonId = id; // LessonId'yi view'a gönderiyoruz.
 
-            
+            ViewBag.LessonId = lessonId.ToString(); // LessonId'yi view'a gönderiyoruz.
 
             return View(quizs);
         }
 
-        public IActionResult CreateQuiz()
+        public IActionResult CreateQuiz(int id)
         {
-            var departments = context.Departments.OrderByDescending(d => d.Id).ToList(); // Bölümleri bölüm numarasına göre sıralıyoruz ve listeye çeviriyoruz.           
-            ViewData["Departments"] = departments; // Bölümleri view'a gönderiyoruz.
-            ViewBag.Lessons = context.Lessons.ToList(); // Ders listesini alıyoruz.
-            return View(new QuizDto());
+            var teacherUsername = HttpContext.User.Identity?.Name;
+            var teacher = context.Teachers.Include(l => l.Lessons).FirstOrDefault(x => x.TeacherMail == teacherUsername);
+            ViewData["ImageFileName"] = teacher?.ImageFileName;
+
+            var lesson = context.Lessons.FirstOrDefault(x => x.LessonId == id);
+            if (lesson == null) return RedirectToAction("Grades");
+
+            var quizDto = new QuizDto
+            {
+                LessonId = lesson.LessonId,
+                
+            };
+
+            // Burada sınav isimlerini liste şeklinde alıyorum
+
+            string[] quizNames = { "Vize","Final","Quiz","Proje","Ödev" };
+
+            ViewBag.QuizNames = quizNames; // Sınav isimlerini view'a gönderiyoruz.
+
+            ViewBag.LessonName = lesson.LessonName;
+            return View(quizDto);
         }
+
 
         [HttpPost]
         public IActionResult CreateQuiz(QuizDto quizDto)
@@ -173,7 +191,6 @@ namespace OgrenciBilgiSistemiProje.Controllers
             {
                 QuizName = quizDto.QuizName,
                 QuizWeight = quizDto.QuizWeight,
-                lessonId = lesson.LessonId,
                 teacherId = teacher.Id,
                 Lesson = lesson,
                 Teacher = teacher
@@ -188,147 +205,149 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult DeleteQuiz(int id)
         {
-            var quiz = context.Quizzes.Find(id);
+            var quiz = context.Quizzes
+                .Include(q => q.Lesson)
+                .FirstOrDefault(q => q.Id == id);
+
             if (quiz == null)
             {
                 return NotFound("Quiz bulunamadı.");
             }
+
+            // Quiz'e bağlı tüm Grade kayıtlarını sil
+            var gradesToDelete = context.Grades.Where(g => g.QuizId == id).ToList();
+            context.Grades.RemoveRange(gradesToDelete);
+
             context.Quizzes.Remove(quiz);
             context.SaveChanges();
+
             return RedirectToAction("Grades");
         }
+
+        public IActionResult EditQuiz(int id)
+        {
+
+            var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
+            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername); // Kullanıcı adına göre öğrenciyi buluyoruz.
+
+            if (teacher == null)
+            {
+                return RedirectToAction("StuTeaLog", "Account"); // Eğer öğrenci yoksa login sayfasına yönlendiriyoruz.
+            }
+
+            var quizzes = context.Quizzes.FirstOrDefault(x => x.Id == id); // quiz'i buluyoruz.
+
+            var quiz = new QuizDto()
+            {
+                QuizName = quizzes.QuizName,
+                QuizWeight = quizzes.QuizWeight,
+            };
+
+
+            ViewBag.ImageLayout = teacher.ImageFileName;
+            ViewData["ImageFileName"] = teacher.ImageFileName; // Resim dosya adını view'a gönderiyoruz.
+            return View(quiz);
+        }
+
+
+        [HttpPost]
+        public IActionResult EditQuiz(QuizDto quizDto)
+        {
+            var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
+            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername); // Kullanıcı adına göre öğrenciyi buluyoruz.
+            if (teacher == null)
+            {
+                return RedirectToAction("StuTeaLog", "Account"); // Eğer öğrenci yoksa login sayfasına yönlendiriyoruz.
+            }
+            var quizzes = context.Quizzes.FirstOrDefault(x => x.Id == quizDto.Id); // quiz'i buluyoruz.
+            if (quizzes == null)
+            {
+                return NotFound("Quiz bulunamadı.");
+            }
+            quizzes.QuizName = quizDto.QuizName;
+            quizzes.QuizWeight = quizDto.QuizWeight;
+            quizzes.Lesson.LessonId = quizDto.LessonId;
+            context.SaveChanges(); // Değişiklikleri kaydet
+            return RedirectToAction("Grades"); // Index sayfasına yönlendir
+        }
+
 
 
         //Öğrenci notlandırma
 
         public IActionResult GradeList(int id) // id: selected lessonId
         {
-            var teacherUsername = HttpContext.User.Identity?.Name;
-            var teacher = context.Teachers
-                .Include(l => l.Lessons)
-                .FirstOrDefault(x => x.TeacherMail == teacherUsername);
-            ViewData["ImageFileName"] = teacher.ImageFileName;
+            var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
+            var teacher = context.Teachers.Include(l => l.Lessons).FirstOrDefault(x => x.TeacherMail == teacherUsername); // Kullanıcı adına göre öğrenciyi buluyoruz.
+            ViewData["ImageFileName"] = teacher.ImageFileName; 
 
-            // Only quizzes for the selected lesson
-            var quizzes = context.Quizzes
-                .Where(q => q.lessonId == id)
-                .ToList();
+            var students = context.Students.ToList();
+            var quizzes = context.Quizzes.ToList();
+            var grades = context.Grades.ToList();
 
-            // Only students enrolled in the selected lesson
-            var studentIds = context.StudentLessons
-                .Where(sl => sl.LessonId == id)
-                .Select(sl => sl.StudentId)
-                .ToList();
+            ViewBag.Students = students;
+            ViewBag.Quizzes = quizzes;
+            ViewBag.Grades = grades;
 
-            var students = context.Students
-                .Where(s => studentIds.Contains(s.StudentId))
-                .ToList();
-
-            // Only grades for the selected lesson
-            var grades = context.Grades
-                .Where(g => g.LessonId == id)
-                .ToList();
-
-            var model = new GradeListViewModel
-            {
-                Quizzes = quizzes,
-                Students = students,
-                Grades = grades
-            };
-
-            return View(model);
+            return View();
         }
-
-
 
 
         [HttpPost]
-        public IActionResult Grades(GradeDto gradeDto)
+        public async Task<IActionResult> UpdateAllScores(List<Grade> Grades)
         {
-            if (gradeDto == null)
+            foreach (var input in Grades)
             {
-                TempData["ErrorMessage"] = "Geçersiz veri gönderildi.";
-                return RedirectToAction("Grades");
-            }
+                var quiz = await context.Quizzes
+                    .Include(q => q.Lesson)
+                    .FirstOrDefaultAsync(q => q.Id == input.QuizId);
 
-            // Öğretmen doğrulama
-            var teacherUsername = HttpContext.User.Identity?.Name;
-            var teacher = context.Teachers
-                .Include(t => t.Lessons)
-                .FirstOrDefault(t => t.TeacherMail == teacherUsername);
-
-            if (teacher == null)
-            {
-                return Unauthorized();
-            }
-
-            // Ders kontrolü
-            var selectedLesson = teacher.Lessons.FirstOrDefault(l => l.LessonId == gradeDto.LessonId);
-            if (selectedLesson == null)
-            {
-                TempData["ErrorMessage"] = "Bu dersi vermiyorsunuz.";
-                return RedirectToAction("Grades");
-            }
-
-            // Öğrenci kontrolü
-            var student = context.Students.FirstOrDefault(s => s.StudentId == gradeDto.StudentId);
-            if (student == null)
-            {
-                TempData["ErrorMessage"] = "Öğrenci bulunamadı.";
-                return RedirectToAction("Grades");
-            }
-
-            // Öğrencinin derse kayıtlı olup olmadığını kontrol et
-            var isStudentEnrolled = context.Grades
-                .Any(cl => cl.StudentId == gradeDto.StudentId && cl.LessonId == gradeDto.LessonId);
-            if (!isStudentEnrolled)
-            {
-                TempData["ErrorMessage"] = "Bu öğrenci bu derse kayıtlı değil.";
-                return RedirectToAction("Grades");
-            }
-
-            // Not aralığı kontrolü
-            if (gradeDto.Midterm < 0 || gradeDto.Midterm > 100 || gradeDto.Final < 0 || gradeDto.Final > 100)
-            {
-                TempData["ErrorMessage"] = "Vize ve final notları 0-100 arasında olmalıdır.";
-                return RedirectToAction("Grades");
-            }
-
-            // Not işlemleri
-            var average = (gradeDto.Midterm * 0.4) + (gradeDto.Final * 0.6);
-            var grade = context.Grades
-                .FirstOrDefault(g => g.StudentId == gradeDto.StudentId && g.LessonId == gradeDto.LessonId);
-
-            try
-            {
-                if (grade == null)
+                if (quiz == null)
                 {
-                    context.Grades.Add(new Grade
+                    TempData["ErrorMessage"] = $"Quiz bulunamadı. QuizId: {input.QuizId}";
+                    continue;
+                }
+
+                var existingGrade = await context.Grades
+                    .FirstOrDefaultAsync(g => g.StudentId == input.StudentId && g.QuizId == input.QuizId);
+
+                if (existingGrade == null)
+                {
+                    // Yeni not
+                    var newGrade = new Grade
                     {
-                        StudentId = gradeDto.StudentId,
-                        LessonId = gradeDto.LessonId,
-                        Midterm = gradeDto.Midterm,
-                        Final = gradeDto.Final,
-                        Average = (float)average
-                    });
+                        StudentId = input.StudentId,
+                        QuizId = input.QuizId,
+                        LessonId = quiz.Lesson.LessonId, // DİKKAT: Buradan lessonId alınmalı
+                        Score = input.Score
+                    };
+                    context.Grades.Add(newGrade);
                 }
                 else
                 {
-                    grade.Midterm = gradeDto.Midterm;
-                    grade.Final = gradeDto.Final;
-                    grade.Average = (float)average;
+                    // Güncelleme
+                    existingGrade.Score = input.Score;
+                    context.Grades.Update(existingGrade);
                 }
-
-                context.SaveChanges();
-                TempData["SuccessMessage"] = "Notlar başarıyla kaydedildi.";
             }
-            catch (Exception)
+
+            try
             {
-                TempData["ErrorMessage"] = "Not kaydedilirken bir hata oluştu.";
+                await context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Tüm notlar başarıyla güncellendi.";
+            }
+            catch (DbUpdateException ex)
+            {
+                TempData["ErrorMessage"] = "Veritabanı hatası: " + ex.InnerException?.Message;
             }
 
-            return RedirectToAction("Grades", new { lessonId = gradeDto.LessonId });
+            return RedirectToAction("Grades");
         }
+
+
+
+
+
         #endregion
 
 

@@ -1,10 +1,11 @@
 ﻿@model List<Quiz>
 @{
 	Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
+	int lessonId = Convert.ToInt32(ViewBag.LessonId);
 }
 
 <div>
-    <a class="btn btn-danger" asp-controller="Teacher" asp-action="CreateQuiz" >Sınav Oluştur</a>
+    <a class="btn btn-danger" asp-controller="Teacher" asp-route-id="@lessonId" asp-action="CreateQuiz">Sınav Oluştur</a>
 </div>
 
 <div class="container mt-4">
@@ -25,7 +26,7 @@
                 <td>@quiz.QuizWeight</td>
                 <td>@quiz.Lesson.LessonName</td>
                 <td>
-                    <a class="btn btn-danger" asp-controller="Teacher" asp-action="EditQuiz" asp-route-id="@quiz.Id">Sınav İşlemleri</a>
+                    <a class="btn btn-danger" asp-controller="Teacher" asp-action="EditQuiz" asp-route-id="@quiz.Id">Sınav Düzenle</a>
                     <a class="btn btn-outline-danger" asp-controller="Teacher" asp-action="DeleteQuiz" onclick="return confirm('(@quiz.QuizName) Adlı Sınavı Silmek İstediğinize Emin Misiniz ?');" asp-route-id="@quiz.Id">Sınav Sil</a>
                 </td>
            </tr>
