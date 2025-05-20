@@ -154,6 +154,10 @@ namespace OgrenciBilgiSistemiProje.Controllers
             var teacher = context.Teachers.Include(l => l.Lessons).FirstOrDefault(x => x.TeacherMail == teacherUsername);
             ViewData["ImageFileName"] = teacher?.ImageFileName;
 
+            string[] quizTypes = new string[] {"Vize","Final","Quiz","Ödev","Proje" };
+
+            ViewBag.QuizTypes = quizTypes.ToList(); // Sınav türlerini view'a gönderiyoruz.
+
             var lesson = context.Lessons.FirstOrDefault(x => x.LessonId == id);
             if (lesson == null) return RedirectToAction("Grades");
 
@@ -272,6 +276,9 @@ namespace OgrenciBilgiSistemiProje.Controllers
         {
             var teacherUsername = HttpContext.User.Identity?.Name;
             var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername);
+            string[] quizTypes = new string[] { "Vize", "Final", "Quiz", "Ödev", "Proje" };
+
+            ViewBag.QuizTypes = new List<string> { "Vize", "Final", "Quiz", "Proje", "Ödev" };
 
             if (teacher == null)
             {

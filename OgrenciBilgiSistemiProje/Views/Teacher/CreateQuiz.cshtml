@@ -16,7 +16,12 @@
 
     <div class="mb-3">
         <label asp-for="QuizName" class="form-label">Sınav Adı</label>
-        <input asp-for="QuizName" class="form-control" />
+        <select asp-for="QuizName" class="form-control">
+            @foreach (var quiz in ViewBag.QuizTypes)
+            {
+                <option value="@quiz">@quiz</option>
+            }
+        </select>
         <span asp-validation-for="QuizName" class="text-danger"></span>
     </div>
 
