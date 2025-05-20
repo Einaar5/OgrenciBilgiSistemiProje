@@ -1,150 +1,83 @@
-Student Information System (SIS) - OBS
-<br>
-📝 Overview
-Student Information System (SIS), also known as OBS (Öğrenci Bilgi Sistemi) in Turkish, is a comprehensive web-based platform designed to streamline academic processes for students, teachers, and administrators in educational institutions. Built with ASP.NET Core MVC, this system provides real-time management of academic records, course materials, and institutional communication.
+<div align="center">
+  <h1>🎓 Student Information System (OBS)</h1>
+  <p>A basic academic management platform built with ASP.NET Core MVC</p>
+  
+  <div>
+    <img src="https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet" alt=".NET 9.0">
+    <img src="https://img.shields.io/badge/ASP.NET_Core-MVC-512BD4?logo=dotnet" alt="ASP.NET Core MVC">
+    <img src="https://img.shields.io/badge/SQL_Server-2022-CC2927?logo=microsoft-sql-server" alt="SQL Server">
+    <img src="https://img.shields.io/badge/Bootstrap-5-7952B3?logo=bootstrap" alt="Bootstrap 5">
+    <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License">
+  </div>
+</div>
 
-🌟 Key Features
-👨‍🎓 For Students:
-Grade Tracking: View all exam results and course grades
+## ✨ Key Features
 
-Course Management: Access registered courses and materials
+### 👨‍🎓 Student Portal
+<ul>
+  <li>📊 Real-time grade tracking</li>
+  <li>📅 Interactive course schedule</li>
+  <li>✅ Attendance monitoring</li>
+  <li>📩 Secure messaging system</li>
+</ul>
 
-Attendance Monitoring: Check attendance records in real-time
+### 👨‍🏫 Teacher Portal
+<ul>
+  <li>✏️ Comprehensive grade management</li>
+  <li>📝 Custom quiz/exam creation</li>
+  <li>📊 Automated attendance system</li>
+  <li>📢 Department-wide announcements</li>
+</ul>
 
-Messaging System: Communicate directly with instructors
+### 👨‍💻 Admin Portal
+<ul>
+  <li>👥 User management (CRUD operations)</li>
+  <li>🏫 Department and program management</li>
+  <li>📆 Academic calendar configuration</li>
+  <li>⚙️ System configuration and settings</li>
+</ul>
 
-👨‍🏫 For Teachers:
-Grade Management: Enter and adjust student grades
+### 🛠️ Technical Stack
+<table>
+  <tr>
+    <th>Component</th>
+    <th>Technology</th>
+  </tr>
+  <tr>
+    <td>Backend Framework</td>
+    <td>ASP.NET Core 9.0 MVC</td>
+  </tr>
+  <tr>
+    <td>Database</td>
+    <td>SQL Server with Entity Framework Core</td>
+  </tr>
+  <tr>
+    <td>Frontend</td>
+    <td>Bootstrap 5 + JavaScript</td>
+  </tr>
+  <tr>
+    <td>Authentication</td>
+    <td>Role-based (Student/Teacher/Admin)</td>
+  </tr>
+</table>
 
-Quiz System: Create and weight different assessment types
+## 🚀 Installation
+```bash
+# Clone the repository
+git clone https://github.com/Einaar/OgrenciBilgiSistemiProje-system.git
 
-Attendance Recording: Mark and review student attendance
-
-Notification Center: Send announcements to classes/departments
-
-🖥️ For Administrators:
-User Management: Handle student and faculty accounts
-
-Course Scheduling: Organize academic timetables
-
-Department Oversight: Manage academic departments
-
-System Analytics: Generate academic reports
-
-🛠️ Technical Specifications
-Framework: ASP.NET Core 6.0 MVC
-
-Database: SQL Server with Entity Framework Core
-
-Authentication: Role-based (Student/Teacher/Admin)
-
-Frontend: Bootstrap 5 with responsive design
-
-
-📚 Database Schema
-The system utilizes a relational database structure with key entities:
-
-Users (Students/Teachers)
-
-Courses/Lessons
-
-Departments
-
-Grades/Assessments
-
-Attendance Records
-
-Notifications/Messages
-
-🚀 Getting Started
-Clone the repository
-
-Configure database connection in appsettings.json
-
-Run migrations: dotnet ef database update
-
-Launch application: dotnet run
-
-bash
-git clone https://github.com/your-repo/obs-system.git
-cd obs-system
-dotnet restore
+# Apply database migrations
 dotnet ef database update
+
+# Run the application 
 dotnet run
 
-
-
-
-
-🌍 Turkish Version (Türkçe)
-Öğrenci Bilgi Sistemi (OBS)
-📝 Genel Bakış
-Öğrenci Bilgi Sistemi (OBS), eğitim kurumlarında öğrenciler, öğretmenler ve yöneticiler için akademik süreçleri dijitalleştiren kapsamlı bir web platformudur. ASP.NET Core MVC ile geliştirilen bu sistem, gerçek zamanlı akademik kayıt yönetimi, ders materyalleri ve kurumsal iletişim imkanları sunar.
-
-🌟 Temel Özellikler
-👨‍🎓 Öğrenciler İçin:
-Not Takibi: Sınav sonuçlarını ve ders notlarını görüntüleme
-
-Ders Yönetimi: Kayıtlı derslere ve materyallere erişim
-
-Devamsızlık Takibi: Anlık devamsızlık bilgilerini görüntüleme
-
-Mesajlaşma: Öğretmenlerle doğrudan iletişim
-
-👨‍🏫 Öğretmenler İçin:
-Not Yönetimi: Öğrenci notlarını girme ve güncelleme
-
-Sınav Sistemi: Farklı ağırlıklarda değerlendirmeler oluşturma
-
-Yoklama Alma: Öğrenci devamsızlıklarını işaretleme
-
-Duyuru Merkezi: Sınıf/bölümlere duyuru gönderme
-
-🖥️ Yöneticiler İçin:
-Kullanıcı Yönetimi: Öğrenci ve öğretmen hesaplarını yönetme
-
-Ders Programlama: Akademik takvim oluşturma
-
-Bölüm Yönetimi: Akademik birimleri düzenleme
-
-Sistem Analitiği: Akademik raporlar oluşturma
-
-🛠️ Teknik Özellikler
-Framework: ASP.NET Core 6.0 MVC
-
-Veritabanı: Entity Framework Core ile SQL Server
-
-Kimlik Doğrulama: Rol tabanlı (Öğrenci/Öğretmen/Yönetici)
-
-Arayüz: Duyarlı (responsive) Bootstrap 5 tasarımı
-
-📚 Veritabanı Yapısı
-Sistemdeki temel veri modelleri:
-
-Kullanıcılar (Öğrenciler/Öğretmenler)
-
-Dersler
-
-Bölümler
-
-Notlar/Değerlendirmeler
-
-Devamsızlık Kayıtları
-
-Duyurular/Mesajlar
-
-🚀 Başlarken
-Depoyu klonlayın
-
-appsettings.json dosyasında veritabanı bağlantısını yapılandırın
-
-Migration'ları çalıştırın: dotnet ef database update
-
-Uygulamayı başlatın: dotnet run
-
-bash
-git clone https://github.com/your-repo/obs-system.git
-cd obs-system
-dotnet restore
-dotnet ef database update
-dotnet run
+```
+<hr><div align="center"> <h2>Öğrenci Bilgi Sistemi (OBS)</h2> <p>ASP.NET Core MVC ile geliştirilmiş kapsamlı akademik yönetim platformu</p> </div>
+🌟 Özellikler
+👨‍🎓 Öğrenci Paneli
+<ul> <li>📊 Gerçek zamanlı not takibi</li> <li>📅 Ders programı görüntüleme</li> <li>✅ Devamsızlık takip sistemi</li> <li>📩 Öğretmenlerle iletişim</li> </ul>
+👨‍🏫 Öğretmen Paneli
+<ul> <li>✏️ Kapsamlı not yönetimi</li> <li>📝 Sınav/quiz oluşturma</li> <li>📊 Otomatik yoklama sistemi</li> <li>📢 Bölüm duyuruları</li> </ul>
+👨‍💻 Yönetici Paneli
+<ul> <li>👥 Kullanıcı yönetimi (CRUD işlemleri)</li> <li>🏫 Bölüm ve program yönetimi</li> <li>📆 Akademik takvim ayarları</li>  <li>⚙️ Sistem konfigürasyonu</li> </ul>
