@@ -2,31 +2,28 @@
 
 @{
     Layout = "~/Views/Shared/_LayoutTeacher.cshtml";
-    
 }
 
 <form asp-action="CreateQuiz" asp-controller="Teacher" method="post">
-
-    
     <input type="hidden" asp-for="LessonId" />
 
-    
-    
+    @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+    {
+        <div class="alert alert-danger">
+            @ViewBag.ErrorMessage
+        </div>
+    }
 
     <div class="mb-3">
-        <label asp-for="QuizName" class="form-label"></label>
-        <select asp-for="QuizName" class="form-control">
-			@foreach (var quizNames in ViewBag.QuizNames)
-			{
-				<option value="@quizNames">@quizNames</option>
-			}
-        </select>
+        <label asp-for="QuizName" class="form-label">Sınav Adı</label>
+        <input asp-for="QuizName" class="form-control" />
         <span asp-validation-for="QuizName" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label asp-for="QuizWeight" class="form-label"></label>
-        <input asp-for="QuizWeight" class="form-control" />
+        <label asp-for="QuizWeight" class="form-label">Sınav Ağırlığı (%)</label>
+        <input asp-for="QuizWeight" class="form-control" type="number" min="0" max="@ViewBag.RemainingWeight" />
+        <small class="form-text text-muted">Kalan ağırlık: @ViewBag.RemainingWeight%</small>
         <span asp-validation-for="QuizWeight" class="text-danger"></span>
     </div>
 
@@ -35,8 +32,23 @@
         <input type="text" class="form-control" value="@ViewBag.LessonName?.ToString()" disabled />
     </div>
 
-    <button type="submit" class="btn btn-danger">Kaydet</button>
+    @if (ViewBag.RemainingWeight <= 0)
+    {
+        <div class="alert alert-danger">
+            Toplam ağırlık %100'e ulaşmış veya geçmiş. Yeni sınav eklenemez.
+        </div>
+        <button type="submit" class="btn btn-danger disabled">Kaydet</button>
+    }
+    else
+    {
+        <button type="submit" class="btn btn-danger">Kaydet</button>
+    }
+
     <a asp-controller="Teacher" asp-action="QuizList" asp-route-id="@Model.LessonId" class="btn btn-outline-danger">
         İptal
     </a>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

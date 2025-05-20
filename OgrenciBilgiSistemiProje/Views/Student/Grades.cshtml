@@ -3,64 +3,80 @@
     var lessons = ViewBag.Lessons as List<Lesson>;
     var quizzes = ViewBag.Quizzes as List<Quiz>;
     var grades = ViewBag.Grades as List<Grade>;
+
+    Func<double, string> calculateLetterGrade = avg =>
+    {
+        if (avg >= 90) return "AA";
+        if (avg >= 85) return "BA";
+        if (avg >= 80) return "BB";
+        if (avg >= 75) return "CB";
+        if (avg >= 70) return "CC";
+        if (avg >= 65) return "DC";
+        if (avg >= 60) return "DD";
+        if (avg >= 50) return "FD";
+        return "FF";
+    };
 }
 
 <h2 class="mt-4 text-center text-danger">Notlarım</h2>
 
 @if (lessons != null && lessons.Any())
 {
-    @foreach (var lesson in lessons)
-    {
-        <div class="mt-5">
-            <h4 class="text-danger">@lesson.LessonName</h4>
-
-            @{
+    <table class="table table-bordered table-hover ">
+        <thead class="table-dark">
+            <tr>
+                <th>Şb</th>
+                <th>Ders Kodu</th>
+                <th>Ders Adı</th>
+                <th>Sınav Notları</th>
+                <th>Ort</th>
+                <th>Not</th>
+                <th>Durumu</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var lesson in lessons)
+            {
                 var relatedQuizzes = quizzes
-                    .Where(q => q.Lesson.LessonId == lesson.LessonId)
-                    .ToList();
+                .Where(q => q.Lesson.LessonId == lesson.LessonId)
+                .ToList();
+
+                var relatedGrades = grades
+                .Where(g => relatedQuizzes.Any(q => q.Id == g.QuizId))
+                .ToList();
+
+                double weightedSum = 0;
+                double totalWeight = 0;
+
+                string sinavNotlari = "";
+
+                foreach (var quiz in relatedQuizzes)
+                {
+                    var grade = relatedGrades.FirstOrDefault(g => g.QuizId == quiz.Id);
+                    var score = grade?.Score ?? 0;
+                    weightedSum += score * quiz.QuizWeight;
+                    totalWeight += quiz.QuizWeight;
+
+                    sinavNotlari += $"{quiz.QuizName}: {score}  ";
+                }
+
+                var weightedAverage = totalWeight > 0 ? (weightedSum / totalWeight) : 0;
+                var letterGrade = calculateLetterGrade(weightedAverage);
+
+                <tr>
+                    <td>1</td>
+                    <td>@lesson.LessonId</td>
+                    <td>@lesson.LessonName</td>
+                    <td>@sinavNotlari</td>
+                    <td>@weightedAverage.ToString("0.00")</td>
+                    <td>@letterGrade</td>
+                    <td>@(letterGrade != "FF" ? "Geçti" : "Kaldı")
+                    </td>
+
+                </tr>
             }
-
-            @if (relatedQuizzes.Any())
-            {
-                <table class="table table-bordered table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            @foreach (var quiz in relatedQuizzes)
-                            {
-                                <th>@quiz.QuizName</th>
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            @foreach (var quiz in relatedQuizzes)
-                            {
-                                var grade = grades.FirstOrDefault(g => g.QuizId == quiz.Id);
-                                <td>@(grade?.Score ?? 0)</td>
-                            }
-                        </tr>
-                    </tbody>
-                </table>
-
-                <p class="fw-bold text-success">
-                    Ortalama: @{
-                        var avg = relatedQuizzes
-                        .Select(q => grades.FirstOrDefault(g => g.QuizId == q.Id)?.Score ?? 0)
-                        .DefaultIfEmpty()
-                        .Average();
-                    } @avg.ToString("0.00")
-                </p>
-
-
-
-                
-            }
-            else
-            {
-                <div class="alert alert-warning mt-2">Bu ders için henüz sınav bulunmamaktadır.</div>
-            }
-        </div>
-    }
+        </tbody>
+    </table>
 }
 else
 {

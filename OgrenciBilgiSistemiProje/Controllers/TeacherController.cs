@@ -161,6 +161,8 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 
             };
 
+           
+
             // Burada sınav isimlerini liste şeklinde alıyorum
 
             string[] quizNames = { "Vize","Final","Quiz","Proje","Ödev" };
@@ -177,30 +179,62 @@ namespace OgrenciBilgiSistemiProje.Controllers
         {
             var teacherUsername = HttpContext.User.Identity?.Name;
             var teacher = context.Teachers.Include(l => l.Lessons)
-                                          .FirstOrDefault(x => x.TeacherMail == teacherUsername);
+                                         .FirstOrDefault(x => x.TeacherMail == teacherUsername);
             var lesson = context.Lessons.FirstOrDefault(l => l.LessonId == quizDto.LessonId);
 
             if (lesson == null || teacher == null)
             {
-                // Form hatalı dolduruldu, tekrar göstereceksen ViewBag'leri doldurmayı unutma!
+                ViewBag.ErrorMessage = "Ders veya öğretmen bulunamadı.";
                 ViewBag.Lessons = context.Lessons.ToList();
+                // ViewBag.QuizNames'i burada tekrar set etmeye gerek yok, çünkü GET metodundan geliyor
+                ViewBag.LessonName = lesson?.LessonName;
+                ViewBag.TotalWeight = 0;
+                ViewBag.RemainingWeight = 100;
                 return View(quizDto);
             }
 
-            Quiz quiz = new Quiz
+            // O dersin sınavlarının ağırlıklarını alıyoruz
+            var quizzes = context.Quizzes
+                .Where(q => q.LessonId == lesson.LessonId)
+                .ToList();
+
+            var totalWeight = quizzes.Sum(q => q.QuizWeight);
+            var newTotalWeight = totalWeight + quizDto.QuizWeight;
+
+            // Toplam ağırlık 100'ü geçiyorsa hata ver
+            if (newTotalWeight > 100)
             {
-                QuizName = quizDto.QuizName,
-                QuizWeight = quizDto.QuizWeight,
-                teacherId = teacher.Id,
-                LessonId = lesson.LessonId,
-                Lesson = lesson,
-                Teacher = teacher
-            };
+                ViewBag.ErrorMessage = $"Toplam ağırlık %100'ü geçemez. Kalan ağırlık: {100 - totalWeight}%";
+                ViewBag.Lessons = context.Lessons.ToList();
+                ViewBag.LessonName = lesson.LessonName;
+                ViewBag.TotalWeight = totalWeight;
+                ViewBag.RemainingWeight = 100 - totalWeight;
+                return View(quizDto);
+            }
 
-            context.Quizzes.Add(quiz);
-            context.SaveChanges();
+            if (ModelState.IsValid)
+            {
+                Quiz quiz = new Quiz
+                {
+                    QuizName = quizDto.QuizName,
+                    QuizWeight = quizDto.QuizWeight,
+                    teacherId = teacher.Id,
+                    LessonId = lesson.LessonId,
+                    Lesson = lesson,
+                    Teacher = teacher
+                };
 
-            return RedirectToAction("Grades"); // yönlendirme yap
+                context.Quizzes.Add(quiz);
+                context.SaveChanges();
+                return RedirectToAction("Grades");
+            }
+
+            // ModelState geçersizse formu tekrar göster
+            ViewBag.Lessons = context.Lessons.ToList();
+            ViewBag.LessonName = lesson.LessonName;
+            ViewBag.TotalWeight = totalWeight;
+            ViewBag.RemainingWeight = 100 - totalWeight;
+            return View(quizDto);
         }
 
 
@@ -227,49 +261,94 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult EditQuiz(int id)
         {
-
-            var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
-            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername); // Kullanıcı adına göre öğrenciyi buluyoruz.
+            var teacherUsername = HttpContext.User.Identity?.Name;
+            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername);
 
             if (teacher == null)
             {
-                return RedirectToAction("StuTeaLog", "Account"); // Eğer öğrenci yoksa login sayfasına yönlendiriyoruz.
+                return RedirectToAction("StuTeaLog", "Account");
             }
 
-            var quizzes = context.Quizzes.FirstOrDefault(x => x.Id == id); // quiz'i buluyoruz.
+            var quiz = context.Quizzes
+                .Include(q => q.Lesson)
+                .FirstOrDefault(x => x.Id == id);
 
-            var quiz = new QuizDto()
+            if (quiz == null)
             {
-                QuizName = quizzes.QuizName,
-                QuizWeight = quizzes.QuizWeight,
+                return NotFound("Quiz bulunamadı.");
+            }
+
+            // Aynı derse ait diğer quiz'lerin toplam ağırlığını hesapla (mevcut quiz hariç)
+            var totalWeight = context.Quizzes
+                .Where(q => q.LessonId == quiz.LessonId && q.Id != id)
+                .Sum(q => q.QuizWeight);
+
+            var quizDto = new QuizDto()
+            {
+                Id = quiz.Id,
+                QuizName = quiz.QuizName,
+                QuizWeight = quiz.QuizWeight,
+                LessonId = quiz.LessonId
             };
 
-
+            ViewBag.TotalWeight = totalWeight;
+            ViewBag.RemainingWeight = 100 - totalWeight;
             ViewBag.ImageLayout = teacher.ImageFileName;
-            ViewData["ImageFileName"] = teacher.ImageFileName; // Resim dosya adını view'a gönderiyoruz.
-            return View(quiz);
+            ViewData["ImageFileName"] = teacher.ImageFileName;
+            return View(quizDto);
         }
-
 
         [HttpPost]
         public IActionResult EditQuiz(QuizDto quizDto)
         {
-            var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
-            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername); // Kullanıcı adına göre öğrenciyi buluyoruz.
+            var teacherUsername = HttpContext.User.Identity?.Name;
+            var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername);
+
             if (teacher == null)
             {
-                return RedirectToAction("StuTeaLog", "Account"); // Eğer öğrenci yoksa login sayfasına yönlendiriyoruz.
+                return RedirectToAction("StuTeaLog", "Account");
             }
-            var quizzes = context.Quizzes.FirstOrDefault(x => x.Id == quizDto.Id); // quiz'i buluyoruz.
-            if (quizzes == null)
+
+            var quiz = context.Quizzes
+                .Include(q => q.Lesson)
+                .FirstOrDefault(x => x.Id == quizDto.Id);
+
+            if (quiz == null)
             {
                 return NotFound("Quiz bulunamadı.");
             }
-            quizzes.QuizName = quizDto.QuizName;
-            quizzes.QuizWeight = quizDto.QuizWeight;
-            quizzes.Lesson.LessonId = quizDto.LessonId;
-            context.SaveChanges(); // Değişiklikleri kaydet
-            return RedirectToAction("Grades"); // Index sayfasına yönlendir
+
+            // Aynı derse ait diğer quiz'lerin toplam ağırlığını hesapla (mevcut quiz hariç)
+            var totalWeight = context.Quizzes
+                .Where(q => q.LessonId == quiz.LessonId && q.Id != quizDto.Id)
+                .Sum(q => q.QuizWeight);
+
+            var newTotalWeight = totalWeight + quizDto.QuizWeight;
+
+            // Toplam ağırlık kontrolü
+            if (newTotalWeight > 100)
+            {
+                ModelState.AddModelError("QuizWeight", $"Toplam ağırlık %100'ü geçemez. Kalan ağırlık: {100 - totalWeight}%");
+                ViewBag.TotalWeight = totalWeight;
+                ViewBag.RemainingWeight = 100 - totalWeight;
+                ViewBag.ImageLayout = teacher.ImageFileName;
+                ViewData["ImageFileName"] = teacher.ImageFileName;
+                return View(quizDto);
+            }
+
+            if (ModelState.IsValid)
+            {
+                quiz.QuizName = quizDto.QuizName;
+                quiz.QuizWeight = quizDto.QuizWeight;
+                context.SaveChanges();
+                return RedirectToAction("Grades");
+            }
+
+            ViewBag.TotalWeight = totalWeight;
+            ViewBag.RemainingWeight = 100 - totalWeight;
+            ViewBag.ImageLayout = teacher.ImageFileName;
+            ViewData["ImageFileName"] = teacher.ImageFileName;
+            return View(quizDto);
         }
 
 
