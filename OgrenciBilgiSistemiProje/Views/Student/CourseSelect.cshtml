@@ -18,7 +18,7 @@
                 <thead class="table-danger">
                     <tr>
                         <th>Ders Adı</th>
-                        <th>Kredi</th>
+                        <th>AKTS</th>
                         <th>Bölüm</th>
                         <th>Öğretmen</th>
                         <th>İşlem</th>
@@ -64,7 +64,7 @@
                     <thead class="table-danger">
                         <tr>
                             <th>Ders Adı</th>
-                            <th>Kredi</th>
+                            <th>AKTS</th>
                             <th>İşlem</th>
                         </tr>
                     </thead>
@@ -86,7 +86,7 @@
                 </table>
             </div>
             <div class="mt-2 text-danger">
-                Toplam Kredi: @totalCredits
+                Toplam AKTS: @totalCredits
             </div>
             <form asp-action="SaveAllSelected" asp-controller="Student" method="post" class="mt-3">
                 <button type="submit" class="btn btn-danger w-100" @(totalCredits > 30 ? "disabled" : "")>Tümünü Kaydet</button>

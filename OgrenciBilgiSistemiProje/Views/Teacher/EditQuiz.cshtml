@@ -6,7 +6,7 @@
 
 <div class="row">
     <div class="col-md-8 mx-auto rounded border p-3">
-        <h2>Quiz Düzenle</h2>
+        <h2>Sınav Düzenle</h2>
         <form asp-action="EditQuiz" asp-controller="Teacher" method="post">
             <input type="hidden" asp-for="Id" />
             <input type="hidden" asp-for="LessonId" />
@@ -19,7 +19,7 @@
             }
 
             <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Quiz Adı</label>
+                <label class="col-sm-4 col-form-label">Sınav Adı</label>
                 <div class="col-sm-8">
                     <input class="form-control" asp-for="QuizName" />
                     <span asp-validation-for="QuizName" class="text-danger"></span>
@@ -27,7 +27,7 @@
             </div>
 
             <div class="row mb-3">
-                <label class="col-sm-4 col-form-label">Quiz Ağırlığı</label>
+                <label class="col-sm-4 col-form-label">Sınav Ağırlığı</label>
                 <div class="col-sm-8">
                     <input class="form-control" asp-for="QuizWeight" type="number" min="0" max="@ViewBag.RemainingWeight" />
                     <small class="form-text text-muted">Kalan ağırlık: @ViewBag.RemainingWeight%</small>

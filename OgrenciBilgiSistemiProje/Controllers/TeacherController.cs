@@ -116,14 +116,16 @@ namespace OgrenciBilgiSistemiProje.Controllers
             var teacher = context.Teachers.Include(l => l.Lessons).FirstOrDefault(x => x.TeacherMail == teacherUsername); // Kullanıcı adına göre öğrenciyi buluyoruz.
             ViewData["ImageFileName"] = teacher.ImageFileName;
 
-            var teacherLessonList = context.Lessons
-                .Include(l => l.Department)
-                .Include(l => l.Teacher)
-                .ToList();
+            var teacherId = context.Teachers
+               .Where(x => x.TeacherMail == teacherUsername)
+               .Select(x => x.Id)
+               .FirstOrDefault();
+            var lessons = context.Lessons
+                .Include(x => x.Teacher)
+                .Include(x => x.Department)
+                .Where(x => x.TeacherId == teacherId).ToList();
 
-
-            
-            return View(teacherLessonList);
+            return View(lessons);
         }
 
         public IActionResult QuizList(int id)
@@ -155,21 +157,28 @@ namespace OgrenciBilgiSistemiProje.Controllers
             var lesson = context.Lessons.FirstOrDefault(x => x.LessonId == id);
             if (lesson == null) return RedirectToAction("Grades");
 
+            // O dersin mevcut sınavlarını ve toplam ağırlığını al
+            var quizzes = context.Quizzes
+                .Where(q => q.LessonId == lesson.LessonId)
+                .ToList();
+
+            var totalWeight = quizzes.Sum(q => q.QuizWeight);
+            var remainingWeight = 100 - totalWeight; // Kalan ağırlığı hesapla
+
             var quizDto = new QuizDto
             {
                 LessonId = lesson.LessonId,
-                
             };
 
-           
-
-            // Burada sınav isimlerini liste şeklinde alıyorum
-
-            string[] quizNames = { "Vize","Final","Quiz","Proje","Ödev" };
-
-            ViewBag.QuizNames = quizNames; // Sınav isimlerini view'a gönderiyoruz.
-
+            // ViewBag değerlerini her durumda ata
+            ViewBag.TotalWeight = totalWeight;
+            ViewBag.RemainingWeight = remainingWeight; // BU SATIR EKSİKTİ!
             ViewBag.LessonName = lesson.LessonName;
+
+            // Sınav isimleri
+            string[] quizNames = { "Vize", "Final", "Quiz", "Proje", "Ödev" };
+            ViewBag.QuizNames = quizNames;
+
             return View(quizDto);
         }
 

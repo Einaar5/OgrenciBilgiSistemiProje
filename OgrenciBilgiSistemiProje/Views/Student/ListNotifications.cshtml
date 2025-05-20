@@ -38,10 +38,10 @@ else
                     <td>
                         @if (!notification.IsRead)
                         {
-                            <form asp-action="MarkAsRead" method="post" style="display:inline;">
+                           @*  <form asp-action="MarkAsRead" method="post" style="display:inline;">
                                 <input type="hidden" name="notificationId" value="@notification.NotificationId" />
                                 <button type="submit" class="btn btn-success">Okundu</button>
-                            </form>
+                            </form> *@
                         }
                         <form method="get" asp-action="NotificationDetail" asp-route-id="@notification.NotificationId">
                             <button type="submit" class="btn btn-danger">Detaylar</button>
