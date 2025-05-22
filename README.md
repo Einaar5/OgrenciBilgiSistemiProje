@@ -5,7 +5,7 @@
   <div>
     <img src="https://img.shields.io/badge/.NET-9.0-512BD4?logo=dotnet" alt=".NET 9.0">
     <img src="https://img.shields.io/badge/ASP.NET_Core-MVC-512BD4?logo=dotnet" alt="ASP.NET Core MVC">
-    <img src="https://img.shields.io/badge/SQL_Server-2022-CC2927?logo=microsoft-sql-server" alt="SQL Server">
+    <img src="https://img.shields.io/badge/SQL_Server-20-CC2927?logo=microsoft-sql-server" alt="SQL Server">
     <img src="https://img.shields.io/badge/Bootstrap-5-7952B3?logo=bootstrap" alt="Bootstrap 5">
     <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License">
   </div>
