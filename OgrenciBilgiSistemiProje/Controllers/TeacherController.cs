@@ -846,9 +846,14 @@ namespace OgrenciBilgiSistemiProje.Controllers
                     {
                         StudentName = $"{sl.Student.StudentName} {sl.Student.StudentSurname}",
                         AbsenceCount = attendances.Sum(a => (!a.IsComeHour1 ? 1 : 0) + (!a.IsComeHour2 ? 1 : 0) + (!a.IsComeHour3 ? 1 : 0))
+                        
                     }
                 )
                 .ToList();
+
+
+
+
 
             ViewBag.AbsenceReport = absenceReport;
             ViewBag.SelectedLessonId = lessonId;

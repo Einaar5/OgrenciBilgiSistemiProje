@@ -22,6 +22,27 @@ namespace OgrenciBilgiSistemiProje.Controllers
             this.environment = environment;
         }
 
+        public void profileDetailViewer()
+        {
+            var studentUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
+            // Öğrenciyi bul ve Department bilgisini de dahil et
+            var student = context.Students
+                .Include(s => s.Department) // Department bilgisini dahil et
+                .FirstOrDefault(x => x.StudentEmail == studentUsername);
+
+            if (student != null)
+            {
+                ViewData["ImageFileName"] = student.ImageFileName;
+
+                // DepartmentName'i ViewData'ya ekleyebilirsiniz
+                ViewData["DepartmentName"] = student.Department.Name;
+            }
+
+
+            ViewBag.Name = student.StudentName;
+            ViewBag.Surname = student.StudentSurname;
+        }
+
         public IActionResult Index()
         {
             var studentUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
@@ -38,6 +59,9 @@ namespace OgrenciBilgiSistemiProje.Controllers
                 ViewData["DepartmentName"] = student.Department.Name;
             }
 
+
+            profileDetailViewer();
+
             return View(student);
         }
 
@@ -45,6 +69,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
         #region Öğrenci Edit
         public IActionResult Edit()
         {
+            profileDetailViewer();
             var studentUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
             var student = context.Students.Include(s=>s.Department).FirstOrDefault(x => x.StudentEmail == studentUsername);
 
@@ -123,6 +148,8 @@ namespace OgrenciBilgiSistemiProje.Controllers
         #region Öğrenci Not
         public IActionResult Grades()
         {
+
+            profileDetailViewer();
             var studentUsername = HttpContext.User.Identity?.Name;
             var student = context.Students.FirstOrDefault(s => s.StudentEmail == studentUsername);
             ViewData["ImageFileName"] = student.ImageFileName;
@@ -159,6 +186,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
         #region Öğrenci Courses
         public IActionResult Courses()
         {
+            profileDetailViewer();
             // Öğrenci bilgilerini al
             var studentUsername = HttpContext.User.Identity?.Name;
             if (string.IsNullOrEmpty(studentUsername))
@@ -207,6 +235,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult ListNotifications()
         {
+            profileDetailViewer();
             var studentUsername = HttpContext.User.Identity?.Name;
             if (string.IsNullOrEmpty(studentUsername))
             {
@@ -272,6 +301,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult NotificationDetail(int id)
         {
+            profileDetailViewer();
             var studentUsername = HttpContext.User.Identity?.Name;
             if (string.IsNullOrEmpty(studentUsername))
             {
@@ -311,6 +341,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult ListTeacher()
         {
+            profileDetailViewer();
             var studentUsername = HttpContext.User.Identity?.Name;
             if(string.IsNullOrEmpty(studentUsername))
             {
@@ -336,6 +367,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult SendMessage(int teacherId)
         {
+            profileDetailViewer();
             var studentUsername = HttpContext.User.Identity?.Name;
             if (string.IsNullOrEmpty(studentUsername))
             {
@@ -430,10 +462,11 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         #region Devamsızlık Durumu
 
-        // İşlev: Öğrencinin devamsızlık durumunu gösterir.
-        [Authorize(Roles = "Student")]
+        
         public IActionResult Attendance()
         {
+
+            profileDetailViewer();
             var studentUsername = HttpContext.User.Identity?.Name;
             if (string.IsNullOrEmpty(studentUsername))
             {
@@ -503,6 +536,9 @@ namespace OgrenciBilgiSistemiProje.Controllers
         // GET: Dersleri listele ve seçilen dersleri göster
         public IActionResult CourseSelect()
         {
+
+
+            profileDetailViewer();
             var studentEmail = User.Identity?.Name;
             if (string.IsNullOrEmpty(studentEmail))
             {
@@ -519,6 +555,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
             var lessons = context.Lessons
                 .Include(l => l.Department)
                 .Include(l => l.Teacher)
+                .Where(l=>l.Department.Id == student.DepartmentId) 
                 .ToList();
 
             // Session'dan geçici olarak seçilen dersleri al

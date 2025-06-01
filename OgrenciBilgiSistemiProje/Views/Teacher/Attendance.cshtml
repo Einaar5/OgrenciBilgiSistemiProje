@@ -108,11 +108,13 @@
                                        @(Model[i].IsComeHour3 ? "checked" : "") />
                                 <input type="hidden" name="attendances[@i].IsComeHour3" value="false" />
                             </td>
+                           
                             <td>
                                 <input type="hidden" name="attendances[@i].StudentId" value="@Model[i].StudentId" />
                                 <input type="hidden" name="attendances[@i].LessonId" value="@Model[i].LessonId" />
                                 <input type="hidden" name="attendances[@i].AttendanceDate" value="@Model[i].AttendanceDate.ToString("yyyy-MM-dd")" />
                             </td>
+                           
                         </tr>
                     }
                 </tbody>
