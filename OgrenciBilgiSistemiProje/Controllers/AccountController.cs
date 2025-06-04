@@ -8,14 +8,14 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace OgrenciBilgiSistemiProje.Controllers
 {
-    // Sadece öğrenci rolündeki kullanıcılar bu controller'a erişebilir
+    // Sadece öğrenci rolündeki kullanıcılar bu controllera erişebilir
     public class AccountController : Controller
     {
         private readonly ApplicationDbContext _context; // Veritabanı işlemleri için context
 
         public AccountController(ApplicationDbContext context) // Constructor
         {
-            _context = context; // Context'i enjekte eder
+            _context = context; // Contexti enjekte eder
         }
 
         public IActionResult Login() => View(); // Login için view döndürür

@@ -70,10 +70,6 @@ namespace OgrenciBilgiSistemiProje.Services
                       .HasForeignKey(g => g.QuizId)
                       .OnDelete(DeleteBehavior.Restrict);
 
-                // 🔥 ÖNEMLİ: Eski unique constraint kaldırılıyor
-                // entity.HasIndex(g => new { g.StudentId, g.LessonId }).IsUnique(); // ❌ ARTIK YOK
-
-                // ✅ Doğru benzersizlik kuralı:
                 entity.HasIndex(g => new { g.StudentId, g.QuizId }).IsUnique();
             });
 

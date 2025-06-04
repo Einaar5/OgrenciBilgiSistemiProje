@@ -178,12 +178,16 @@
 				<!-- User Dropdown -->
 				<div class="ms-auto">
 					<div class="dropdown">
-						<button class="btn p-0 border-0 dropdown-toggle" type="button" id="userDropdown"
+						<button class="btn p-0 border-0 d-flex dropdown-toggle" type="button" id="userDropdown"
 								data-bs-toggle="dropdown" aria-expanded="false">
-							<img src="/img/@ViewData["ImageFileName"]"
-								 class="profile-img rounded-circle"
-								 alt="Profil"
-								 onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=@ViewData["UserName"]&background=dc3545&color=fff&size=128'" />
+							<div class="d-flex align-items-center gap-1">
+								<img src="/img/@ViewData["ImageFileName"]"
+									 class="profile-img rounded-circle"
+									 alt="Profil"
+									 onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=@ViewData["UserName"]&background=dc3545&color=fff&size=128'" />
+								<p class="text-light mb-0">@ViewBag.Name @ViewBag.Surname</p>
+							</div>
+
 						</button>
 						<ul class="dropdown-menu dropdown-menu-end shadow">
 							<li><h6 class="dropdown-header">Hesap Yönetimi</h6></li>

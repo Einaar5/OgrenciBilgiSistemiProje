@@ -3,8 +3,8 @@
     public class AdminAcc
     {
         public int Id { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
+        public string Username { get; set; } = "Admin";
+        public string Password { get; set; } = "12345678";
 
     }
 }

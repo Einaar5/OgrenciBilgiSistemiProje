@@ -25,8 +25,21 @@ namespace OgrenciBilgiSistemiProje.Controllers
             this.context = context;
             this.environment = environment;
         }
+
+        public void profileDetailViewer()
+        {
+
+            var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
+            var teacher = context.Teachers.Include(l => l.Lessons).FirstOrDefault(x => x.TeacherMail == teacherUsername); // Kullanıcı adına göre öğrenciyi buluyoruz.
+            ViewData["ImageFileName"] = teacher.ImageFileName;
+
+            ViewBag.Name = teacher.TeacherName;
+            ViewBag.Surname = teacher.TeacherSurname;
+        }
+
         public IActionResult Index()
         {
+            profileDetailViewer();
             var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
             var teacher = context.Teachers.Include(l => l.Lessons).FirstOrDefault(x => x.TeacherMail == teacherUsername); // Kullanıcı adına göre öğrenciyi buluyoruz.
             ViewData["ImageFileName"] = teacher.ImageFileName;
@@ -36,6 +49,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
         #region Öğretmen Bilgi Edit
         public IActionResult Edit()
         {
+            profileDetailViewer();
             var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
             var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername); // Kullanıcı adına göre öğrenciyi buluyoruz.
             if (teacher == null)
@@ -112,6 +126,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
        
         public IActionResult Grades()
         {
+            profileDetailViewer();
             var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
             var teacher = context.Teachers.Include(l => l.Lessons).FirstOrDefault(x => x.TeacherMail == teacherUsername); // Kullanıcı adına göre öğrenciyi buluyoruz.
             ViewData["ImageFileName"] = teacher.ImageFileName;
@@ -130,6 +145,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult QuizList(int id)
         {
+            profileDetailViewer();
             var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adını alıyoruz.
             var teacher = context.Teachers.Include(l => l.Lessons).FirstOrDefault(x => x.TeacherMail == teacherUsername); // Kullanıcı adına göre öğrenciyi buluyoruz.
             ViewData["ImageFileName"] = teacher.ImageFileName;
@@ -150,6 +166,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult CreateQuiz(int id)
         {
+            profileDetailViewer();
             var teacherUsername = HttpContext.User.Identity?.Name;
             var teacher = context.Teachers.Include(l => l.Lessons).FirstOrDefault(x => x.TeacherMail == teacherUsername);
             ViewData["ImageFileName"] = teacher?.ImageFileName;
@@ -253,6 +270,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult DeleteQuiz(int id)
         {
+            profileDetailViewer();
             var quiz = context.Quizzes
                 .Include(q => q.Lesson)
                 .FirstOrDefault(q => q.Id == id);
@@ -274,6 +292,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult EditQuiz(int id)
         {
+            profileDetailViewer();
             var teacherUsername = HttpContext.User.Identity?.Name;
             var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername);
             string[] quizTypes = new string[] { "Vize", "Final", "Quiz", "Ödev", "Proje" };
@@ -373,6 +392,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult GradeList(int id) // id = lessonId
         {
+            profileDetailViewer();
             var teacherUsername = HttpContext.User.Identity?.Name;
             var teacher = context.Teachers
                                  .Include(t => t.Lessons)
@@ -470,6 +490,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
         #region Courses
         public IActionResult Courses()
         {
+            profileDetailViewer();
             var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adına göre id alıyoruz
             var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername);
             ViewBag.ImageLayout = teacher.ImageFileName;
@@ -499,6 +520,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
         // Öğretmende Duyuru Listeleme
         public IActionResult ListNotifications()
         {
+            profileDetailViewer();
             var teacherUsername = HttpContext.User.Identity?.Name;
             if (string.IsNullOrEmpty(teacherUsername))
             {
@@ -530,6 +552,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult CreateNotification()
         {
+            profileDetailViewer();
             var teacherUsername = HttpContext.User.Identity?.Name;
             if (string.IsNullOrEmpty(teacherUsername))
             {
@@ -665,6 +688,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult ListMessages()
         {
+            profileDetailViewer();
             var teacherUsername = HttpContext.User.Identity?.Name;
             if (string.IsNullOrEmpty(teacherUsername))
             {
@@ -692,6 +716,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult DeleteMessages(int id)
         {
+            profileDetailViewer();
             var message = context.StudentMessages.Find(id);
             if (message == null)
             {
@@ -708,6 +733,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult DeleteNotification(int id) // notification silme 
         {
+            profileDetailViewer();
             var notification = context.Notifications.Find(id);
             if (notification == null)
             {
@@ -725,6 +751,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
         // İşlev: Öğretmenin bir ders seçip, o derse kayıtlı öğrencilerin devamsızlık durumlarını girmesini sağlar.
         public IActionResult Attendance(int lessonId = 0, DateTime? attendanceDate = null)
         {
+            profileDetailViewer();
             var teacherUsername = HttpContext.User.Identity?.Name;
             if (string.IsNullOrEmpty(teacherUsername))
             {
@@ -939,6 +966,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult AttendanceReport(int lessonId = 0)
         {
+            profileDetailViewer();
             var teacherUsername = HttpContext.User.Identity?.Name;
             if (string.IsNullOrEmpty(teacherUsername))
             {
@@ -1019,6 +1047,7 @@ namespace OgrenciBilgiSistemiProje.Controllers
 
         public IActionResult myCourses()
         {
+            profileDetailViewer();
             var teacherUsername = HttpContext.User.Identity?.Name; // Kullanıcı adına göre id alıyoruz
             var teacher = context.Teachers.FirstOrDefault(x => x.TeacherMail == teacherUsername);
             ViewBag.ImageLayout = teacher.ImageFileName;
